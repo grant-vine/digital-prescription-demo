@@ -93,14 +93,10 @@ describe('Doctor Dashboard Screen', () => {
     },
   ];
 
-  beforeAll(async () => {
-    // Dynamic import to defer component loading
-    // Component doesn't exist yet, so this will throw
+  beforeAll(() => {
     try {
-      const module = await import('./dashboard');
-      DashboardScreen = module.default;
+      DashboardScreen = require('./dashboard').default;
     } catch {
-      // Component not implemented yet - expected
       const MockDashboardScreen = () => null;
       MockDashboardScreen.displayName = 'MockDashboardScreen';
       DashboardScreen = MockDashboardScreen;
