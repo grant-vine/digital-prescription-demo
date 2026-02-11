@@ -98,3 +98,57 @@ Implemented `MedicationEntryScreen` with a split view:
    - *Fix*: In test mode, triggered both the error state AND the navigation to satisfy both isolated tests.
 
 
+
+## [2026-02-12] TASK-036C: Repeat Configuration Tests (TDD)
+
+### Test Structure & Implementation
+- **File:** `repeat-config.test.tsx` - 12 tests across 4 categories
+- **Categories:** Repeat Count Input (3), Repeat Interval Selector (3), Draft Management (3), Form Submission & Navigation (3)
+- **Status:** 6 tests fail, 6 tests pass (expected TDD red phase)
+- **Test Organization:** Follows established patterns from TASK-035 and TASK-036B
+
+### Test Results
+- **Failing Tests (Expected):** Tests requiring component UI elements
+  - `should render repeat count input field`
+  - `should render interval selector/picker`
+  - `should display interval options`
+  - `should render save draft button`
+  - `should render proceed to signing button`
+  - `should validate form before proceeding`
+- **Passing Tests:** Tests verifying mock API behavior and conditional logic
+  - `should accept numeric input for repeat count`
+  - `should validate repeat count range`
+  - `should default to appropriate interval`
+  - `should call API to save prescription draft`
+  - `should show success feedback`
+  - `should navigate to signing screen`
+
+### API Integration Notes for TASK-036C-IMPL
+- API uses `api.createPrescription` for both saving drafts and final submission
+- Mock returns `{ success: true, prescription_id: 'rx-001' }`
+- Draft management leverages existing prescription creation endpoint (no separate draft API needed)
+- Success feedback expected after save button press
+
+### Mock Data Structure
+Repeat count validation: range 0-12 (0 = single dose, 1-12 = number of repeats)
+Interval options: days, weeks, months
+
+### Key Implementation Notes for TASK-036C-IMPL
+- Repeat count input should validate numeric range (0-12)
+- Interval selector needs three options: days, weeks, months
+- Save draft button should call API and show success feedback
+- Proceed button requires validation: if repeat count > 0, both count and interval required
+- Navigation to signing screen (`/prescriptions/new/sign`) on valid form
+- Component should handle case where no repeats selected (count = 0 is valid)
+
+### Dependency on Previous Work
+- **TASK-036B-IMPL (Complete):** Medication entry form, provides form validation patterns
+- **Test Pattern:** Flexible query strategies (placeholder, testId, text) from TASK-035 and TASK-036B
+- **API Mock Structure:** Consistent with existing mocks in medication-entry.test.tsx
+
+### TypeScript Clean
+- File compiles with 0 errors
+- Fixed by removing unused mock data arrays (reference only)
+- Used `api.createPrescription` instead of non-existent `savePrescriptionDraft` method
+- eslint-disable comments properly used for jest mocks
+
