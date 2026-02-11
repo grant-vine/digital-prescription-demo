@@ -956,10 +956,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/tests/test_qr.py
 
-TASK-018:
-TYPE: implementation
-SCOPE: services/backend
-TITLE: Implement QR code generation service
+- [x] TASK-018: Implement QR code generation service
 DESCRIPTION: Create service for generating QR codes with VCs (US-004). Must make TASK-017 tests pass.
 INPUTS: TASK-017
 OUTPUTS: Working QR generation endpoint
