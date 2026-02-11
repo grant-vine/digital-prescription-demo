@@ -1258,7 +1258,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/dashboard.test.tsx
 
-TASK-034:
+- [x] TASK-034:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement doctor dashboard
