@@ -58,6 +58,19 @@ export interface PaginatedResponse {
   page_size: number;
 }
 
+export interface PatientSearchResult {
+  id: number;
+  name: string;
+  medical_record: string;
+  did?: string;
+  date_of_birth?: string;
+}
+
+export interface PatientSearchResponse {
+  items: PatientSearchResult[];
+  total: number;
+}
+
 // --- Axios Instance ---
 
 const API_URL = 'http://localhost:8000'; // In real app, this should be env var
@@ -236,6 +249,18 @@ export const api = {
 
   async createPrescription(data: PrescriptionCreate): Promise<Prescription> {
     const response = await getClient().post('/prescriptions', data);
+    return response.data;
+  },
+
+  async searchPatients(query: string): Promise<PatientSearchResponse> {
+    const response = await getClient().get('/patients/search', {
+      params: { q: query },
+    });
+    return response.data;
+  },
+
+  async getPatient(id: number): Promise<PatientSearchResult> {
+    const response = await getClient().get(`/patients/${id}`);
     return response.data;
   },
 };
