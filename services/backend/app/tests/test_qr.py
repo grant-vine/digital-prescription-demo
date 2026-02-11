@@ -19,7 +19,6 @@ import pytest
 from fastapi.testclient import TestClient
 from datetime import datetime, timedelta
 import base64
-import json
 
 
 @pytest.fixture
@@ -34,6 +33,7 @@ def test_client(
 ):
     """Create FastAPI TestClient for making requests."""
     from app.main import app
+
     return TestClient(app)
 
 
@@ -68,6 +68,7 @@ def pharmacist_headers(valid_pharmacist_jwt_token):
 def signed_prescription(test_session, doctor_user, patient_user):
     """Create signed prescription with digital signature for QR generation."""
     from app.models.prescription import Prescription
+
     prescription = Prescription(
         doctor_id=doctor_user.id,
         patient_id=patient_user.id,
@@ -91,6 +92,7 @@ def signed_prescription(test_session, doctor_user, patient_user):
 def unsigned_prescription(test_session, doctor_user, patient_user):
     """Create unsigned prescription without digital signature."""
     from app.models.prescription import Prescription
+
     prescription = Prescription(
         doctor_id=doctor_user.id,
         patient_id=patient_user.id,
@@ -112,6 +114,7 @@ def unsigned_prescription(test_session, doctor_user, patient_user):
 def large_prescription(test_session, doctor_user, patient_user):
     """Create prescription exceeding QR capacity (~2900 bytes)."""
     from app.models.prescription import Prescription
+
     long_instructions = (
         "IMPORTANT PATIENT INSTRUCTIONS:\n\n"
         "Take 1 tablet in the morning with breakfast. "
@@ -120,8 +123,7 @@ def large_prescription(test_session, doctor_user, patient_user):
         "Do not take with milk or dairy products. "
         "May cause dizziness - avoid driving. "
         "Report any allergic reactions immediately.\n"
-        "DETAILED DOSING SCHEDULE:\n"
-        + ("This medication requires careful monitoring. " * 100)
+        "DETAILED DOSING SCHEDULE:\n" + ("This medication requires careful monitoring. " * 100)
     )
     prescription = Prescription(
         doctor_id=doctor_user.id,
@@ -159,7 +161,9 @@ async def test_generate_qr_success(test_client, signed_prescription, doctor_head
 
 
 @pytest.mark.asyncio
-async def test_generate_qr_unsigned_prescription(test_client, unsigned_prescription, doctor_headers):
+async def test_generate_qr_unsigned_prescription(
+    test_client, unsigned_prescription, doctor_headers
+):
     """Test that unsigned prescriptions cannot generate QR codes."""
     response = test_client.post(
         f"/api/v1/prescriptions/{unsigned_prescription.id}/qr",
@@ -181,7 +185,9 @@ async def test_generate_qr_doctor_can_generate(test_client, signed_prescription,
 
 
 @pytest.mark.asyncio
-async def test_generate_qr_patient_own_prescription(test_client, signed_prescription, patient_headers):
+async def test_generate_qr_patient_own_prescription(
+    test_client, signed_prescription, patient_headers
+):
     """Test patient can generate QR code for their own prescription."""
     response = test_client.post(
         f"/api/v1/prescriptions/{signed_prescription.id}/qr",
@@ -194,7 +200,9 @@ async def test_generate_qr_patient_own_prescription(test_client, signed_prescrip
 
 
 @pytest.mark.asyncio
-async def test_generate_qr_pharmacist_forbidden(test_client, signed_prescription, pharmacist_headers):
+async def test_generate_qr_pharmacist_forbidden(
+    test_client, signed_prescription, pharmacist_headers
+):
     """Test pharmacist CANNOT generate QR codes. Expected: 403 Forbidden."""
     response = test_client.post(
         f"/api/v1/prescriptions/{signed_prescription.id}/qr",
@@ -205,7 +213,9 @@ async def test_generate_qr_pharmacist_forbidden(test_client, signed_prescription
 
 
 @pytest.mark.asyncio
-async def test_generate_qr_patient_others_prescription_forbidden(test_client, signed_prescription, test_session):
+async def test_generate_qr_patient_others_prescription_forbidden(
+    test_client, signed_prescription, test_session
+):
     """Test patient cannot generate QR for other patient's prescription."""
     from app.models.user import User
     from app.core.security import hash_password
@@ -369,7 +379,9 @@ async def test_qr_embeds_full_vc_structure(test_client, signed_prescription, doc
 
 
 @pytest.mark.asyncio
-async def test_qr_vc_contains_prescription_metadata(test_client, signed_prescription, doctor_headers):
+async def test_qr_vc_contains_prescription_metadata(
+    test_client, signed_prescription, doctor_headers
+):
     """Test that VC contains prescription metadata."""
     response = test_client.post(
         f"/api/v1/prescriptions/{signed_prescription.id}/qr",
@@ -440,7 +452,9 @@ async def test_get_qr_not_found(test_client, doctor_headers):
 
 
 @pytest.mark.asyncio
-async def test_get_qr_all_roles_can_retrieve(test_client, signed_prescription, doctor_headers, patient_headers, pharmacist_headers):
+async def test_get_qr_all_roles_can_retrieve(
+    test_client, signed_prescription, doctor_headers, patient_headers, pharmacist_headers
+):
     """Test that all authenticated users can retrieve QR data."""
     gen_response = test_client.post(
         f"/api/v1/prescriptions/{signed_prescription.id}/qr",
@@ -467,9 +481,12 @@ async def test_get_qr_all_roles_can_retrieve(test_client, signed_prescription, d
 
 
 @pytest.mark.asyncio
-async def test_generate_qr_expired_prescription(test_client, test_session, doctor_user, patient_user, doctor_headers):
+async def test_generate_qr_expired_prescription(
+    test_client, test_session, doctor_user, patient_user, doctor_headers
+):
     """Test that expired prescriptions cannot generate QR codes."""
     from app.models.prescription import Prescription
+
     expired_prescription = Prescription(
         doctor_id=doctor_user.id,
         patient_id=patient_user.id,
@@ -496,7 +513,9 @@ async def test_generate_qr_expired_prescription(test_client, test_session, docto
 
 
 @pytest.mark.asyncio
-async def test_qr_generation_full_flow(test_client, signed_prescription, doctor_headers, patient_headers):
+async def test_qr_generation_full_flow(
+    test_client, signed_prescription, doctor_headers, patient_headers
+):
     """Test full QR flow: Doctor generates, patient retrieves."""
     gen_response = test_client.post(
         f"/api/v1/prescriptions/{signed_prescription.id}/qr",

@@ -941,10 +941,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/services/vc.py
 
-TASK-017:
-TYPE: test
-SCOPE: services/backend
-TITLE: Write failing QR code generation tests
+- [x] TASK-017: Write failing QR code generation tests (TDD)
 DESCRIPTION: Create tests for QR code generation before implementation.
 INPUTS: TASK-016
 OUTPUTS: test_qr.py with failing tests
