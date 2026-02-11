@@ -1422,7 +1422,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/sign.tsx
 
-TASK-039:
+- [x] TASK-039:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing QR generation display tests
