@@ -1403,7 +1403,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/sign.test.tsx
 
-TASK-038:
+- [x] TASK-038:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement prescription signing screen
