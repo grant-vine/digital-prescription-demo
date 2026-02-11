@@ -18,7 +18,7 @@ from fastapi.testclient import TestClient
 
 
 @pytest.fixture
-def test_client():
+def test_client(override_get_db, doctor_user, patient_user, pharmacist_user):
     """Create FastAPI TestClient for making requests.
 
     Will fail until app has auth routes.
@@ -26,21 +26,6 @@ def test_client():
     from app.main import app
 
     return TestClient(app)
-
-
-@pytest.fixture
-def valid_jwt_token():
-    """Mock JWT token for authenticated requests.
-
-    Real token generation happens in TASK-010.
-    For tests, we mock a valid token structure.
-    """
-    return (
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJzdWIiOiIxIiwibmFtZSI6IkRyLiBKb2huIFNtaXRoIiwi"
-        "cm9sZSI6ImRvY3RvciIsImV4cCI6OTk5OTk5OTk5OX0."
-        "fake_signature_test"
-    )
 
 
 @pytest.fixture
@@ -56,28 +41,28 @@ def malformed_jwt_token():
 
 
 @pytest.fixture
-def doctor_auth_payload(doctor_user_data):
+def doctor_auth_payload():
     """Login payload for doctor."""
     return {
-        "username": doctor_user_data["username"],
-        "password": "password123",  # Plain password before hashing
+        "username": "dr_smith",
+        "password": "password123",
     }
 
 
 @pytest.fixture
-def patient_auth_payload(patient_user_data):
+def patient_auth_payload():
     """Login payload for patient."""
     return {
-        "username": patient_user_data["username"],
+        "username": "patient_doe",
         "password": "password456",
     }
 
 
 @pytest.fixture
-def pharmacist_auth_payload(pharmacist_user_data):
+def pharmacist_auth_payload():
     """Login payload for pharmacist."""
     return {
-        "username": pharmacist_user_data["username"],
+        "username": "pharm_jones",
         "password": "password789",
     }
 
@@ -229,7 +214,7 @@ async def test_login_empty_body(test_client):
 
 
 @pytest.mark.asyncio
-async def test_token_refresh_success(test_client, valid_jwt_token):
+async def test_token_refresh_success(test_client, valid_refresh_token):
     """Test token refresh with valid refresh token.
 
     EXPECTED FAILURE: Endpoint POST /api/v1/auth/refresh does not exist yet.
@@ -243,7 +228,7 @@ async def test_token_refresh_success(test_client, valid_jwt_token):
     """
     response = test_client.post(
         "/api/v1/auth/refresh",
-        json={"refresh_token": valid_jwt_token},
+        json={"refresh_token": valid_refresh_token},
     )
 
     # FAILS until TASK-010
@@ -254,7 +239,7 @@ async def test_token_refresh_success(test_client, valid_jwt_token):
     assert data["token_type"] == "bearer"
     assert "expires_in" in data
     # New token should be different from old
-    assert data["access_token"] != valid_jwt_token
+    assert data["access_token"] != valid_refresh_token
 
 
 @pytest.mark.asyncio

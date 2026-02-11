@@ -6,6 +6,9 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 import asyncio
 
+from app.core.security import hash_password
+from app.core.auth import create_access_token, create_refresh_token
+
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -150,3 +153,98 @@ def audit_event_data():
         "details": {"medication": "Amoxicillin", "quantity": 21},
         "ip_address": "127.0.0.1",
     }
+
+
+@pytest.fixture
+def doctor_user(test_session):
+    """Create a doctor user in the test database."""
+    from app.models.user import User
+    
+    user = User(
+        username="dr_smith",
+        email="smith@hospital.co.za",
+        password_hash=hash_password("password123"),
+        role="doctor",
+        full_name="Dr. John Smith",
+        registration_number="HPCSA_12345",
+    )
+    test_session.add(user)
+    test_session.commit()
+    test_session.refresh(user)
+    return user
+
+
+@pytest.fixture
+def patient_user(test_session):
+    """Create a patient user in the test database."""
+    from app.models.user import User
+    
+    user = User(
+        username="patient_doe",
+        email="patient@example.com",
+        password_hash=hash_password("password456"),
+        role="patient",
+        full_name="John Doe",
+        registration_number=None,
+    )
+    test_session.add(user)
+    test_session.commit()
+    test_session.refresh(user)
+    return user
+
+
+@pytest.fixture
+def pharmacist_user(test_session):
+    """Create a pharmacist user in the test database."""
+    from app.models.user import User
+    
+    user = User(
+        username="pharm_jones",
+        email="jones@pharmacy.co.za",
+        password_hash=hash_password("password789"),
+        role="pharmacist",
+        full_name="Alice Jones",
+        registration_number="SAPC_67890",
+    )
+    test_session.add(user)
+    test_session.commit()
+    test_session.refresh(user)
+    return user
+
+
+@pytest.fixture
+def override_get_db(test_session):
+    """Override get_db dependency to use test_session."""
+    from app.dependencies.auth import get_db
+    from app.main import app
+    
+    def _override_get_db():
+        try:
+            yield test_session
+        finally:
+            pass
+    
+    app.dependency_overrides[get_db] = _override_get_db
+    yield
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def valid_jwt_token(doctor_user):
+    """Generate real JWT token for doctor user."""
+    return create_access_token({
+        "sub": str(doctor_user.id),
+        "username": doctor_user.username,
+        "role": str(doctor_user.role)
+    })
+
+
+@pytest.fixture
+def valid_refresh_token(doctor_user):
+    """Generate real refresh token for doctor user."""
+    return create_refresh_token({
+        "sub": str(doctor_user.id),
+        "username": doctor_user.username,
+        "role": str(doctor_user.role)
+    })
+
