@@ -476,3 +476,117 @@ All use `DoctorTheme.colors`, `DoctorTheme.spacing`, `DoctorTheme.typography`.
 - 5 failures due to test design (multiple element matches)
 - Implementation is production-ready
 
+
+## [2026-02-11 23:45] TASK-035: Patient Selection Tests (TDD)
+
+### API Service Extension Pattern
+Added patient search methods to API service for doctor workflow:
+- `searchPatients(query: string)` - Search patients by name/ID/medical record
+- `getPatient(id: number)` - Get single patient details
+
+Pattern matches existing methods: async, returns `Promise<T>`, uses `getClient()` internally.
+
+### TypeScript Interfaces Added
+```typescript
+export interface PatientSearchResult {
+  id: number;
+  name: string;
+  medical_record: string;
+  did?: string;
+  date_of_birth?: string;
+}
+
+export interface PatientSearchResponse {
+  items: PatientSearchResult[];
+  total: number;
+}
+```
+
+### Test File Structure
+Patient selection tests follow established dashboard pattern:
+- 13 tests in 5 categories
+- Synchronous `require('./patient-select').default` import (not async)
+- Mock setup before imports (expo-router, AsyncStorage, API service)
+- Debounce test uses `jest.useFakeTimers()` and `jest.advanceTimersByTime(300)`
+
+### Test Categories
+1. **Patient Search (4 tests):** Input field, debounce timing, API call verification, results display
+2. **Patient Selection (3 tests):** Click to select, display selected info, enable proceed button
+3. **QR Scan Option (2 tests):** QR button render, scanner launch
+4. **Manual Entry (2 tests):** Form render, validation
+5. **Navigation (2 tests):** Back to dashboard, proceed to medication entry
+
+### TDD Results
+- **6/13 tests fail** (expected - component doesn't exist yet)
+- **7/13 tests pass** (mock behavior tests that don't require component)
+- TypeScript compilation: ✅ Clean (0 errors)
+- All failures are due to missing UI elements (search input, buttons, etc.)
+
+### Mock Data Structure
+```typescript
+const mockPatients = [
+  {
+    id: 101,
+    name: 'Jane Doe',
+    medical_record: 'MR-101-2026',
+    did: 'did:cheqd:testnet:patient101',
+    date_of_birth: '1985-05-15',
+  },
+  // ... more patients
+];
+```
+
+### API Mock Setup
+```typescript
+jest.mock('../../../services/api', () => ({
+  api: {
+    searchPatients: jest.fn().mockResolvedValue({
+      items: mockPatients,
+      total: 2,
+    }),
+    getPatient: jest.fn(),
+  },
+}));
+```
+
+### Debounce Test Pattern
+```typescript
+it('should debounce search input (300ms)', async () => {
+  jest.useFakeTimers();
+  const { queryByPlaceholderText } = render(<PatientSelectScreen />);
+  const searchInput = queryByPlaceholderText(/search/i);
+  
+  fireEvent.changeText(searchInput!, 'John');
+  expect(api.searchPatients).not.toHaveBeenCalled(); // Immediate check
+  
+  jest.advanceTimersByTime(300);
+  await waitFor(() => {
+    expect(api.searchPatients).toHaveBeenCalledWith('John');
+  });
+  
+  jest.useRealTimers();
+});
+```
+
+### Notes for TASK-036A (Implementation)
+- Component path: `apps/mobile/src/app/(doctor)/prescriptions/patient-select.tsx`
+- Export pattern: `export default function PatientSelectScreen() { ... }`
+- Must implement:
+  - Search input with 300ms debounce
+  - Patient list display (FlatList recommended)
+  - Patient selection state management
+  - QR scan button (launches QR scanner)
+  - Manual entry button (shows form)
+  - Back navigation button
+  - Proceed button (enabled when patient selected)
+- Theme: Use `DoctorTheme` (Royal Blue #2563EB)
+- Navigation: `router.push('/(doctor)/prescriptions/medication-entry')` on proceed
+
+### Verification
+- File created: ✅ `apps/mobile/src/app/(doctor)/prescriptions/patient-select.test.tsx` (304 lines)
+- API service extended: ✅ `searchPatients` and `getPatient` methods added
+- Test count: ✅ 13 tests (meets requirement)
+- TDD validation: ✅ 6/13 fail (component doesn't exist), 7/13 pass (mock behavior)
+- TypeScript: ✅ 0 errors
+- Git commit: ✅ `fe06b67`
+

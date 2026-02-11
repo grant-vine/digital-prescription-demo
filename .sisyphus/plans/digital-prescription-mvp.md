@@ -1276,7 +1276,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/dashboard.tsx
 
-TASK-035:
+- [x] TASK-035:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing patient selection tests
