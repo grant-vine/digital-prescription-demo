@@ -8,6 +8,7 @@ from app.api.v1.prescriptions import router as prescriptions_router
 from app.api.v1.dids import router as dids_router
 from app.api.v1.signing import router as signing_router
 from app.api.v1.qr import router as qr_router
+from app.api.v1.verify import router as verify_router
 
 app = FastAPI(
     title="Digital Prescription API",
@@ -29,6 +30,7 @@ app.include_router(prescriptions_router, prefix="/api/v1", tags=["prescriptions"
 app.include_router(dids_router, tags=["dids"])
 app.include_router(signing_router, tags=["signing"])
 app.include_router(qr_router, tags=["qr"])
+app.include_router(verify_router, tags=["verification"])
 
 
 @app.get("/health")
