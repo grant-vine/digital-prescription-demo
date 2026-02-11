@@ -1,16 +1,13 @@
-"""Prescription signing and verification endpoints.
+"""Prescription signing endpoint.
 
-Implements US-003 (Sign Prescription) and US-010 (Verify Prescription):
+Implements US-003 (Sign Prescription):
 - POST /api/v1/prescriptions/{id}/sign - Sign prescription as W3C VC
-- GET /api/v1/prescriptions/{id}/verify - Verify signature validity
 
 RBAC:
 - Sign: Doctor only (prescribing doctor)
-- Verify: All authenticated users
 """
 
 from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -33,15 +30,6 @@ class SignatureResponse(BaseModel):
     signature: str
     issuer_did: str
     subject_did: str
-
-
-class VerificationResponse(BaseModel):
-    valid: bool
-    issuer_did: Optional[str] = None
-    signed_at: Optional[str] = None
-    signature_algorithm: Optional[str] = None
-    credential_id: Optional[str] = None
-    error: Optional[str] = None
 
 
 @router.post(
@@ -175,88 +163,6 @@ async def sign_prescription(
             signature=signature,
             issuer_did=doctor_did,
             subject_did=patient_did,
-        )
-
-    finally:
-        await vc_service.close()
-
-
-@router.get(
-    "/api/v1/prescriptions/{id}/verify",
-    response_model=VerificationResponse,
-)
-async def verify_prescription(
-    id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Verify prescription signature validity.
-
-    Verifies W3C Verifiable Credential cryptographic signature.
-    All authenticated users can verify prescriptions.
-
-    RBAC: All authenticated users (doctor, patient, pharmacist)
-
-    Error codes:
-        404: Prescription not found
-        400: Prescription not signed
-    """
-    prescription = db.query(Prescription).filter(Prescription.id == id).first()
-    if not prescription:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Prescription not found",
-        )
-
-    if not prescription.digital_signature or not prescription.credential_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Prescription not signed",
-        )
-
-    doctor_did_record = db.query(DID).filter(DID.user_id == prescription.doctor_id).first()
-    patient_did_record = db.query(DID).filter(DID.user_id == prescription.patient_id).first()
-
-    if not doctor_did_record or not patient_did_record:
-        return VerificationResponse(
-            valid=False,
-            error="Issuer or subject DID not found",
-        )
-
-    doctor_did = doctor_did_record.did_identifier
-    patient_did = patient_did_record.did_identifier
-
-    vc_service = VCService()
-    try:
-        credential = vc_service.create_credential(
-            prescription=prescription,
-            doctor_did=doctor_did,
-            patient_did=patient_did,
-        )
-
-        proof = {
-            "type": "Ed25519Signature2020",
-            "created": prescription.updated_at.isoformat() + "Z",
-            "proofPurpose": "assertionMethod",
-            "verificationMethod": f"{doctor_did}#key-1",
-            "proofValue": prescription.digital_signature,
-        }
-        credential["proof"] = proof
-
-        verification_result = await vc_service.verify_credential(credential)
-
-        if not verification_result.get("valid", False):
-            return VerificationResponse(
-                valid=False,
-                error=verification_result.get("error", "Signature verification failed"),
-            )
-
-        return VerificationResponse(
-            valid=True,
-            issuer_did=doctor_did,
-            signed_at=proof["created"],
-            signature_algorithm="Ed25519Signature2020",
-            credential_id=prescription.credential_id,
         )
 
     finally:
