@@ -1386,7 +1386,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/new.tsx
 
-TASK-037:
+- [x] TASK-037:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing prescription signing tests

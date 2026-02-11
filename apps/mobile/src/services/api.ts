@@ -85,6 +85,27 @@ export interface MedicationSearchResponse {
   total: number;
 }
 
+export interface PrescriptionDraft {
+  id: string;
+  patient_name: string;
+  patient_id: number;
+  medications: Array<{
+    name: string;
+    dosage: string;
+    instructions: string;
+  }>;
+  repeat_count: number;
+  repeat_interval: string;
+  created_at: string;
+}
+
+export interface SignPrescriptionResponse {
+  success: boolean;
+  prescription_id: string;
+  signature: string;
+  signed_at?: string;
+}
+
 // --- Axios Instance ---
 
 const API_URL = 'http://localhost:8000'; // In real app, this should be env var
@@ -284,6 +305,16 @@ export const api = {
     const response = await getClient().get('/medications/search', {
       params: { q },
     });
+    return response.data;
+  },
+
+  async getPrescriptionDraft(prescriptionId: string): Promise<PrescriptionDraft> {
+    const response = await getClient().get(`/prescriptions/${prescriptionId}/draft`);
+    return response.data;
+  },
+
+  async signPrescription(prescriptionId: string): Promise<SignPrescriptionResponse> {
+    const response = await getClient().post(`/prescriptions/${prescriptionId}/sign`, {});
     return response.data;
   },
 };
