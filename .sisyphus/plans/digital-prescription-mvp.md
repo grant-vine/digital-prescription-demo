@@ -1313,7 +1313,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/patient-select.tsx
 
-TASK-036B:
+- [x] TASK-036B:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing medication entry tests
