@@ -990,10 +990,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/tests/test_verify.py
 
-TASK-020:
-TYPE: implementation
-SCOPE: services/backend
-TITLE: Implement verification service
+- [x] TASK-020: Implement verification service
 DESCRIPTION: Create service for verifying prescription authenticity (US-010). Must make TASK-019 tests pass.
 INPUTS: TASK-019
 OUTPUTS: Working verification API
