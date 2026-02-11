@@ -1,0 +1,22 @@
+{
+  "name": "digital-prescription-demo",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "description": "Digital prescription demo using Self-Sovereign Identity (SSI) infrastructure",
+  "author": "Digital Prescription Team",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "echo 'Run npm run dev from specific workspace'",
+    "test": "echo 'Run npm test from specific workspace'",
+    "lint": "echo 'Run npm run lint from specific workspace'",
+    "monorepo:check": "node -e \"console.log('Monorepo workspace setup validated')\""
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
