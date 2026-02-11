@@ -1439,7 +1439,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/qr.test.tsx
 
-TASK-040:
+- [x] TASK-040:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement QR code display for patient
