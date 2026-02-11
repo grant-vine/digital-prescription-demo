@@ -2,7 +2,9 @@
 
 ## Overview
 
-Digital Prescription System MVP using Self-Sovereign Identity (SSI) infrastructure. Enables doctors to create digitally signed prescriptions, patients to receive/manage them in digital wallets, and pharmacists to verify/dispense medications securely.
+**🎯 Technology Demo Project:** This repository demonstrates the rapid implementation of digital wallet solutions using an **agentic framework**. It showcases how AI agents can collaboratively build complex Self-Sovereign Identity (SSI) infrastructure through systematic planning and execution.
+
+**Demo Focus:** Digital Prescription System enabling doctors to create digitally signed prescriptions, patients to receive/manage them in digital wallets, and pharmacists to verify/dispense medications securely.
 
 **Architecture:** React Native mobile app (3 themed roles) + Python/FastAPI backend + ACA-Py SSI infrastructure  
 **MVP Timeline:** 4 weeks (Weeks 1-4)  
@@ -10,6 +12,95 @@ Digital Prescription System MVP using Self-Sovereign Identity (SSI) infrastructu
 **Total Story Points:** 57 SP (MVP scope)  
 **Total Tasks:** 73 atomic tasks  
 **Plan Version:** 2.0 (Revised per Momus Review)  
+**Repository:** https://github.com/grant-vine/digital-prescription-demo
+
+---
+
+## Milestone Strategy
+
+This project uses **Git Branches and Tags** as milestone checkpoints that third-party developers can use as implementation starting points:
+
+### Current Milestones
+
+| Milestone | Branch/Tag | Description | Status |
+|-----------|-----------|-------------|--------|
+| **Ready to Dev** | `milestone/ready-to-dev` | Complete planning phase, all stories documented, execution plan approved | ✅ Current |
+| Foundation | `milestone/foundation` | Monorepo initialized, Docker stack running | 🔄 Pending |
+| Backend Core | `milestone/backend-core` | Auth and prescription API complete | 🔄 Pending |
+| SSI Integration | `milestone/ssi-integration` | ACA-Py integrated, DID/VC/QR services ready | 🔄 Pending |
+| Mobile Core | `milestone/mobile-core` | Theming, navigation, QR components done | 🔄 Pending |
+| Doctor Flow | `milestone/doctor-flow` | Doctor create/sign/send prescription complete | 🔄 Pending |
+| Patient Flow | `milestone/patient-flow` | Patient receive/view/share complete | 🔄 Pending |
+| Pharmacist Flow | `milestone/pharmacist-flow` | Verification and dispensing complete | 🔄 Pending |
+| System Features | `milestone/system-features` | Validation, repeats, revocation, audit done | 🔄 Pending |
+| **MVP Complete** | `v1.0.0-mvp` | All 16 stories implemented, E2E tests passing | 🔄 Pending |
+
+### Using Milestones
+
+Third-party developers can start from any milestone:
+
+```bash
+# Clone and checkout a specific milestone
+git clone https://github.com/grant-vine/digital-prescription-demo.git
+git checkout milestone/ready-to-dev  # Or any other milestone
+
+# View all available milestones
+git branch -a | grep milestone/
+git tag -l
+```
+
+### Creating New Milestones
+
+When reaching a milestone:
+
+```bash
+# Create milestone branch from current state
+git checkout -b milestone/milestone-name
+
+# Tag significant releases
+git tag -a v1.0.0-mvp -m "MVP Complete - All 16 stories implemented"
+
+# Push milestone and tags
+git push origin milestone/milestone-name
+git push origin --tags
+```
+
+### Developer Notes
+
+Work logs and timing are tracked in `developer-notes.md` in the project root. Agents update this file with:
+- Date and agent name
+- Tasks completed
+- Time taken (using actual CLI dates)
+- Files modified
+- Notes and next steps
+
+---
+
+## Quick Start
+
+### For Third-Party Developers
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/grant-vine/digital-prescription-demo.git
+cd digital-prescription-demo
+
+# 2. Choose your starting milestone
+git checkout milestone/ready-to-dev  # Current milestone
+
+# 3. View the execution plan
+cat .sisyphus/plans/digital-prescription-mvp.md
+
+# 4. Start development
+/start-work digital-prescription-mvp
+```
+
+### Current Status
+
+- ✅ **Planning Phase Complete:** All 25 user stories documented
+- ✅ **Execution Plan Approved:** 9.5/10 Momus rating
+- ✅ **Milestone Branch Created:** `milestone/ready-to-dev`
+- 🔄 **Next:** Infrastructure validation (TASK-000)  
 
 ---
 
