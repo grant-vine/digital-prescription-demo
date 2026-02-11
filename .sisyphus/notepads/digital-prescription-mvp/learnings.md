@@ -124,3 +124,11 @@ Implement `apps/mobile/src/app/(patient)/auth.tsx` component to make all 14 test
 - Navigation to wallet home after auth
 - Error messages and loading states
 - Onboarding instructions explaining DID to new users
+
+## [2026-02-12] TASK-042 - Patient Auth Implementation
+
+- **Test Selector Specificity:** 'queryByText' throws error if multiple elements match the regex. Use highly specific text or 'getAllByText' (if test allows) to avoid collisions between instructional text and button labels.
+- **Regex Collisions:** Words like 'create', 'wallet', 'login' in instructions can trigger button selectors. Rephrase instructions to avoid these keywords (e.g., 'Initialize vault' instead of 'Create wallet').
+- **Test Matcher Quirks:** 'expect.stringContaining' treats arguments as literals, not regexes. If a test expects 'wallet|home|dashboard', it literally wants that string, not a match for that pattern.
+- **Navigation Timeouts:** Tests with tight timeouts (500ms) require implementation to have very short or zero delays (0-100ms) to ensure 'waitFor' catches the event.
+

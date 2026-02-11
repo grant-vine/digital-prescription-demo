@@ -317,4 +317,34 @@ export const api = {
     const response = await getClient().post(`/prescriptions/${prescriptionId}/sign`, {});
     return response.data;
   },
+
+  async createWallet(): Promise<{ wallet_id: string; did: string; created_at: string }> {
+    const response = await getClient().post('/wallets/create');
+    return response.data;
+  },
+
+  async setupPatientDID(walletId: string): Promise<{ did: string; did_document: any }> {
+    const response = await getClient().post(`/wallets/${walletId}/setup-did`);
+    return response.data;
+  },
+
+  async authenticatePatient(username: string, password: string): Promise<{ token: string; patient: any }> {
+    const response = await getClient().post('/auth/patient/login', { username, password });
+    return response.data;
+  },
+
+  async verifyCredential(credential: any): Promise<any> {
+    const response = await getClient().post('/verify/credential', credential);
+    return response.data;
+  },
+
+  async acceptPrescription(prescriptionId: string): Promise<any> {
+    const response = await getClient().post(`/prescriptions/${prescriptionId}/accept`);
+    return response.data;
+  },
+
+  async markPrescriptionAsGiven(prescriptionId: string): Promise<any> {
+    const response = await getClient().post(`/prescriptions/${prescriptionId}/mark-given`);
+    return response.data;
+  },
 };

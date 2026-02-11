@@ -1477,7 +1477,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(patient)/auth.test.tsx
 
-TASK-042:
+- [x] TASK-042:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement patient wallet setup
