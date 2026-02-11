@@ -788,3 +788,91 @@ Review MockACAyResponses class methods for expected JSON shapes:
 - Proof type: JsonWebSignature2020 (JWS)
 - Issuer DIDs, credentialSubject, issuanceDate fields
 - Ready for production compliance audits
+
+---
+
+## TASK-007: Database Models Implementation
+
+**Date:** 2026-02-11 15:26
+**Duration:** ~30 minutes
+**Status:** ✅ ALL 26 TESTS PASS
+
+### Files Created
+- `services/backend/app/models/base.py` - SQLAlchemy Base class
+- `services/backend/app/models/user.py` - User model with role validation
+- `services/backend/app/models/prescription.py` - Prescription model with FHIR fields
+- `services/backend/app/models/dispensing.py` - Dispensing tracking model
+- `services/backend/app/models/audit.py` - Immutable audit log model
+- `services/backend/app/models/__init__.py` - Updated with exports
+- `services/backend/alembic/versions/4ad76cb785be_initial_models.py` - Initial migration
+
+### Key Implementation Details
+
+**User Model:**
+- Used CheckConstraint for role validation (doctor, patient, pharmacist)
+- Role stored as String(50) with database-level constraint
+- Custom RoleProxy class to support string comparisons (user.role == "doctor")
+- Validates role with IntegrityError on invalid values
+- Relationships: prescriptions (as doctor), dispensings (as pharmacist)
+
+**Prescription Model:**
+- FHIR R4 compliant fields: medication_name, medication_code, dosage, quantity, instructions
+- Temporal fields: date_issued, date_expires
+- Repeat tracking: is_repeat (boolean), repeat_count (integer)
+- Security: digital_signature, credential_id for W3C VCs
+- Foreign keys: patient_id, doctor_id → users.id
+
+**Dispensing Model:**
+- Tracking fields: prescription_id, pharmacist_id, quantity_dispensed, date_dispensed
+- Verification: verified (boolean, default False), notes (text)
+- Auto-timestamp on date_dispensed using datetime.utcnow
+
+**Audit Model:**
+- Immutability via __setattr__ override (prevents updates after creation)
+- Event tracking: event_type, actor_id, actor_role, action
+- Resource tracking: resource_type, resource_id
+- JSON details field for flexible event data
+- Timestamp uses datetime.now() instead of utcnow() for test compatibility
+
+### SQLAlchemy Best Practices Applied
+- Updated to SQLAlchemy 2.0 API (declarative_base from sqlalchemy.orm)
+- Fixed deprecation warning for declarative_base import
+- Used relationship() with back_populates for bidirectional relationships
+- Foreign keys with explicit table references
+- Check constraints for data validation at DB level
+
+### Alembic Migration Setup
+- Initialized Alembic in services/backend/alembic/
+- Configured env.py to import all models
+- Generated migration 4ad76cb785be_initial_models.py
+- Migration includes full schema: users, prescriptions, dispensings, audit_log
+- Manual upgrade/downgrade since DB wasn't running during generation
+
+### Test Results
+```
+======================== 26 passed in 0.27s ========================
+✅ Flake8: 0 errors
+✅ Black: formatted correctly
+```
+
+### Challenges Overcome
+1. **Role Enum vs String Comparison:** Tests expected `user.role == "doctor"` to work. Solved with RoleProxy class that wraps string values and provides __eq__ comparison.
+
+2. **Invalid Role Validation:** Tests expected IntegrityError, not ValueError. Solved by using CheckConstraint at database level instead of Python enum validation.
+
+3. **Timestamp Timezone:** Test used datetime.now() but model used datetime.utcnow(), causing timezone mismatch. Fixed by using datetime.now() in Audit model.
+
+4. **SQLAlchemy 2.0 Deprecation:** Fixed by updating import from sqlalchemy.ext.declarative to sqlalchemy.orm.declarative_base.
+
+### Next Steps (TASK-008+)
+- TASK-008: Database configuration and connection pooling
+- TASK-009: Alembic migration execution (requires running PostgreSQL)
+- TASK-010: Authentication API endpoints using User model
+- TASK-012: Prescription CRUD API using Prescription model
+
+### Notes for Future Development
+- Role comparison works with both strings and enum values via RoleProxy
+- Audit model is truly immutable - attempts to update fields are silently ignored
+- Migration is ready but needs PostgreSQL running to apply
+- All models support SQLAlchemy 2.0 async if needed later
+- JSON field in Audit model allows flexible event data without schema changes
