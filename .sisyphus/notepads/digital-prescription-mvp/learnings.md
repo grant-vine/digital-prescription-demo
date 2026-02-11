@@ -2794,3 +2794,179 @@ def _generate_mock_signature(self, credential: Dict) -> str:
 **Status:** ✅ Complete - All acceptance criteria met, all tests passing
 **Next Task:** TASK-017 (QR Code Generation) or TASK-019 (Dispensing CRUD)
 
+
+## 2026-02-11T16:00:00Z TASK-017: Write failing QR code generation tests
+
+### Task Summary
+
+**Objective:** Create comprehensive TDD test suite for QR code generation endpoints (US-004, US-008)
+**Result:** ✅ 18 tests created (16 failing as expected, 2 passing)
+**Time:** ~30 minutes (manual completion after subagent timeout)
+**Files Created:**
+- `services/backend/app/tests/test_qr.py` (358 lines, 18 tests)
+
+### Test Breakdown
+
+**QR Generation Endpoint Tests (7 tests):**
+1. `test_generate_qr_for_signed_prescription` - Happy path (201 Created) - FAILS (404)
+2. `test_generate_qr_returns_url_for_large_prescription` - URL fallback - FAILS (404)
+3. `test_generate_qr_for_unsigned_prescription_fails` - 400 Bad Request - FAILS (404)
+4. `test_generate_qr_for_nonexistent_prescription` - 404 Not Found - PASSES ✅
+5. `test_generate_qr_requires_authentication` - 401 Unauthorized - FAILS (404)
+6. `test_patient_can_generate_qr_for_own_prescription` - Patient access - FAILS (404)
+7. `test_pharmacist_cannot_generate_qr` - 403 Forbidden - FAILS (404)
+
+**QR Data Structure Tests (3 tests):**
+8. `test_qr_data_contains_valid_vc` - QR embeds W3C VC - FAILS (404)
+9. `test_qr_uses_error_correction_level_h` - Error correction H - FAILS (404)
+10. `test_qr_size_threshold_is_2953_bytes` - QR capacity threshold - FAILS (404)
+
+**Credential Embedding Tests (2 tests):**
+11. `test_qr_embeds_full_vc_credential` - Complete VC in QR - FAILS (404)
+12. `test_qr_includes_prescription_metadata` - Metadata preserved - FAILS (404)
+
+**URL Fallback Tests (3 tests):**
+13. `test_url_fallback_includes_credential_id` - credential_id in URL - FAILS (404)
+14. `test_url_fallback_points_to_api_endpoint` - URL format - FAILS (404)
+15. `test_url_fallback_includes_verification_hash` - Security hash - FAILS (404)
+
+**Integration Tests (2 tests):**
+16. `test_qr_service_uses_vc_service_for_credentials` - VCService integration - FAILS (404)
+17. `test_qr_generation_preserves_signature` - Signature preservation - FAILS (404)
+
+**Collection Test:**
+18. `test_pytest_collection` - Pytest collection verification - PASSES ✅
+
+### Fixtures Created
+
+1. **`test_client`**: FastAPI TestClient with all dependencies
+2. **`doctor_token`**: JWT token for doctor authentication
+3. **`patient_token`**: JWT token for patient authentication
+4. **`signed_prescription`**: Prescription with digital_signature and credential_id
+5. **`unsigned_prescription`**: Prescription without signature (for error tests)
+6. **`large_prescription`**: Prescription with 3000+ char instructions (URL fallback test)
+
+### Expected API Specification
+
+**POST /api/v1/prescriptions/{id}/qr**
+- Auth: Doctor OR Patient (owner check)
+- Validation: Prescription must be signed (digital_signature + credential_id)
+- Response 201:
+  ```json
+  {
+    "qr_code": "base64_encoded_png",
+    "data_type": "embedded|url",
+    "credential_id": "cred_123456",
+    "url": "https://api/v1/credentials/{credential_id}?hash=..."  // if data_type=url
+  }
+  ```
+
+**QR Code Requirements:**
+- Format: Base64-encoded PNG image
+- Error Correction: Level H (30% recovery)
+- Maximum Capacity: 2953 bytes (QR Version 40)
+- Data Type: "embedded" (VC in QR) or "url" (retrieval endpoint)
+
+**Access Control:**
+- ✅ Doctor can generate QR for own prescriptions
+- ✅ Patient can generate QR for own prescriptions
+- ❌ Pharmacist cannot generate QR (read-only access)
+
+### Technical Decisions
+
+**Why Error Correction Level H?**
+- Medical data requires high reliability
+- QR codes may be printed/displayed on low-quality screens
+- 30% recovery allows reading even if partially damaged
+
+**Why 2953 Byte Threshold?**
+- QR Version 40 (177x177 modules) maximum with ECL-H
+- Larger data → unreadable QR codes on mobile screens
+- URL fallback provides graceful degradation
+
+**Why Block Pharmacists from Generating QR?**
+- Pharmacists scan/verify QR codes, don't generate them
+- Aligns with US-004 (doctor sends) and US-008 (patient shares)
+- Reduces attack surface (pharmacist devices shouldn't create credentials)
+
+### Challenges Encountered
+
+**Challenge 1: Subagent Timeout**
+**Problem:** Subagent timed out after 10 minutes, created implementation files (violating TDD)
+**Solution:** Manually reverted implementation files, kept only test file, fixed linting/formatting
+
+**Challenge 2: Unused Import**
+**Problem:** `from app.models.did import DID` imported but not used
+**Solution:** Removed unused import to pass flake8
+
+**Challenge 3: Black Formatting**
+**Problem:** File not formatted according to black standards
+**Solution:** Ran `black app/tests/test_qr.py` to auto-format
+
+### Verification Results
+
+```
+✅ Linting: flake8 passed (0 errors)
+✅ Formatting: black compliant
+✅ Tests: 16/18 failing as expected (TDD red phase)
+✅ Collection: pytest collection successful
+```
+
+**Test Results:**
+- 16 FAILED (404 Not Found - endpoint not implemented) ✅ Expected
+- 2 PASSED (collection test + 404 test for non-existent prescription) ✅ Expected
+
+### Implementation Requirements for TASK-018
+
+**Service Layer (`app/services/qr.py`):**
+1. `QRService` class with:
+   - `generate_qr(credential: Dict[str, Any]) -> str`: Generate base64 QR
+   - `create_url_fallback(credential_id: str) -> str`: Create retrieval URL
+   - Size threshold check (2953 bytes)
+   - Error correction level H
+
+**API Layer (`app/api/v1/qr.py`):**
+2. Endpoint: `POST /api/v1/prescriptions/{id}/qr`
+   - Auth: Require doctor OR patient (owner check)
+   - Validation: Prescription must be signed
+   - Response: QRResponse schema
+   - Integration: Use VCService.create_credential()
+
+**Dependencies:**
+3. Install `qrcode` library:
+   ```bash
+   pip install qrcode[pil]
+   ```
+
+**Response Schema:**
+```python
+class QRResponse(BaseModel):
+    qr_code: str  # base64-encoded PNG
+    data_type: str  # "embedded" | "url"
+    credential_id: str
+    url: Optional[str] = None  # present if data_type="url"
+```
+
+### Notes for Next Task
+
+**TASK-018 Implementation Checklist:**
+- [ ] Install qrcode library in requirements.txt
+- [ ] Create app/services/qr.py with QRService class
+- [ ] Create app/api/v1/qr.py with POST endpoint
+- [ ] Register QR router in app/main.py
+- [ ] Make all 16 failing tests pass
+- [ ] Verify linting and formatting
+- [ ] Commit atomic unit
+
+**Key Integration Points:**
+- Use `VCService.create_credential()` to get full W3C VC
+- Encode VC as base64 PNG QR code
+- Check VC JSON size before encoding (threshold: 2953 bytes)
+- If too large, use URL fallback format
+
+---
+
+**Status:** ✅ Complete - All acceptance criteria met, tests failing as expected (TDD red phase)
+**Next Task:** TASK-018 (Implement QR code generation service)
+**Time Taken:** ~30 minutes (manual completion after subagent timeout)
+
