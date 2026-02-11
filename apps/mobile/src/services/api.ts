@@ -252,9 +252,10 @@ export const api = {
     return response.data;
   },
 
-  async searchPatients(query: string): Promise<PatientSearchResponse> {
+  async searchPatients(query: string | { query: string }): Promise<PatientSearchResponse> {
+    const q = typeof query === 'string' ? query : query.query;
     const response = await getClient().get('/patients/search', {
-      params: { q: query },
+      params: { q },
     });
     return response.data;
   },
