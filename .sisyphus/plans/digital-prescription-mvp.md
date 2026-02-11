@@ -1223,7 +1223,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/auth.test.tsx
 
-TASK-032:
+- [x] TASK-032:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement doctor authentication screen
@@ -1241,7 +1241,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/auth.tsx
 
-TASK-033:
+- [x] TASK-033:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing doctor dashboard tests
