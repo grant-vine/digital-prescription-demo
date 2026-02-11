@@ -1331,7 +1331,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/medication-entry.test.tsx
 
-TASK-036B-IMPL:
+- [x] TASK-036B-IMPL:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement medication entry form
