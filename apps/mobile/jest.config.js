@@ -8,4 +8,7 @@ module.exports = {
   ],
   setupFilesAfterEnv: [],
   testEnvironment: 'node',
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-native|expo|expo-router|@react-native)/)',
+  ],
 };

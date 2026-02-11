@@ -1,7 +1,6 @@
 /* Structure validation tests for mobile app. */
 
 import fs from 'fs';
-import path from 'path';
 
 describe('Mobile App Structure', () => {
   describe('Directory Structure', () => {

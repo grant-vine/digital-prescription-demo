@@ -4608,3 +4608,81 @@ async def verify_prescription(
 - Goal: Verify prescription is authentic and not revoked before dispensing
 - Acceptance Criteria: All 25 tests documented in test_verify.py
 - Status: TDD tests written, awaiting implementation in TASK-020
+
+## [2026-02-11] TASK-021: Theme Component Tests
+
+### Created Files
+- `apps/mobile/src/components/theme/ThemeProvider.test.tsx` - 20 comprehensive tests across 6 categories
+
+### Test Categories & Counts
+1. **ThemeProvider Rendering (3 tests):** Component wrapping, context provision, default theme
+2. **Role-Based Theme Selection (3 tests):** Doctor (blue), Patient (cyan), Pharmacist (green)
+3. **Theme Color Validation (6 tests):** Primary colors + required keys for each role
+4. **Theme Switching (3 tests):** Dynamic role changes, context updates, child preservation
+5. **Context Integration (2 tests):** useTheme hook access, error handling outside provider
+6. **Theme Structure Validation (3 tests):** Spacing objects, typography objects, consistency
+
+### Test Execution Results
+- **Status:** ✅ All tests properly failing (as expected for TDD)
+- **Jest collection:** 20 tests collected successfully
+- **ESLint validation:** ✅ 0 errors, 0 warnings
+- **Expected failures:** 10 tests (ThemeProvider not yet implemented)
+- **Passing tests:** 10 tests (theme definition validation)
+
+### Design Decisions
+1. **TDD Approach:** Tests written before implementation using @ts-expect-error to suppress TypeScript errors
+2. **Test Structure:** Each test includes "EXPECTED FAILURE" and "Expected behavior after TASK-022" docstrings
+3. **Category Organization:** Logical grouping of 20 tests into 6 distinct test categories
+4. **Helper Functions:** TestComponent and test utilities built into each test for independence
+5. **React.createElement:** Direct usage for createElement to test component without import (missing implementation)
+
+### Dependencies Added
+- `@testing-library/react-native` - React Native testing utilities
+- `react-test-renderer@18.2.0` - Renderer for tests
+- `ts-jest` - TypeScript support for Jest
+- `eslint-plugin-react` & `eslint-plugin-react-hooks` - ESLint plugins
+- `babel.config.js` - Babel configuration for Expo/Jest compatibility
+
+### Key Implementation Notes for TASK-022
+1. **ThemeProvider Component:**
+   - Should accept `role` prop ('doctor' | 'patient' | 'pharmacist')
+   - Should provide theme context via React.createContext
+   - Should wrap children and render them unchanged
+
+2. **useTheme Hook:**
+   - Should return theme object with colors, spacing, typography
+   - Should throw error if used outside ThemeProvider
+   - Should work at any nesting depth
+
+3. **Theme Selection Logic:**
+   - doctor role → DoctorTheme (#2563EB primary)
+   - patient role → PatientTheme (#0891B2 primary)
+   - pharmacist role → PharmacistTheme (#059669 primary)
+   - Default role (no prop) → Patient theme (most common use)
+
+4. **Dynamic Switching:**
+   - Context should update when role prop changes
+   - Consumers should re-render with new theme
+   - Children should not unmount on theme switch
+
+### Validation Results
+- ✅ npm test -- ThemeProvider.test.tsx --passWithNoTests=false
+  - Test Suites: 1 failed (expected - tests intentionally fail)
+  - Tests: 10 failed, 10 passed, 20 total
+- ✅ npm run lint
+  - 0 errors, 0 warnings
+
+### Files Modified
+- Created: `apps/mobile/src/components/theme/ThemeProvider.test.tsx` (630+ lines)
+- Modified: `apps/mobile/jest.config.js` (added transformIgnorePatterns)
+- Created: `apps/mobile/babel.config.js` (Expo/Jest Babel setup)
+- Modified: `apps/mobile/src/tests/structure.test.ts` (removed unused import)
+- Modified: `apps/mobile/package.json` (via npm install - added testing deps)
+
+### Next Steps for TASK-022
+1. Create `ThemeProvider.tsx` with React.createContext
+2. Implement `useTheme` hook
+3. Create color/spacing/typography selection logic based on role
+4. Add context provider wrapper component
+5. Run tests - all 20 should pass
+6. Verify no ESLint errors
