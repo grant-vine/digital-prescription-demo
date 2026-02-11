@@ -240,6 +240,26 @@ def valid_jwt_token(doctor_user):
 
 
 @pytest.fixture
+def valid_patient_jwt_token(patient_user):
+    """Generate real JWT token for patient user."""
+    return create_access_token({
+        "sub": str(patient_user.id),
+        "username": patient_user.username,
+        "role": str(patient_user.role)
+    })
+
+
+@pytest.fixture
+def valid_pharmacist_jwt_token(pharmacist_user):
+    """Generate real JWT token for pharmacist user."""
+    return create_access_token({
+        "sub": str(pharmacist_user.id),
+        "username": pharmacist_user.username,
+        "role": str(pharmacist_user.role)
+    })
+
+
+@pytest.fixture
 def valid_refresh_token(doctor_user):
     """Generate real refresh token for doctor user."""
     return create_refresh_token({

@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.auth import router as auth_router
+from app.api.v1.prescriptions import router as prescriptions_router
 
 app = FastAPI(
     title="Digital Prescription API",
@@ -21,6 +22,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
+app.include_router(prescriptions_router, prefix="/api/v1", tags=["prescriptions"])
 
 
 @app.get("/health")

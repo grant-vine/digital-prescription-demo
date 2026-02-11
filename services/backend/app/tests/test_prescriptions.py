@@ -85,19 +85,19 @@ def auth_headers_doctor(valid_jwt_token):
 
 
 @pytest.fixture
-def auth_headers_patient(valid_jwt_token):
+def auth_headers_patient(valid_patient_jwt_token):
     """Headers with patient JWT token."""
     return {
-        "Authorization": f"Bearer {valid_jwt_token}",
+        "Authorization": f"Bearer {valid_patient_jwt_token}",
         "Content-Type": "application/json",
     }
 
 
 @pytest.fixture
-def auth_headers_pharmacist(valid_jwt_token):
+def auth_headers_pharmacist(valid_pharmacist_jwt_token):
     """Headers with pharmacist JWT token."""
     return {
-        "Authorization": f"Bearer {valid_jwt_token}",
+        "Authorization": f"Bearer {valid_pharmacist_jwt_token}",
         "Content-Type": "application/json",
     }
 
@@ -288,7 +288,7 @@ async def test_create_prescription_invalid_patient(
 
 
 @pytest.mark.asyncio
-async def test_get_prescription_by_id(test_client, auth_headers_doctor):
+async def test_get_prescription_by_id(test_client, auth_headers_doctor, prescription_data_doctor):
     """Test retrieving existing prescription by ID.
 
     EXPECTED FAILURE: Endpoint GET /api/v1/prescriptions/{id} does not exist yet.
@@ -302,18 +302,24 @@ async def test_get_prescription_by_id(test_client, auth_headers_doctor):
         ...
     }
     """
-    # Assuming prescription with ID 1 exists (created in previous test)
+    create_response = test_client.post(
+        "/api/v1/prescriptions",
+        json=prescription_data_doctor,
+        headers=auth_headers_doctor,
+    )
+    assert create_response.status_code == 201
+    prescription_id = create_response.json()["id"]
+    
     response = test_client.get(
-        "/api/v1/prescriptions/1",
+        f"/api/v1/prescriptions/{prescription_id}",
         headers=auth_headers_doctor,
     )
 
-    # FAILS until TASK-012
     assert response.status_code == 200
     data = response.json()
 
     assert "id" in data
-    assert data["id"] == 1
+    assert data["id"] == prescription_id
     assert "medication_name" in data
     assert "doctor_id" in data
 
@@ -384,6 +390,14 @@ async def test_update_prescription_draft(
         ...
     }
     """
+    create_response = test_client.post(
+        "/api/v1/prescriptions",
+        json=prescription_data_doctor,
+        headers=auth_headers_doctor,
+    )
+    assert create_response.status_code == 201
+    prescription_id = create_response.json()["id"]
+    
     update_data = {
         "medication_name": "Updated Amoxicillin",
         "dosage": "1000mg",
@@ -391,12 +405,11 @@ async def test_update_prescription_draft(
     }
 
     response = test_client.put(
-        "/api/v1/prescriptions/1",
+        f"/api/v1/prescriptions/{prescription_id}",
         json=update_data,
         headers=auth_headers_doctor,
     )
 
-    # FAILS until TASK-012
     assert response.status_code == 200
     data = response.json()
 
@@ -456,7 +469,7 @@ async def test_update_prescription_unauthorized(test_client, prescription_data_d
 
 
 @pytest.mark.asyncio
-async def test_update_prescription_signed_forbidden(test_client, auth_headers_doctor):
+async def test_update_prescription_signed_forbidden(test_client, auth_headers_doctor, prescription_data_doctor, test_session):
     """Test that signed prescriptions cannot be updated.
 
     EXPECTED FAILURE: Endpoint does not exist yet.
@@ -471,20 +484,32 @@ async def test_update_prescription_signed_forbidden(test_client, auth_headers_do
         "detail": "Cannot modify signed prescriptions"
     }
     """
+    from app.models.prescription import Prescription
+    
+    create_response = test_client.post(
+        "/api/v1/prescriptions",
+        json=prescription_data_doctor,
+        headers=auth_headers_doctor,
+    )
+    assert create_response.status_code == 201
+    prescription_id = create_response.json()["id"]
+    
+    prescription = test_session.query(Prescription).filter(Prescription.id == prescription_id).first()
+    prescription.digital_signature = "mock_signature_xyz"
+    test_session.commit()
+    
     update_data = {
         "medication_name": "Updated Amoxicillin",
     }
 
-    # Assuming prescription with ID 1 is signed
     response = test_client.put(
-        "/api/v1/prescriptions/1",
+        f"/api/v1/prescriptions/{prescription_id}",
         json=update_data,
         headers=auth_headers_doctor,
     )
 
-    # FAILS until TASK-012
-    # Will return 403 only if prescription is actually signed
-    assert response.status_code in [200, 403]
+    assert response.status_code == 403
+    assert "signed" in response.json()["detail"].lower()
 
 
 # ============================================================================
