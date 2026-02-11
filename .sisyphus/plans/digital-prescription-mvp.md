@@ -871,7 +871,7 @@ REQUIRES-EXCLUSIVE-FILES: services/backend/app/api/v1/prescriptions.py
 
 ### BATCH 3: SSI Integration (Week 1-2)
 
-TASK-013:
+- [x] TASK-013: Write failing DID/Wallet API tests
 TYPE: test
 SCOPE: services/backend
 TITLE: Write failing DID/Wallet API tests
