@@ -2970,3 +2970,150 @@ class QRResponse(BaseModel):
 **Next Task:** TASK-018 (Implement QR code generation service)
 **Time Taken:** ~30 minutes (manual completion after subagent timeout)
 
+
+## 2026-02-11T16:30:00Z TASK-018: Implement QR code generation service
+
+### Task Summary
+
+**Objective:** Implement QR code generation service to make all 16 failing tests from TASK-017 pass
+**Result:** ✅ All 18 tests passing (16 failures → passes, 2 already passing)
+**Time:** ~45 minutes (subagent timeout + manual fixes)
+**Files Created:**
+- `services/backend/app/services/qr.py` (95 lines) - QR generation service
+- `services/backend/app/api/v1/qr.py` (101 lines) - QR API endpoint
+
+**Files Modified:**
+- `services/backend/app/main.py` - Registered QR router
+- `services/backend/requirements.txt` - Added qrcode[pil]==7.4.2
+- `services/backend/app/tests/test_qr.py` - Fixed pharmacist test (username, token format)
+
+### Implementation Details
+
+**QRService Class (`app/services/qr.py`):**
+- `generate_qr(data: str) -> str`: Generate base64-encoded PNG QR code
+  - Error correction: Level H (30% recovery)
+  - Auto-sizing (version=None)
+  - Returns base64-encoded PNG string
+- `create_url_fallback(credential_id, credential) -> str`: Create retrieval URL with hash
+  - Format: `https://api.rxdistribute.com/api/v1/credentials/{id}?hash={sha256[:16]}`
+  - Hash prevents enumeration attacks
+- `generate_prescription_qr(prescription, doctor_did, patient_did, credential_id) -> Dict`:
+  - Uses VCService.create_credential() to get W3C VC
+  - Adds credential ID and proof from prescription.digital_signature
+  - Checks size threshold (2953 bytes)
+  - Returns embedded QR or URL fallback
+
+**QR API Endpoint (`app/api/v1/qr.py`):**
+- POST /api/v1/prescriptions/{id}/qr
+- RBAC: Doctor OR Patient (owner check)
+- Validation: Prescription must be signed (digital_signature + credential_id)
+- Response: QRResponse(qr_code, data_type, credential_id, url?)
+- Error codes: 400 (unsigned), 403 (forbidden), 404 (not found), 500 (DID missing)
+
+### Test Results
+
+```
+✅ All 18 tests passing (16 failures → passes)
+✅ Linting: flake8 passed (0 errors)
+✅ Formatting: black compliant
+✅ Coverage: 100% on qr.py, 88% on qr API endpoint
+```
+
+**Test Breakdown:**
+- QR Generation Endpoint: 7/7 passing
+- QR Data Structure: 3/3 passing
+- Credential Embedding: 2/2 passing
+- URL Fallback: 3/3 passing
+- Integration: 2/2 passing
+- Collection: 1/1 passing
+
+### Challenges Encountered
+
+**Challenge 1: Subagent Timeout**
+**Problem:** Subagent timed out after 10 minutes, left incomplete work
+**Solution:** Manually verified implementation, fixed test bugs, formatted code
+
+**Challenge 2: Test Bug - Missing username Field**
+**Problem:** Pharmacist test created User without `username` field (required by model)
+**Solution:** Added `username="pharmacist_test"` to User creation
+
+**Challenge 3: Test Bug - Wrong Token Format**
+**Problem:** Test used `{"sub": email, "user_id": id}` but create_access_token expects `{"sub": str(id), "username": username, "role": role}`
+**Solution:** Fixed token creation to match conftest.py pattern
+
+**Challenge 4: Test Bug - Wrong Field Name**
+**Problem:** Test used `hashed_password` but User model expects `password_hash`
+**Solution:** Changed to `password_hash="fake_hash"`
+
+### Technical Decisions
+
+**QR Code Library: qrcode[pil]==7.4.2**
+- Mature, well-maintained Python library
+- PIL/Pillow integration for image generation
+- Supports all error correction levels
+- Easy base64 encoding
+
+**Error Correction Level H (30% Recovery):**
+- Medical data requires high reliability
+- QR codes may be printed/displayed on low-quality screens
+- Allows reading even if 30% of QR code is damaged
+
+**Size Threshold: 2953 Bytes**
+- QR Version 40 (177x177 modules) maximum with ECL-H
+- Practical limit lower (~2000 bytes) for mobile scanners
+- URL fallback provides graceful degradation
+
+**URL Fallback with Hash:**
+- Prevents credential enumeration attacks
+- SHA-256 hash (first 16 chars) in query string
+- Future endpoint: GET /api/v1/credentials/{id}?hash={hash}
+
+**RBAC: Doctor OR Patient (Owner Check)**
+- Doctor can generate QR for own prescriptions
+- Patient can generate QR for own prescriptions
+- Pharmacist blocked (read-only access)
+- Aligns with US-004 (doctor sends) and US-008 (patient shares)
+
+### Code Quality
+
+**Linting:** ✅ flake8 passed (0 errors)
+**Formatting:** ✅ black compliant
+**Test Coverage:** 100% on qr.py, 88% on qr API endpoint
+**Code Review:**
+- All endpoints have comprehensive docstrings
+- RBAC rules explicitly documented
+- Error codes match HTTP standards
+- Pydantic models for type safety
+
+### Notes for Future Tasks
+
+**TASK-019 (Credential Issuance Tests):**
+- QR generation complete, now test credential issuance flow
+- Integration: Doctor signs → generates QR → patient scans → receives credential
+- Consider DIDComm v2 messaging (US-018) as future replacement for QR
+
+**URL Fallback Endpoint (Future):**
+- Implement GET /api/v1/credentials/{id}?hash={hash}
+- Validate hash matches credential
+- Rate limiting to prevent abuse
+- Consider short-lived URLs (expiry timestamp)
+
+**Mobile App Integration (BATCH 4):**
+- QR scanner component (React Native Camera)
+- Parse QR data (embedded VC JSON or URL)
+- If URL, fetch credential from endpoint
+- Store credential in mobile wallet
+
+### References
+
+- **User Stories:** US-004 (Send Prescription via QR), US-008 (Share with Pharmacist)
+- **QR Library:** https://github.com/lincolnloop/python-qrcode
+- **W3C VC:** Verifiable Credentials Data Model 2.0
+- **Test Specification:** `app/tests/test_qr.py` (358 lines, 18 tests)
+
+---
+
+**Status:** ✅ Complete - All acceptance criteria met, all tests passing
+**Next Task:** TASK-019 (Write failing credential issuance tests)
+**Time Taken:** ~45 minutes (subagent timeout + manual fixes)
+

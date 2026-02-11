@@ -196,8 +196,9 @@ class TestQRGenerationEndpoint:
         from app.core.auth import create_access_token
 
         pharmacist = User(
+            username="pharmacist_test",
             email="pharmacist@test.com",
-            hashed_password="fake_hash",
+            password_hash="fake_hash",
             full_name="Test Pharmacist",
             role="pharmacist",
         )
@@ -205,7 +206,11 @@ class TestQRGenerationEndpoint:
         test_session.commit()
 
         pharmacist_token = create_access_token(
-            data={"sub": pharmacist.email, "user_id": pharmacist.id}
+            {
+                "sub": str(pharmacist.id),
+                "username": pharmacist.username,
+                "role": str(pharmacist.role),
+            }
         )
 
         response = test_client.post(
