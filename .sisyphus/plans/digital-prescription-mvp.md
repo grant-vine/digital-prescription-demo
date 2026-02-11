@@ -1495,7 +1495,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(patient)/auth.tsx
 
-TASK-043:
+- [x] TASK-043:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing prescription receipt tests
