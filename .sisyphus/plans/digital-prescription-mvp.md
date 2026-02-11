@@ -1024,7 +1024,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/components/theme/ThemeProvider.test.tsx
 
-TASK-022:
+- [x] TASK-022:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement theming system
