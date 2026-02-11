@@ -876,3 +876,154 @@ Review MockACAyResponses class methods for expected JSON shapes:
 - Migration is ready but needs PostgreSQL running to apply
 - All models support SQLAlchemy 2.0 async if needed later
 - JSON field in Audit model allows flexible event data without schema changes
+
+---
+
+## TASK-008: ACA-Py Service Layer Implementation (2026-02-11)
+
+### Implementation Details
+
+**File Created:** `services/backend/app/services/acapy.py` (82 statements, 77% coverage)
+
+**ACAPyService class provides 5 core methods:**
+
+1. **create_wallet()** - POST /wallet/did/create
+   - Returns: did, verkey, public
+   - Extracts result from wrapper response
+
+2. **get_wallet_status()** - GET /status
+   - Returns: version, label, wallet, public_did
+   - Health check endpoint
+
+3. **create_did(method, public)** - POST /wallet/did/create
+   - Creates DID with specific method (cheqd:testnet)
+   - Returns: did, verkey, public, method
+   - Ensures method field in response
+
+4. **issue_credential(credential)** - POST /issue-credential-2.0/send
+   - Formats payload for ACA-Py issue-credential-2.0 API
+   - Returns: cred_ex_id, state, credential_id, credential (W3C VC)
+   - Includes full proof (JsonWebSignature2020)
+
+5. **verify_credential(vc)** - POST /present-proof-2.0/verify-presentation
+   - Wraps credential in presentation format
+   - Returns: verified, presentation_id, state, presentation
+   - Handles validation failures gracefully (400 errors)
+
+6. **create_revocation_registry(issuer_did, cred_def_id)** - POST /revocation/create-registry
+   - Returns: revoc_reg_id, revoc_reg_def, revoc_reg_entry
+   - Max credentials: 1,000,000
+
+### Key Technical Decisions
+
+**HTTP Client:** httpx.AsyncClient
+- Async/await support for FastAPI integration
+- Base URL configuration via ACAPY_ADMIN_URL
+- Proper connection management with close() and context managers
+
+**Error Handling Strategy:**
+- All methods return dicts (never raise exceptions)
+- HTTP errors → error field in response dict
+- 400 errors for credential verification → verified=False
+- Network errors → error field with str(exception)
+
+**Response Transformations:**
+- create_wallet: Extracts "result" wrapper
+- create_did: Ensures method field exists
+- verify_credential: Ensures verified boolean exists
+- issue_credential: ACA-Py-specific payload format
+
+### Testing Infrastructure
+
+**Added Dependencies:**
+- httpx==0.25.2 (HTTP client)
+- respx==0.20.2 (HTTP mocking for tests)
+
+**Test Mocking Pattern:**
+```python
+@pytest.mark.asyncio
+@respx.mock
+async def test_method(self):
+    respx.post("http://acapy:8001/endpoint").mock(
+        return_value=respx.MockResponse(200, json=mock_data)
+    )
+    # Test code
+```
+
+**All 12 Tests Pass:**
+- 2 wallet operations tests
+- 2 DID operations tests
+- 2 credential operations tests
+- 1 revocation registry test
+- 2 service interface tests
+- 1 endpoint documentation test
+- 1 environment config test
+- 1 error handling test
+
+### Environment Configuration
+
+**ACAPY_ADMIN_URL:**
+- Default: http://acapy:8001
+- Read from environment variable
+- Can be overridden in constructor
+- Service works with or without explicit admin_url parameter
+
+### Code Quality
+
+**Linting:** flake8 → 0 errors
+**Formatting:** black → compliant
+**Test Coverage:** 77% (error branches untested, expected)
+
+### Response Format Examples
+
+**DID Creation:**
+```json
+{
+  "did": "did:cheqd:testnet:e5fa7b0aafc4bbd1ac18b0e4e8d1e8a5",
+  "verkey": "3Aw4Z3R4T8Qw1Y2X3C4V5B6N7M8K9L0",
+  "public": true,
+  "method": "cheqd:testnet"
+}
+```
+
+**Credential Issuance:**
+```json
+{
+  "cred_ex_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "state": "done",
+  "credential_id": "vc_12345_credential_id",
+  "credential": {
+    "@context": [...],
+    "type": ["VerifiableCredential", "PrescriptionCredential"],
+    "issuer": "did:cheqd:testnet:issuer123",
+    "credentialSubject": {...},
+    "proof": {
+      "type": "JsonWebSignature2020",
+      "jws": "eyJhbGc..."
+    }
+  }
+}
+```
+
+**Credential Verification:**
+```json
+{
+  "verified": true,
+  "presentation_id": "pres_12345",
+  "state": "done",
+  "presentation": {...}
+}
+```
+
+### Next Steps (Dependencies)
+
+**TASK-009:** Database initialization (migrations)
+**TASK-010:** Authentication service layer
+**TASK-011:** Configuration management (settings.py)
+**TASK-014:** API endpoints using ACAPyService
+
+**Integration Requirements:**
+- ACAPyService ready for dependency injection
+- Async context manager support (__aenter__, __aexit__)
+- Works with FastAPI dependency injection via Depends()
+

@@ -12,6 +12,7 @@ Uses mocked HTTP responses to simulate ACA-Py Admin API endpoints.
 """
 
 import pytest
+import respx
 from typing import Dict, Any
 
 
@@ -144,6 +145,7 @@ class TestACAPyWalletOperations:
     """Tests for wallet creation and management."""
 
     @pytest.mark.asyncio
+    @respx.mock
     async def test_wallet_creation(self, mock_acapy_responses):
         """Test wallet DID creation via ACA-Py.
 
@@ -156,6 +158,12 @@ class TestACAPyWalletOperations:
         """
         from app.services.acapy import ACAPyService
 
+        respx.post("http://acapy:8001/wallet/did/create").mock(
+            return_value=respx.MockResponse(
+                200, json=mock_acapy_responses.wallet_creation_response()
+            )
+        )
+
         service = ACAPyService(admin_url="http://acapy:8001")
         result = await service.create_wallet()
 
@@ -165,6 +173,7 @@ class TestACAPyWalletOperations:
         assert result["public"] is True
 
     @pytest.mark.asyncio
+    @respx.mock
     async def test_wallet_status(self):
         """Test retrieving wallet status from ACA-Py.
 
@@ -175,6 +184,12 @@ class TestACAPyWalletOperations:
         MUST FAIL with ModuleNotFoundError until TASK-008.
         """
         from app.services.acapy import ACAPyService
+
+        respx.get("http://acapy:8001/status").mock(
+            return_value=respx.MockResponse(
+                200, json=MockACAyResponses.wallet_status_response()
+            )
+        )
 
         service = ACAPyService(admin_url="http://acapy:8001")
         result = await service.get_wallet_status()
@@ -188,6 +203,7 @@ class TestACAPyDIDOperations:
     """Tests for DID creation and resolution."""
 
     @pytest.mark.asyncio
+    @respx.mock
     async def test_did_creation_cheqd_testnet(self, mock_acapy_responses):
         """Test DID creation on cheqd testnet.
 
@@ -200,6 +216,12 @@ class TestACAPyDIDOperations:
         """
         from app.services.acapy import ACAPyService
 
+        respx.post("http://acapy:8001/wallet/did/create").mock(
+            return_value=respx.MockResponse(
+                200, json=mock_acapy_responses.did_response()
+            )
+        )
+
         service = ACAPyService(admin_url="http://acapy:8001")
         result = await service.create_did(method="cheqd:testnet")
 
@@ -208,6 +230,7 @@ class TestACAPyDIDOperations:
         assert "verkey" in result
 
     @pytest.mark.asyncio
+    @respx.mock
     async def test_did_creation_with_public_key(self):
         """Test DID creation with custom public key export.
 
@@ -219,6 +242,12 @@ class TestACAPyDIDOperations:
         """
         from app.services.acapy import ACAPyService
 
+        respx.post("http://acapy:8001/wallet/did/create").mock(
+            return_value=respx.MockResponse(
+                200, json=MockACAyResponses.did_response()
+            )
+        )
+
         service = ACAPyService(admin_url="http://acapy:8001")
         result = await service.create_did(method="cheqd:testnet", public=True)
 
@@ -229,6 +258,7 @@ class TestACAPyCredentialOperations:
     """Tests for credential issuance and verification."""
 
     @pytest.mark.asyncio
+    @respx.mock
     async def test_credential_issuance(self, mock_acapy_responses):
         """Test credential issuance in W3C VC format.
 
@@ -253,6 +283,12 @@ class TestACAPyCredentialOperations:
             },
         }
 
+        respx.post("http://acapy:8001/issue-credential-2.0/send").mock(
+            return_value=respx.MockResponse(
+                200, json=mock_acapy_responses.credential_issuance_response()
+            )
+        )
+
         service = ACAPyService(admin_url="http://acapy:8001")
         result = await service.issue_credential(credential_input)
 
@@ -263,6 +299,7 @@ class TestACAPyCredentialOperations:
         assert "proof" in result["credential"]
 
     @pytest.mark.asyncio
+    @respx.mock
     async def test_credential_verification(self, mock_acapy_responses):
         """Test credential verification.
 
@@ -291,6 +328,12 @@ class TestACAPyCredentialOperations:
             },
         }
 
+        respx.post("http://acapy:8001/present-proof-2.0/verify-presentation").mock(
+            return_value=respx.MockResponse(
+                200, json=mock_acapy_responses.credential_verification_response()
+            )
+        )
+
         service = ACAPyService(admin_url="http://acapy:8001")
         result = await service.verify_credential(vc_to_verify)
 
@@ -303,6 +346,7 @@ class TestACAPyRevocationOperations:
     """Tests for credential revocation registry operations."""
 
     @pytest.mark.asyncio
+    @respx.mock
     async def test_create_revocation_registry(self, mock_acapy_responses):
         """Test creation of revocation registry.
 
@@ -314,6 +358,12 @@ class TestACAPyRevocationOperations:
         MUST FAIL with ModuleNotFoundError until TASK-008.
         """
         from app.services.acapy import ACAPyService
+
+        respx.post("http://acapy:8001/revocation/create-registry").mock(
+            return_value=respx.MockResponse(
+                200, json=mock_acapy_responses.revocation_registry_response()
+            )
+        )
 
         service = ACAPyService(admin_url="http://acapy:8001")
         result = await service.create_revocation_registry(
@@ -413,6 +463,7 @@ class TestACAPyErrorHandling:
     """Tests for error handling in ACA-Py service."""
 
     @pytest.mark.asyncio
+    @respx.mock
     async def test_credential_verification_failure_handling(self):
         """Test graceful handling of credential verification failure.
 
@@ -434,6 +485,12 @@ class TestACAPyErrorHandling:
                 "jws": "invalid_jws",
             },
         }
+
+        respx.post("http://acapy:8001/present-proof-2.0/verify-presentation").mock(
+            return_value=respx.MockResponse(
+                400, json={"error": "Invalid proof"}
+            )
+        )
 
         service = ACAPyService(admin_url="http://acapy:8001")
         result = await service.verify_credential(invalid_vc)
