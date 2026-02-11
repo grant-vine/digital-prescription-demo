@@ -1349,7 +1349,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/medication-entry.tsx
 
-TASK-036C:
+- [x] TASK-036C:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing repeat configuration tests
