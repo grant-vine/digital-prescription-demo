@@ -4898,3 +4898,79 @@ When navigation is added, all tests should still pass and documentation confirms
 - Layout groups handle role-specific screens
 
 ---
+
+## 2026-02-11 20:15 - TASK-024: Implement Role Selector Navigation
+
+**Implementation Complete:** ✅
+
+**Files Modified:**
+- `apps/mobile/src/app/index.tsx` (added navigation)
+- `apps/mobile/src/app/(doctor)/_layout.tsx` (ThemeProvider integration)
+- `apps/mobile/src/app/(patient)/_layout.tsx` (ThemeProvider integration)
+- `apps/mobile/src/app/(pharmacist)/_layout.tsx` (ThemeProvider integration)
+- `apps/mobile/jest.setup.js` (expo-router mocks)
+- `apps/mobile/jest.config.js` (setup file configuration)
+
+**Implementation Details:**
+
+**1. Navigation Integration (index.tsx):**
+```typescript
+import { useRouter } from 'expo-router';
+const router = useRouter();
+// Continue button:
+onPress={() => router.push(`/(${selectedRole})`)}
+```
+- Template literal builds routes dynamically: `/(doctor)`, `/(patient)`, `/(pharmacist)`
+- Follows Expo Router file-based routing conventions
+- Navigation triggered only when role selected
+
+**2. ThemeProvider Integration (Layout files):**
+```typescript
+<ThemeProvider role="doctor">  // or patient/pharmacist
+  <Stack screenOptions={{ ... }}>
+    ...
+  </Stack>
+</ThemeProvider>
+```
+- Each layout wrapped with role-specific ThemeProvider
+- Ensures theme context available throughout layout tree
+- Children components can use `useTheme()` hook
+
+**3. Jest Testing Setup:**
+- Created `jest.setup.js` with expo-router mocks
+- Mocked `useRouter`, `Stack`, navigation methods
+- Updated `jest.config.js` to include setup file
+- All 12 tests passing without modification
+
+**Verification Results:**
+- ✅ Jest: 12/12 tests passing (100%)
+- ✅ TypeScript: 0 errors
+- ✅ ESLint: 0 errors
+
+**Key Design Decisions:**
+
+1. **Dynamic Route Building**: Used template literals `\`/(${selectedRole})\`` instead of switch statement - cleaner and less verbose
+2. **ThemeProvider Position**: Placed at layout level (not app root) - allows different themes per route group
+3. **Jest Mocks**: Created comprehensive expo-router mock - enables testing navigation without full router context
+
+**Testing Pattern:**
+- Tests verify component renders correctly
+- Tests verify state management works
+- Tests verify navigation is called (through mocks)
+- All tests pass without modifications from TASK-023
+
+**Integration Points:**
+- RoleSelector → Navigation → Layout → ThemeProvider → Theme Context
+- Flow: User selects role → Continue button pressed → Navigate to layout → Theme applied
+
+**Next Steps:**
+- TASK-025: Write failing QR scanner component tests
+- Future: Add QR code scanning functionality
+- Future: Implement role-specific screens in layout groups
+
+**Challenges Overcome:**
+- Subagent failed silently (no file changes)
+- Orchestrator implemented directly to maintain momentum
+- expo-router module not found in Jest - added comprehensive mocks
+
+**Commit:** Pending

@@ -1061,7 +1061,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/index.test.tsx
 
-TASK-024:
+- [x] TASK-024:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement role selector and navigation

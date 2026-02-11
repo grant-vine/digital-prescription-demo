@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 
 type Role = 'doctor' | 'patient' | 'pharmacist' | null;
 
 export default function RoleSelector() {
   const [selectedRole, setSelectedRole] = useState<Role>(null);
+  const router = useRouter();
 
   const roles = [
     {
@@ -79,6 +81,7 @@ export default function RoleSelector() {
                 roles.find((r) => r.id === selectedRole)?.color || '#2563EB',
             },
           ]}
+          onPress={() => router.push(`/(${selectedRole})`)}
         >
           <Text style={styles.continueButtonText}>Continue as {selectedRole}</Text>
         </TouchableOpacity>
