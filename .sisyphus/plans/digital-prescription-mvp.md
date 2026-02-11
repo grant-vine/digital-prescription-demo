@@ -1098,7 +1098,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/components/qr/QRScanner.test.tsx
 
-TASK-026:
+- [x] TASK-026:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement QR scanner component
@@ -1116,7 +1116,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/components/qr/QRScanner.tsx
 
-TASK-026.5:
+- [x] TASK-026.5:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement manual QR data entry fallback
@@ -1134,7 +1134,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/components/qr/ManualEntry.tsx
 
-TASK-027:
+- [x] TASK-027:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing QR display component tests
@@ -1169,7 +1169,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/components/qr/QRDisplay.tsx
 
-TASK-029:
+- [x] TASK-029:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing API client tests
