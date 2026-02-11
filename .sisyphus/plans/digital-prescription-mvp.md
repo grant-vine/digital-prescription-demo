@@ -1294,7 +1294,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/patient-select.test.tsx
 
-TASK-036A:
+- [x] TASK-036A:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement patient selection screen
