@@ -268,3 +268,54 @@ def valid_refresh_token(doctor_user):
         "role": str(doctor_user.role)
     })
 
+
+@pytest.fixture
+def mock_acapy_service(monkeypatch):
+    """Mock ACA-Py service for DID/wallet creation tests."""
+    import asyncio
+    import uuid
+    
+    class MockACAPyService:
+        def __init__(self, admin_url=None):
+            self.admin_url = admin_url
+        
+        async def create_wallet(self):
+            unique_id = uuid.uuid4().hex
+            return {
+                "did": f"did:cheqd:testnet:{unique_id}",
+                "verkey": "mock-verification-key",
+                "public": True
+            }
+        
+        async def create_did(self, method="cheqd:testnet", public=True):
+            unique_id = uuid.uuid4().hex
+            return {
+                "did": f"did:cheqd:testnet:{unique_id}",
+                "verkey": "mock-verification-key",
+                "public": public,
+                "method": method
+            }
+        
+        async def close(self):
+            pass
+    
+    import app.api.v1.dids as dids_module
+    monkeypatch.setattr(dids_module, "ACAPyService", MockACAPyService)
+    return MockACAPyService
+
+
+@pytest.fixture
+def doctor_with_wallet(test_session, doctor_user):
+    """Create wallet for doctor user (for test_wallet_status_success)."""
+    from app.models.wallet import Wallet
+    import uuid
+    
+    wallet = Wallet(
+        user_id=doctor_user.id,
+        wallet_id=f"wallet-{uuid.uuid4().hex}",
+        status="active"
+    )
+    test_session.add(wallet)
+    test_session.commit()
+    return doctor_user
+

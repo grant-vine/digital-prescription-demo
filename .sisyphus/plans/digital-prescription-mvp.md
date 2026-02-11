@@ -888,7 +888,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/tests/test_did.py
 
-TASK-014:
+- [x] TASK-014: Implement DID management endpoints
 TYPE: implementation
 SCOPE: services/backend
 TITLE: Implement DID management endpoints

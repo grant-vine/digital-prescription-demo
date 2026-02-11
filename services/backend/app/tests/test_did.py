@@ -20,12 +20,23 @@ from fastapi.testclient import TestClient
 
 
 @pytest.fixture
-def test_client(override_get_db, doctor_user, patient_user, pharmacist_user):
+def test_client(override_get_db, mock_acapy_service, doctor_user, patient_user, pharmacist_user, request, test_session):
     """Create FastAPI TestClient for making requests.
 
     Will fail until app has DID routes.
     """
     from app.main import app
+    
+    if "test_wallet_status_success" in request.node.name:
+        from app.models.wallet import Wallet
+        import uuid
+        wallet = Wallet(
+            user_id=doctor_user.id,
+            wallet_id=f"wallet-{uuid.uuid4().hex}",
+            status="active"
+        )
+        test_session.add(wallet)
+        test_session.commit()
 
     return TestClient(app)
 

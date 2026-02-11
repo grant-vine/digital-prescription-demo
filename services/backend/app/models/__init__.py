@@ -5,6 +5,8 @@ from app.models.user import User, UserRole
 from app.models.prescription import Prescription
 from app.models.dispensing import Dispensing
 from app.models.audit import Audit
+from app.models.did import DID
+from app.models.wallet import Wallet
 
 __all__ = [
     "Base",
@@ -13,4 +15,6 @@ __all__ = [
     "Prescription",
     "Dispensing",
     "Audit",
+    "DID",
+    "Wallet",
 ]
