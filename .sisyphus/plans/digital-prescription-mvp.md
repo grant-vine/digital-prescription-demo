@@ -1367,7 +1367,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/repeat-config.test.tsx
 
-TASK-036C-IMPL:
+- [x] TASK-036C-IMPL:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement repeat configuration and form submission
