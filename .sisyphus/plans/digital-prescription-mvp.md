@@ -906,7 +906,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/api/v1/dids.py
 
-TASK-015:
+- [x] TASK-015: Write failing credential signing tests
 TYPE: test
 SCOPE: services/backend
 TITLE: Write failing credential signing tests
