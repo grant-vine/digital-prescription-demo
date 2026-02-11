@@ -21,7 +21,15 @@ from fastapi.testclient import TestClient
 
 
 @pytest.fixture
-def test_client(override_get_db, doctor_user, patient_user, pharmacist_user):
+def test_client(
+    override_get_db,
+    doctor_user,
+    patient_user,
+    pharmacist_user,
+    doctor_with_did,
+    patient_with_did,
+    mock_acapy_signing_service,
+):
     """Create FastAPI TestClient for making requests.
 
     Will fail until app has signing routes.

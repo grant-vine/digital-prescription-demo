@@ -923,7 +923,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/tests/test_signing.py
 
-TASK-016:
+- [x] TASK-016: Implement credential signing service
 TYPE: implementation
 SCOPE: services/backend
 TITLE: Implement credential signing service

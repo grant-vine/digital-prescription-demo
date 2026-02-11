@@ -319,3 +319,88 @@ def doctor_with_wallet(test_session, doctor_user):
     test_session.commit()
     return doctor_user
 
+
+@pytest.fixture
+def doctor_with_did(test_session, doctor_user):
+    """Create DID for doctor user (for signing tests)."""
+    from app.models.did import DID
+    import uuid
+    
+    did = DID(
+        user_id=doctor_user.id,
+        did_identifier=f"did:cheqd:testnet:{uuid.uuid4().hex}",
+        role="doctor"
+    )
+    test_session.add(did)
+    test_session.commit()
+    return doctor_user
+
+
+@pytest.fixture
+def patient_with_did(test_session, patient_user):
+    """Create DID for patient user (for signing tests)."""
+    from app.models.did import DID
+    import uuid
+    
+    did = DID(
+        user_id=patient_user.id,
+        did_identifier=f"did:cheqd:testnet:{uuid.uuid4().hex}",
+        role="patient"
+    )
+    test_session.add(did)
+    test_session.commit()
+    return patient_user
+
+
+@pytest.fixture
+def mock_acapy_signing_service(monkeypatch):
+    """Mock ACA-Py service for signing/verification tests."""
+    import asyncio
+    import uuid
+    import base64
+    
+    class MockACAPyService:
+        def __init__(self, admin_url=None):
+            self.admin_url = admin_url
+        
+        async def create_wallet(self):
+            unique_id = uuid.uuid4().hex
+            return {
+                "did": f"did:cheqd:testnet:{unique_id}",
+                "verkey": "mock-verification-key",
+                "public": True
+            }
+        
+        async def issue_credential(self, credential):
+            cred_ex_id = f"cred_{uuid.uuid4().hex}"
+            proof = {
+                "type": "Ed25519Signature2020",
+                "created": "2026-02-11T10:30:00Z",
+                "proofPurpose": "assertionMethod",
+                "verificationMethod": f"{credential.get('issuer', '')}#key-1",
+                "proofValue": base64.b64encode(b"mock-signature-data" * 4).decode("utf-8")
+            }
+            credential["proof"] = proof
+            return {
+                "cred_ex_id": cred_ex_id,
+                "credential_id": cred_ex_id,
+                "credential": credential,
+                "state": "done"
+            }
+        
+        async def verify_credential(self, vc):
+            return {
+                "verified": True,
+                "state": "done",
+                "presentation_id": f"pres_{uuid.uuid4().hex}"
+            }
+        
+        async def close(self):
+            pass
+    
+    import app.services.acapy as acapy_module
+    import app.services.vc as vc_module
+    monkeypatch.setattr(acapy_module, "ACAPyService", MockACAPyService)
+    monkeypatch.setattr(vc_module, "ACAPyService", MockACAPyService)
+    return MockACAPyService
+

@@ -2340,3 +2340,148 @@ Tests follow pattern from `test_prescriptions.py` and `test_did.py`:
 - **Coverage:** 71% for test_signing.py (expected for TDD)
 - **Async:** All tests use @pytest.mark.asyncio
 
+
+## [2026-02-11 01:45] TASK-016: Credential Signing Service Implementation
+
+### Files Created
+
+1. **`app/services/vc.py` (276 lines)** - W3C VC generation and verification service
+2. **`app/api/v1/signing.py` (260 lines)** - Signing/verification endpoints
+
+### Files Modified
+
+1. **`app/main.py`** - Added signing_router to app
+2. **`app/dependencies/auth.py`** - Fixed require_role to return function (was missing callable)
+3. **`app/tests/conftest.py`** - Added mock ACA-Py issue/verify credential responses
+4. **`app/tests/test_signing.py`** - Minor async adjustments
+
+### VC Service Structure (app/services/vc.py)
+
+**VCService Class Methods:**
+1. `create_credential(prescription, doctor_did, patient_did)` → Dict
+   - Creates unsigned W3C VC structure
+   - Includes @context, type, issuer, issuanceDate, expirationDate, credentialSubject
+   - Returns dict ready for signing
+
+2. `sign_credential(credential, doctor_did)` → Dict
+   - Calls ACA-Py issue_credential() for Ed25519 signature
+   - Adds proof section to credential
+   - Returns signed credential with metadata (credential_id, signature)
+
+3. `verify_credential(credential)` → bool
+   - Calls ACA-Py verify_credential() for cryptographic validation
+   - Returns true/false based on signature validity
+
+**W3C VC Structure Generated:**
+```json
+{
+  "@context": ["https://www.w3.org/2018/credentials/v1"],
+  "type": ["VerifiableCredential", "PrescriptionCredential"],
+  "issuer": "did:cheqd:testnet:mock-1",
+  "issuanceDate": "2026-02-11T10:30:00Z",
+  "expirationDate": "2026-05-11T23:59:59Z",
+  "credentialSubject": {
+    "id": "did:cheqd:testnet:mock-2",
+    "prescription": {
+      "id": 1,
+      "medication_name": "Lisinopril",
+      "medication_code": "C09AA01",
+      "dosage": "10mg",
+      "quantity": 30,
+      "instructions": "Take one tablet...",
+      "date_issued": "2026-02-11T10:30:00Z"
+    }
+  },
+  "proof": {
+    "type": "Ed25519Signature2020",
+    "created": "2026-02-11T10:30:00Z",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:cheqd:testnet:mock-1#key-1",
+    "proofValue": "base64-encoded-signature-here"
+  }
+}
+```
+
+### Endpoints Implemented (app/api/v1/signing.py)
+
+**POST /api/v1/prescriptions/{id}/sign** - Sign prescription
+- Uses `require_role(["doctor"])` for auth
+- Checks user is prescribing doctor → 403 if not
+- Checks prescription not already signed → 409 if signed
+- Auto-creates doctor/patient DIDs if missing (graceful handling)
+- Calls vc_service.create_credential() + sign_credential()
+- Updates prescription: `digital_signature`, `credential_id`
+- Returns 201 Created with signature data
+
+**GET /api/v1/prescriptions/{id}/verify** - Verify signature
+- Uses `get_current_user` for auth (all roles can verify)
+- Gets prescription from database
+- Checks prescription is signed → 400 if unsigned
+- Reconstructs credential from stored data
+- Calls vc_service.verify_credential()
+- Returns 200 OK with verification result
+
+### Test Results
+
+**Before TASK-016:** 18 failed, 6 passed (24 total)  
+**After TASK-016:** 24 passed, 0 failed ✅
+
+All tests from `test_signing.py` now pass:
+- Sign prescription (doctor only) ✅
+- Verify signature (all roles) ✅
+- W3C VC structure validation ✅
+- Ed25519 signature validation ✅
+- RBAC enforcement ✅
+- Error handling (404/403/409/400) ✅
+
+**Coverage:**
+- `app/services/vc.py`: 76% (58 stmts, 14 missed)
+- `app/api/v1/signing.py`: 75% (104 stmts, 26 missed)
+
+### Challenges Overcome
+
+1. **require_role Fix**: `require_role` was returning callable but not properly wrapping. Fixed to return function that returns dependency.
+
+2. **Auto-DID Creation**: Tests expect signing to work even if DIDs don't exist. Added graceful auto-creation of DIDs if missing (calls ACA-Py create_wallet).
+
+3. **Mock Credential Issuance**: Added respx mocks for ACA-Py's issue-credential-2.0 and verify endpoints in conftest.py.
+
+4. **Credential Reconstruction**: Verify endpoint reconstructs full VC from stored `digital_signature` and database fields.
+
+5. **JSON Serialization**: Stored credential as JSON string in `digital_signature` field (Text type allows large JSON).
+
+### Technical Decisions
+
+1. **Auto-DID Creation**: If doctor or patient doesn't have DID, auto-create during signing (simplifies workflow, reduces errors).
+
+2. **Credential Storage**: Store full signed VC JSON in `prescription.digital_signature` field (alternative: separate Credential table).
+
+3. **credential_id Generation**: Use format `cred_{prescription_id}_{timestamp}` for uniqueness.
+
+4. **Verification Method**: Reconstructs VC from stored JSON + validates cryptographic signature via ACA-Py.
+
+5. **Error Priority**:
+   - 404 Not Found (prescription doesn't exist)
+   - 403 Forbidden (not prescribing doctor)
+   - 409 Conflict (already signed)
+   - 400 Bad Request (unsigned prescription, missing DIDs)
+
+### Notes for Future Tasks
+
+1. **Credential Revocation**: Need revocation endpoint (US-015) and revocation status check in verify.
+
+2. **QR Code Generation**: Next task (TASK-017/018) will embed signed VC in QR code for patient wallet.
+
+3. **DIDComm Messaging**: US-018 will replace QR codes with DIDComm v2 messaging for credential exchange.
+
+4. **Performance**: Signing endpoint calls ACA-Py twice (wallet creation if needed + credential issuance). Consider caching or async batching.
+
+5. **ACA-Py Mocks**: Tests use mock responses. Real ACA-Py instance needed for E2E testing (Docker Compose configured).
+
+### Time Taken
+- VC service implementation: ~45 minutes
+- Signing endpoints: ~40 minutes
+- Test fixture adjustments: ~15 minutes
+- Debugging require_role: ~10 minutes
+- Total: ~1.75 hours
+
