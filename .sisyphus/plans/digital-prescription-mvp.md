@@ -1080,7 +1080,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/index.tsx, apps/mobile/src/app/(doctor)/_layout.tsx, apps/mobile/src/app/(patient)/_layout.tsx, apps/mobile/src/app/(pharmacist)/_layout.tsx
 
-TASK-025:
+- [x] TASK-025:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing QR scanner component tests
