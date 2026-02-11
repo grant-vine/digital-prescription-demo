@@ -1,130 +1,44 @@
-/**
- * API Client Tests
- *
- * TDD test suite for backend API client wrapper.
- * All tests are designed to FAIL until api service is implemented in TASK-030.
- *
- * Test Categories:
- * 1. Authentication (Login, Refresh, Logout)
- * 2. Prescription Management (List, Get, Create)
- * 3. Error Handling (Network, 401, 403, 404, 500)
- * 4. Interceptors (Request injection, Response handling)
- * 5. Token Management (Storage, Refresh flow)
- */
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-var-requires */
-
-// Types matching Backend Pydantic Schemas
-interface LoginRequest {
-  username: string; // Backend uses username, not email
-  password: string;
-}
-
-interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-  expires_in: number;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-    role: string;
-  };
-}
-
-interface Prescription {
-  id: number;
-  doctor_id: number;
-  patient_id: number;
-  medication_name: string;
-  medication_code?: string;
-  dosage: string;
-  quantity: number;
-  instructions?: string;
-  date_issued: string;
-  date_expires: string;
-  is_repeat: boolean;
-  repeat_count: number;
-  digital_signature?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface PrescriptionCreate {
-  patient_id: number;
-  medication_name: string;
-  medication_code: string;
-  dosage: string;
-  quantity: number;
-  instructions: string;
-  date_expires: string;
-  is_repeat: boolean;
-  repeat_count: number;
-}
-
-// Mock axios
-jest.mock('axios', () => ({
-  create: jest.fn(),
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
-  defaults: { headers: { common: {} } },
-}), { virtual: true });
-// @ts-expect-error
+import { api, LoginRequest, TokenResponse, Prescription, PrescriptionCreate } from './api';
 import axios from 'axios';
-const mockedAxios = axios as unknown as jest.Mocked<typeof axios>;
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Mock AsyncStorage
+// Setup Mocks
+jest.mock('axios');
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
-}), { virtual: true });
-// @ts-expect-error
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Dynamic require for API module (not yet implemented)
-let api: any;
-try {
-  api = require('./api');
-} catch (e) {
-  api = null;
-}
+}));
 
 describe('API Client', () => {
-  // Mock axios instance
-  const mockAxiosInstance = {
-    interceptors: {
-      request: { use: jest.fn(), eject: jest.fn() },
-      response: { use: jest.fn(), eject: jest.fn() },
-    },
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
-    request: jest.fn(),
-    defaults: { headers: { common: {} } },
+  // Create a mock instance that is a callable function
+  const mockAxiosInstance: any = jest.fn();
+  
+  // Attach methods to the mock instance
+  mockAxiosInstance.interceptors = {
+    request: { use: jest.fn(), eject: jest.fn() },
+    response: { use: jest.fn(), eject: jest.fn() },
   };
+  mockAxiosInstance.get = jest.fn();
+  mockAxiosInstance.post = jest.fn();
+  mockAxiosInstance.put = jest.fn();
+  mockAxiosInstance.delete = jest.fn();
+  mockAxiosInstance.defaults = { headers: { common: {} } };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Setup axios create mock
-    mockedAxios.create.mockReturnValue(mockAxiosInstance as any);
+    // Reset the mock instance implementation
+    (axios.create as jest.Mock).mockReturnValue(mockAxiosInstance);
+    
+    // Reset api module if needed (or just re-init)
+    api.reset();
+    api.init();
   });
 
   describe('Initialization', () => {
-    it('should be defined', () => {
-      // EXPECTED FAILURE: api module does not exist
-      expect(api).toBeTruthy();
-    });
-
     it('should create axios instance with base URL', () => {
-      if (!api) { expect(api).toBeTruthy(); return; } // Skip if api not loaded (fail via previous test)
-      
-      // Expected behavior: api.init() or module load creates instance
-      expect(mockedAxios.create).toHaveBeenCalledWith(
+      expect(axios.create).toHaveBeenCalledWith(
         expect.objectContaining({
           baseURL: expect.stringContaining('http'),
           timeout: expect.any(Number),
@@ -135,12 +49,6 @@ describe('API Client', () => {
 
   describe('Authentication', () => {
     it('should login successfully and store tokens', async () => {
-      // EXPECTED FAILURE: api.login not implemented
-      if (!api) {
-         expect(api).toBeTruthy(); 
-         return;
-      }
-
       const loginCreds: LoginRequest = { username: 'doctor', password: 'password' };
       const mockResponse: TokenResponse = {
         access_token: 'acc_123',
@@ -161,18 +69,16 @@ describe('API Client', () => {
     });
 
     it('should handle login failure (401)', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
+      const error = {
+        response: { status: 401, data: { detail: 'Invalid credentials' } },
+        config: { url: '/auth/login' }
+      };
+      mockAxiosInstance.post.mockRejectedValueOnce(error);
 
-      mockAxiosInstance.post.mockRejectedValueOnce({
-        response: { status: 401, data: { detail: 'Invalid credentials' } }
-      });
-
-      await expect(api.login('wrong', 'pass')).rejects.toThrow();
+      await expect(api.login('wrong', 'pass')).rejects.toEqual(error);
     });
 
     it('should logout and clear tokens', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
       mockAxiosInstance.post.mockResolvedValueOnce({ data: { message: 'Logged out' } });
 
       await api.logout();
@@ -185,8 +91,6 @@ describe('API Client', () => {
 
   describe('Prescriptions', () => {
     it('should list prescriptions', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
       const mockList = {
         items: [{ id: 1, medication_name: 'Aspirin' }],
         total: 1,
@@ -204,8 +108,6 @@ describe('API Client', () => {
     });
 
     it('should get single prescription by ID', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
       const mockPrescription: Prescription = {
         id: 123,
         doctor_id: 1,
@@ -229,18 +131,16 @@ describe('API Client', () => {
     });
 
     it('should handle 404 when getting prescription', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
+      const error = {
+        response: { status: 404, data: { detail: 'Not found' } },
+        config: { url: '/prescriptions/999' }
+      };
+      mockAxiosInstance.get.mockRejectedValueOnce(error);
 
-      mockAxiosInstance.get.mockRejectedValueOnce({
-        response: { status: 404, data: { detail: 'Not found' } }
-      });
-
-      await expect(api.getPrescription(999)).rejects.toThrow();
+      await expect(api.getPrescription(999)).rejects.toEqual(error);
     });
 
     it('should create prescription', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
       const newRx: PrescriptionCreate = {
         patient_id: 2,
         medication_name: 'Amoxicillin',
@@ -265,22 +165,21 @@ describe('API Client', () => {
 
   describe('Interceptors', () => {
     it('should add Authorization header to requests', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
-      // Get the request interceptor callback
+      // Re-init to attach interceptors
+      api.init();
+      
       const requestInterceptor = mockAxiosInstance.interceptors.request.use.mock.calls[0][0];
       
       (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('valid_token');
       
-      const config = { headers: {} };
+      const config = { headers: {}, url: '/prescriptions' };
       const enhancedConfig = await requestInterceptor(config);
 
       expect(enhancedConfig.headers['Authorization']).toBe('Bearer valid_token');
     });
 
     it('should NOT add Authorization header to login request', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
+      api.init();
       const requestInterceptor = mockAxiosInstance.interceptors.request.use.mock.calls[0][0];
       
       const config = { url: '/auth/login', headers: {} };
@@ -290,14 +189,12 @@ describe('API Client', () => {
     });
 
     it('should handle response errors globally', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
-      // Get the response interceptor error callback
-      // Usually [0] is success handler, [1] is error handler
+      api.init();
       const errorInterceptor = mockAxiosInstance.interceptors.response.use.mock.calls[0][1];
       
       const error = {
-        response: { status: 500, data: { detail: 'Server Error' } }
+        response: { status: 500, data: { detail: 'Server Error' } },
+        config: { url: '/prescriptions' }
       };
 
       await expect(errorInterceptor(error)).rejects.toEqual(error);
@@ -306,12 +203,10 @@ describe('API Client', () => {
 
   describe('Token Refresh Flow', () => {
     it('should attempt refresh on 401 error', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
+      api.init();
       const errorInterceptor = mockAxiosInstance.interceptors.response.use.mock.calls[0][1];
       
-      // Setup: 401 error on original request
-      const originalRequest = { _retry: false, headers: {} };
+      const originalRequest = { _retry: false, headers: {}, url: '/prescriptions' };
       const error = {
         config: originalRequest,
         response: { status: 401 }
@@ -328,8 +223,8 @@ describe('API Client', () => {
         data: { access_token: 'new_access', refresh_token: 'new_refresh' }
       });
       
-      // Mock retry success
-      mockAxiosInstance.request = jest.fn().mockResolvedValue({ data: 'retry_success' });
+      // Mock the retry call itself (the axios instance being called as a function)
+      mockAxiosInstance.mockResolvedValueOnce({ data: 'retry_success' });
 
       const result = await errorInterceptor(error);
 
@@ -339,11 +234,10 @@ describe('API Client', () => {
     });
 
     it('should logout if refresh fails', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
+      api.init();
       const errorInterceptor = mockAxiosInstance.interceptors.response.use.mock.calls[0][1];
       
-      const originalRequest = { _retry: false, headers: {} };
+      const originalRequest = { _retry: false, headers: {}, url: '/prescriptions' };
       const error = {
         config: originalRequest,
         response: { status: 401 }
@@ -352,10 +246,8 @@ describe('API Client', () => {
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue('bad_refresh');
       
       // Mock refresh failure
-      mockAxiosInstance.post.mockRejectedValueOnce({ response: { status: 401 } });
+      mockAxiosInstance.post.mockRejectedValueOnce({ response: { status: 401 }, config: { url: '/auth/refresh' } });
 
-      // Mock logout (spy on module method if possible, or check side effects)
-      // Since api is local var, we check side effects (clearing storage)
       try {
         await errorInterceptor(error);
       } catch (e) {
@@ -369,21 +261,20 @@ describe('API Client', () => {
 
   describe('Error Handling', () => {
     it('should propagate network errors', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
-      mockAxiosInstance.get.mockRejectedValueOnce(new Error('Network Error'));
+      const error = new Error('Network Error');
+      // @ts-expect-error - Intentionally adding config property to Error
+      error.config = { url: '/prescriptions' };
+      mockAxiosInstance.get.mockRejectedValueOnce(error);
       await expect(api.getPrescriptions()).rejects.toThrow('Network Error');
     });
 
     it('should propagate 403 Forbidden', async () => {
-      if (!api) { expect(api).toBeTruthy(); return; }
-
-      mockAxiosInstance.get.mockRejectedValueOnce({
-        response: { status: 403, data: { detail: 'Forbidden' } }
-      });
-      await expect(api.getPrescription(999)).rejects.toEqual(expect.objectContaining({
-        response: { status: 403 }
-      }));
+      const error = {
+        response: { status: 403, data: { detail: 'Forbidden' } },
+        config: { url: '/prescriptions/999' }
+      };
+      mockAxiosInstance.get.mockRejectedValueOnce(error);
+      await expect(api.getPrescription(999)).rejects.toEqual(error);
     });
   });
 });

@@ -1,34 +1,23 @@
-/**
- * QRDisplay Component Tests
- * 
- * Comprehensive TDD test suite for QR code display component.
- * All tests are designed to FAIL until QRDisplay component is implemented in TASK-028.
- * 
- * Test Categories:
- * 1. QR Code Rendering (4 tests)
- * 2. Data Binding (4 tests)
- * 3. Size Requirements (3 tests)
- * 4. Refresh/Regenerate (3 tests)
- * 5. High Contrast Display (2 tests)
- */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-var-requires */
+
+// Setup jest mock BEFORE any imports
+jest.mock('react-native-qrcode-svg', () => {
+  const React = require('react');
+  const { View, Text } = require('react-native');
+  return {
+    __esModule: true,
+    default: ({ value, size }: any) =>
+      React.createElement(
+        View,
+        { testID: 'qr-code-mock', style: { width: size, height: size } },
+        React.createElement(Text, {}, `QR Code: ${value?.substring(0, 20)}...`)
+      ),
+  };
+});
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-
-// Mock react-native-qrcode-svg
-jest.mock('react-native-qrcode-svg', () => require('../../../__mocks__/react-native-qrcode-svg').default);
-
-/**
- * Import QRDisplay - will be implemented in TASK-028
- * Currently imported with dynamic require to handle missing module in tests
- */
-let QRDisplay: any;
-try {
-  QRDisplay = require('./QRDisplay').default;
-} catch (e) {
-  QRDisplay = null;
-}
+import QRDisplay from './QRDisplay';
 
 // Interface for type safety in tests
 interface VerifiableCredential {

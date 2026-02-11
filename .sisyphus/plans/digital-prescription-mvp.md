@@ -1151,7 +1151,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/components/qr/QRDisplay.test.tsx
 
-TASK-028:
+- [x] TASK-028:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement QR display component
@@ -1186,7 +1186,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/services/api.test.ts
 
-TASK-030:
+- [x] TASK-030:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement API client service

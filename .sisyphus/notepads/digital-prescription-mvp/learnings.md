@@ -81,3 +81,26 @@ Total: 16 tests
 - Tests fail: Yes (16/16 failed with `expect(api).toBeTruthy()` receiving null)
 - TypeScript: 0 errors
 - ESLint: 0 errors
+
+## [2026-02-11] TASK-030: API Client Implementation
+
+### Files Created
+- apps/mobile/src/services/api.ts
+- apps/mobile/src/services/api.test.ts (Rewritten with mock fixes)
+
+### Implementation Features
+- **Axios Instance**: Lazy initialization pattern with `getClient()`
+- **Request Interceptor**: Automatically injects `Bearer` token from AsyncStorage
+- **Response Interceptor**: Handles 401 Unauthorized by attempting token refresh
+- **Retry Logic**: Queues concurrent requests while refreshing, then retries them
+- **Type Safety**: Full TypeScript interfaces for Auth and Prescription resources
+
+### Fixes Applied to Tests
+- **Mock Structure**: Updated mock error objects to include `config: { url: ... }` to satisfy interceptor checks
+- **Callable Mock**: Changed `mockAxiosInstance` to be a callable `jest.fn()` to support `return _axiosInstance(originalRequest)`
+- **Async Handling**: Corrected `mockRejectedValueOnce` usage for async error tests
+
+### Verification
+- Tests passed: Yes (15/15 passed)
+- TypeScript: 0 errors
+- ESLint: 0 errors
