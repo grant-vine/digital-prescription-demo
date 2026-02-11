@@ -2,12 +2,16 @@
 
 ## Project Overview
 
-This is a digital prescription system using Self-Sovereign Identity (SSI) infrastructure. It enables doctors to create and digitally sign prescriptions, patients to receive and manage them in digital wallets, and pharmacists to verify and dispense medications securely.
+**🎯 Technology Demo:** This is a technology demonstration project showcasing the rapid implementation of digital wallet solutions using an **agentic framework**. The goal is to demonstrate how AI agents can collaboratively build complex Self-Sovereign Identity (SSI) infrastructure through systematic planning and execution.
+
+**Demo Focus:** Digital prescription system using Self-Sovereign Identity (SSI) infrastructure. Enables doctors to create and digitally sign prescriptions, patients to receive and manage them in digital wallets, and pharmacists to verify and dispense medications securely.
 
 **Status:** Planning Phase - Ready for Development  
 **Architecture:** Python/FastAPI backend + React Native mobile apps  
 **SSI Infrastructure:** ACA-Py (local dev) → DIDx CloudAPI (production)  
 **Standards:** W3C Verifiable Credentials, FHIR R4 (enhanced phase)  
+**Repository:** https://github.com/grant-vine/digital-prescription-demo  
+**Execution Plan:** `.sisyphus/plans/digital-prescription-mvp.md` (73 tasks, 4-week MVP)  
 
 ---
 
@@ -47,7 +51,87 @@ This is a digital prescription system using Self-Sovereign Identity (SSI) infras
     ├── 023-mobile-wallet-deep-integration.md
     ├── 024-kubernetes-deployment.md
     └── 025-monitoring-observability.md
+    └── developer-notes.md              # Agent work log and timing
 ```
+
+---
+
+## Milestone Strategy
+
+This project uses **Git Branches and Tags** as milestone checkpoints that third-party developers can use as implementation starting points.
+
+### Current Milestones
+
+| Milestone | Branch/Tag | Description | Status |
+|-----------|-----------|-------------|--------|
+| **Ready to Dev** | `milestone/ready-to-dev` | Complete planning phase, all stories documented, execution plan approved | ✅ Current |
+| Foundation | `milestone/foundation` | Monorepo initialized, Docker stack running | 🔄 Pending |
+| Backend Core | `milestone/backend-core` | Auth and prescription API complete | 🔄 Pending |
+| SSI Integration | `milestone/ssi-integration` | ACA-Py integrated, DID/VC/QR services ready | 🔄 Pending |
+| Mobile Core | `milestone/mobile-core` | Theming, navigation, QR components done | 🔄 Pending |
+| Doctor Flow | `milestone/doctor-flow` | Doctor create/sign/send prescription complete | 🔄 Pending |
+| Patient Flow | `milestone/patient-flow` | Patient receive/view/share complete | 🔄 Pending |
+| Pharmacist Flow | `milestone/pharmacist-flow` | Verification and dispensing complete | 🔄 Pending |
+| System Features | `milestone/system-features` | Validation, repeats, revocation, audit done | 🔄 Pending |
+| **MVP Complete** | `v1.0.0-mvp` | All 16 stories implemented, E2E tests passing | 🔄 Pending |
+
+### Using Milestones
+
+Third-party developers can start from any milestone:
+
+```bash
+# Clone and checkout a specific milestone
+git clone https://github.com/grant-vine/digital-prescription-demo.git
+cd digital-prescription-demo
+git checkout milestone/ready-to-dev  # Or any other milestone
+
+# View all available milestones
+git branch -a | grep milestone/
+git tag -l
+```
+
+### Creating Milestones
+
+When completing a milestone:
+
+```bash
+# Create milestone branch from current state
+git checkout -b milestone/milestone-name
+
+# Tag significant releases
+git tag -a v1.0.0-mvp -m "MVP Complete - All 16 stories implemented"
+
+# Push milestone and tags
+git push origin milestone/milestone-name
+git push origin --tags
+```
+
+### Developer Notes
+
+**IMPORTANT:** All agents must update `developer-notes.md` when completing work:
+
+```markdown
+#### [DATE] - [AGENT NAME]
+
+**Tasks Completed:**
+- [TASK-ID]: [Brief description]
+
+**Time Taken:**
+- Start: [HH:MM]
+- End: [HH:MM]
+- Duration: [X hours Y minutes]
+
+**Files Modified:**
+- `path/to/file` - [what changed]
+
+**Notes:**
+[Any important context]
+
+**Next Steps:**
+[What should happen next]
+```
+
+**Use actual dates from CLI commands for timing.**
 
 ---
 
