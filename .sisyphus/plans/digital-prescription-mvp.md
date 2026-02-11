@@ -1008,10 +1008,7 @@ REQUIRES-EXCLUSIVE-FILES: services/backend/app/api/v1/verify.py
 
 ### BATCH 4: Mobile Core (Week 2)
 
-TASK-021:
-TYPE: test
-SCOPE: apps/mobile
-TITLE: Write failing theme component tests
+- [x] TASK-021: Write failing theme component tests
 DESCRIPTION: Create tests for theme provider and role-specific themes before implementation.
 INPUTS: TASK-003
 OUTPUTS: Theme.test.tsx with failing tests
