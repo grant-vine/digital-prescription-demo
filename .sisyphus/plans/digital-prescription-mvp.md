@@ -1206,7 +1206,7 @@ REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/services/api.ts
 
 ### BATCH 5: Doctor Flow (Week 2-3)
 
-TASK-031:
+- [x] TASK-031:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing doctor auth screen tests

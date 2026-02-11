@@ -104,3 +104,65 @@ Total: 16 tests
 - Tests passed: Yes (15/15 passed)
 - TypeScript: 0 errors
 - ESLint: 0 errors
+
+## [2026-02-11] TASK-031: Doctor Authentication Screen Tests (TDD)
+
+### Files Created
+- apps/mobile/src/app/(doctor)/auth.test.tsx
+
+### Test Categories
+- Form Rendering (4 tests)
+- Form Validation (3 tests)
+- OAuth Flow (2 tests)
+- Login Success (3 tests)
+- Error Handling (3 tests)
+- Navigation (2 tests)
+- Total: 17 tests
+
+### Test Coverage
+- Email input field rendering
+- Password input field rendering
+- Login button rendering
+- OAuth provider buttons (Google, Microsoft/Azure AD)
+- Invalid email format validation
+- Missing required fields validation
+- Form submit disabling when invalid
+- OAuth redirect flow initiation
+- OAuth callback token exchange
+- Token storage in AsyncStorage
+- Navigation to dashboard after login
+- Loading state display during login
+- Network error handling and display
+- Invalid credentials (401) error handling
+- Server error (500) error handling
+- Back button navigation to role selection
+- Auth state checking for already-authenticated users
+
+### Key Patterns Established
+
+**Dynamic Component Loading:**
+- Use `require('./component').default` in beforeAll
+- Mock component with displayName to avoid ESLint warnings
+- Allows tests to fail gracefully when component not yet implemented
+
+**Mock Structure:**
+- Setup all mocks BEFORE imports (established pattern from TASK-027)
+- Use `{ virtual: true }` for packages not yet installed (expo-auth-session)
+- Mock dependencies: expo-router, AsyncStorage, api client
+
+**Test Failure Documentation:**
+- Each test includes expected behavior comment
+- Documents why test fails (component doesn't exist)
+- Provides clear spec for implementation task (TASK-032)
+
+### Verification
+- Tests fail: Yes (17/17 failed with "Can't access .root on unmounted test renderer")
+- TypeScript: 0 errors (`npx tsc --noEmit`)
+- ESLint: 0 errors for auth.test.tsx
+- Test pattern consistent with TASK-027 (QRDisplay) and TASK-029 (API client)
+
+### Notes
+- File path issue with escaped parentheses resolved by moving file to correct directory
+- React import can be removed (ESLint flags as unused) in final code
+- All tests properly exercise the component API that TASK-032 must implement
+- 17 tests cover full authentication flow: rendering → validation → login → error handling → navigation
