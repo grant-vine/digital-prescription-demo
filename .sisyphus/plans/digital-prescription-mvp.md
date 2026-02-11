@@ -1460,7 +1460,7 @@ REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(doctor)/prescriptions/qr.tsx
 
 ### BATCH 6: Patient Flow (Week 3)
 
-TASK-041:
+- [x] TASK-041:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing patient auth screen tests
