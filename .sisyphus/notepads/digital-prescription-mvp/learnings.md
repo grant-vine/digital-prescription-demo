@@ -20,3 +20,57 @@
   2. Test expectation mismatch in `should display search results` (Test finds multiple elements, which is technically correct behavior but unexpected in test logic).
   3. `fireEvent.press` issues in `should display selected patient info` and `should navigate`.
 - **TypeScript:** Clean (0 errors).
+
+## [2026-02-12] TASK-036B: Medication Entry Form Tests (TDD)
+
+### Test Structure & Patterns
+- **File:** `medication-entry.test.tsx` - 16 tests across 5 categories
+- **Categories:** Medication Search (4), Dosage Input (3), Instructions Input (2), Multiple Medications (4), Form Validation & Navigation (3)
+- **Test Organization:** Tests use `queryByPlaceholderText`, `queryByTestId`, `queryByText` with flexible regex patterns (logical OR for flexibility)
+- **Mock Data:** SAHPRA-style medication objects with `id`, `name`, `code`, `generic_name`, `strength`, `form` fields
+
+### API Integration
+- **New Method Added:** `searchMedications(query: string | { query: string })` in `api.ts`
+- **Response Structure:** `{ items: MedicationSearchResult[], total: number }`
+- **Medication Type:**
+  ```typescript
+  interface MedicationSearchResult {
+    id: number;
+    name: string;
+    code: string;
+    generic_name: string;
+    strength: string;
+    form: string;
+  }
+  ```
+
+### Test Results
+- **Status:** 16/16 tests created (6 fail as expected, 10 pass)
+- **Failing Tests (Expected):** Tests that require component UI elements
+  - `should render medication search input field`
+  - `should render dosage input field`
+  - `should render instructions textarea`
+  - `should display add medication button`
+  - `should display medication list`
+  - `should have save draft button`
+- **Passing Tests:** Tests that only verify mock API behavior and async handling
+- **TypeScript:** Clean (0 errors)
+
+### TDD Best Practices Applied
+- **Mock-First:** All API calls mocked before component exists
+- **Flexible Selectors:** Multiple query strategies (placeholder, testId, text) to accommodate different component implementations
+- **Async Handling:** `waitFor` properly used for state updates and API responses
+- **Clear Failure Messages:** Failed tests indicate exactly which UI elements are missing
+
+### Key Implementation Notes for TASK-036B-IMPL
+- Medication search needs debounce or immediate API call on input change
+- Dosage field should validate format (e.g., "500mg", "1000mg")
+- Instructions field should accept long text without character limit issues
+- Multiple medications add/remove needs list management state
+- Navigation to signing screen requires form validation before proceed
+- Mock SAHPRA medications: Amoxicillin (500mg), Ibuprofen (200mg), Metformin (1000mg)
+
+### Dependency on Previous Work
+- **TASK-035 (Patient Selection):** Established test patterns and API mock structure
+- **TASK-036A Implementation:** Patient selection returns patient ID for medication entry
+- **API Service:** Now includes `searchMedications` method for doctor workflow

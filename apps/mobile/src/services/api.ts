@@ -71,6 +71,20 @@ export interface PatientSearchResponse {
   total: number;
 }
 
+export interface MedicationSearchResult {
+  id: number;
+  name: string;
+  code: string;
+  generic_name: string;
+  strength: string;
+  form: string;
+}
+
+export interface MedicationSearchResponse {
+  items: MedicationSearchResult[];
+  total: number;
+}
+
 // --- Axios Instance ---
 
 const API_URL = 'http://localhost:8000'; // In real app, this should be env var
@@ -262,6 +276,14 @@ export const api = {
 
   async getPatient(id: number): Promise<PatientSearchResult> {
     const response = await getClient().get(`/patients/${id}`);
+    return response.data;
+  },
+
+  async searchMedications(query: string | { query: string }): Promise<MedicationSearchResponse> {
+    const q = typeof query === 'string' ? query : query.query;
+    const response = await getClient().get('/medications/search', {
+      params: { q },
+    });
     return response.data;
   },
 };
