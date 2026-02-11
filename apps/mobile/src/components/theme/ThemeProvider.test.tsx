@@ -20,10 +20,9 @@ import { PatientTheme } from './PatientTheme';
 import { PharmacistTheme } from './PharmacistTheme';
 
 /**
- * Mock ThemeProvider component - to be replaced by actual implementation in TASK-022
- * This is intentionally missing to ensure tests fail initially.
+ * Import ThemeProvider and useTheme - implemented in TASK-022
  */
-// import { ThemeProvider, useTheme } from './ThemeProvider';
+import { ThemeProvider, useTheme } from './ThemeProvider';
 
 describe('ThemeProvider', () => {
   /**
@@ -44,7 +43,6 @@ describe('ThemeProvider', () => {
        */
       const { getByText } = render(
         React.createElement(
-          // @ts-expect-error - ThemeProvider does not exist yet
           ThemeProvider,
           { role: 'doctor' },
           React.createElement(Text, null, 'Test Child')
@@ -65,7 +63,6 @@ describe('ThemeProvider', () => {
        * - Theme colors accessible via context
        */
       const TestConsumer = () => {
-        // @ts-expect-error - useTheme does not exist yet
         const theme = useTheme?.();
         return (
           <Text testID="theme-primary">
@@ -76,7 +73,6 @@ describe('ThemeProvider', () => {
 
       const { getByTestId } = render(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'doctor' },
           React.createElement(TestConsumer)
@@ -97,7 +93,6 @@ describe('ThemeProvider', () => {
        */
       const { getByText } = render(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           {},
           React.createElement(Text, null, 'Default Theme Child')
@@ -124,7 +119,6 @@ describe('ThemeProvider', () => {
        * - All doctor theme colors applied to context
        */
       const TestComponent = () => {
-        // @ts-expect-error Not yet implemented
         const theme = useTheme?.();
         return (
           <Text testID="theme-color">
@@ -135,7 +129,6 @@ describe('ThemeProvider', () => {
 
       const { getByTestId } = render(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'doctor' },
           React.createElement(TestComponent)
@@ -157,7 +150,6 @@ describe('ThemeProvider', () => {
        * - All patient theme colors applied to context
        */
       const TestComponent = () => {
-        // @ts-expect-error Not yet implemented
         const theme = useTheme?.();
         return (
           <Text testID="theme-color">
@@ -168,7 +160,6 @@ describe('ThemeProvider', () => {
 
       const { getByTestId } = render(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'patient' },
           React.createElement(TestComponent)
@@ -190,7 +181,6 @@ describe('ThemeProvider', () => {
        * - All pharmacist theme colors applied to context
        */
       const TestComponent = () => {
-        // @ts-expect-error Not yet implemented
         const theme = useTheme?.();
         return (
           <Text testID="theme-color">
@@ -201,7 +191,6 @@ describe('ThemeProvider', () => {
 
       const { getByTestId } = render(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'pharmacist' },
           React.createElement(TestComponent)
@@ -345,7 +334,6 @@ describe('ThemeProvider', () => {
        * - useTheme hook reflects new theme
        */
       const TestComponent = () => {
-        // @ts-expect-error Not yet implemented
         const theme = useTheme?.();
         return (
           <Text testID="current-theme">
@@ -356,7 +344,6 @@ describe('ThemeProvider', () => {
 
       const { getByTestId, rerender } = render(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'doctor' },
           React.createElement(TestComponent)
@@ -370,7 +357,6 @@ describe('ThemeProvider', () => {
       // Re-render with patient role
       rerender(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'patient' },
           React.createElement(TestComponent)
@@ -392,7 +378,6 @@ describe('ThemeProvider', () => {
        * - No stale theme data persists
        */
       const TestComponent = () => {
-        // @ts-expect-error Not yet implemented
         const theme = useTheme?.();
         return (
           <Text testID="theme-secondary">
@@ -403,7 +388,6 @@ describe('ThemeProvider', () => {
 
       const { getByTestId, rerender } = render(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'pharmacist' },
           React.createElement(TestComponent)
@@ -416,7 +400,6 @@ describe('ThemeProvider', () => {
       // Switch to doctor
       rerender(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'doctor' },
           React.createElement(TestComponent)
@@ -442,7 +425,6 @@ describe('ThemeProvider', () => {
 
       const { getByTestId, rerender } = render(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'doctor' },
           React.createElement(TestComponent)
@@ -454,7 +436,6 @@ describe('ThemeProvider', () => {
       // Switch theme
       rerender(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'patient' },
           React.createElement(TestComponent)
@@ -483,7 +464,6 @@ describe('ThemeProvider', () => {
        * - Throws error if used outside ThemeProvider
        */
       const DeepNestedComponent = () => {
-        // @ts-expect-error Not yet implemented
         const theme = useTheme?.();
         return (
           <Text testID="deep-theme">
@@ -498,7 +478,6 @@ describe('ThemeProvider', () => {
 
       const { getByTestId } = render(
         React.createElement(
-          // @ts-expect-error Not yet implemented
           ThemeProvider,
           { role: 'doctor' },
           React.createElement(MiddleComponent)
@@ -522,7 +501,6 @@ describe('ThemeProvider', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       const ComponentWithoutProvider = () => {
-        // @ts-expect-error Not yet implemented
         const theme = useTheme?.();
         return <Text>{theme?.colors?.primary || 'error'}</Text>;
       };
@@ -606,23 +584,14 @@ describe('ThemeProvider', () => {
       const firstSpacingKeys = Object.keys(themes[0].spacing).sort();
       const firstTypographyKeys = Object.keys(themes[0].typography).sort();
 
-      themes.forEach((theme, index) => {
+      themes.forEach((theme) => {
         const colorKeys = Object.keys(theme.colors).sort();
         const spacingKeys = Object.keys(theme.spacing).sort();
         const typographyKeys = Object.keys(theme.typography).sort();
 
-        expect(colorKeys).toEqual(
-          firstColorKeys,
-          `Theme ${index} colors differ from first theme`
-        );
-        expect(spacingKeys).toEqual(
-          firstSpacingKeys,
-          `Theme ${index} spacing differs from first theme`
-        );
-        expect(typographyKeys).toEqual(
-          firstTypographyKeys,
-          `Theme ${index} typography differs from first theme`
-        );
+        expect(colorKeys).toEqual(firstColorKeys);
+        expect(spacingKeys).toEqual(firstSpacingKeys);
+        expect(typographyKeys).toEqual(firstTypographyKeys);
       });
     });
   });
