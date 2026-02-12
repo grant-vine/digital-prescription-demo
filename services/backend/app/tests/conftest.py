@@ -419,3 +419,25 @@ def mock_acapy_signing_service(monkeypatch):
     monkeypatch.setattr(vc_module, "ACAPyService", MockACAPyService)
     return MockACAPyService
 
+
+@pytest.fixture
+async def async_client(test_session):
+    """Create async test client for FastAPI app."""
+    from httpx import AsyncClient, ASGITransport
+    from app.main import app
+    from app.dependencies.auth import get_db
+    
+    def override_get_db():
+        try:
+            yield test_session
+        finally:
+            pass
+    
+    app.dependency_overrides[get_db] = override_get_db
+    
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
+    
+    app.dependency_overrides.clear()
+
