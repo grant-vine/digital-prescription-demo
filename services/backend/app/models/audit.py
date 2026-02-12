@@ -24,6 +24,12 @@ class Audit(TenantMixin, Base):
 
     timestamp = Column(DateTime, default=datetime.now, nullable=False)
 
+    # US-020: Advanced audit fields (nullable for backward compatibility)
+    correlation_id = Column(String(100), nullable=True)
+    session_id = Column(String(100), nullable=True)
+    result = Column(String(50), nullable=True, default="success")
+    previous_hash = Column(String(256), nullable=True)
+
     _immutable = False
 
     def __setattr__(self, key, value):
