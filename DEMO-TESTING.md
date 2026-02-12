@@ -2,7 +2,8 @@
 
 **Status:** ✅ Ready for Testing  
 **Date:** 2026-02-12  
-**Version:** 1.0  
+**Version:** 1.1  
+**ACA-Py:** 1.4.0 (via `ghcr.io/openwallet-foundation/acapy-agent:py3.12-1.4.0`)
 
 ---
 
@@ -354,6 +355,11 @@ curl -X POST http://localhost:8000/api/v1/prescriptions/rx-20260212-001/dispense
 - Services show "Exited" status
 - Port conflicts (8000, 8001, 5432, 6379)
 
+**Infrastructure Details:**
+- ACA-Py image: `ghcr.io/openwallet-foundation/acapy-agent:py3.12-1.4.0` (official OWF registry)
+- Wallet type: `askar-anoncreds` (matches DIDx CloudAPI)
+- DIDComm flags enabled for future DIDx migration
+
 **Solutions:**
 ```bash
 # Check service status
@@ -568,7 +574,8 @@ curl -X POST http://localhost:8000/api/v1/prescriptions/rx-001/dispense \
 ### After Successful Testing
 
 1. **Production Deployment**
-   - Switch from ACA-Py to DIDx CloudAPI (configuration-only change)
+   - Switch from ACA-Py to DIDx CloudAPI (configuration-only change via SSIProvider)
+   - Local ACA-Py already upgraded to 1.4.0 (matching DIDx CloudAPI version)
    - Deploy to Kubernetes cluster
    - Configure production secrets (not `Demo@2024`)
    - Enable HTTPS/TLS
@@ -610,6 +617,7 @@ curl -X POST http://localhost:8000/api/v1/prescriptions/rx-001/dispense \
 
 ---
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Last Updated:** 2026-02-12  
-**Status:** ✅ Ready for Demo Testing
+**Status:** ✅ Ready for Demo Testing  
+**Infrastructure:** ACA-Py 1.4.0 | PostgreSQL 15 | Redis 7

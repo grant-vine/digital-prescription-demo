@@ -40,7 +40,10 @@ services:
       - prescription_network
 
   acapy:
-    image: bcgovimages/aries-cloudagent:py3.9-indy-1.16.0_0.12.2
+    # Upgraded from bcgovimages 0.12.2 to official OWF 1.4.0 for DIDx compatibility
+    # bcgovimages is deprecated; GHCR is the official registry
+    # 1.4.0 matches DIDx CloudAPI; 1.2.0 has askar-anoncreds bugs (fixed in 1.3.0+)
+    image: ghcr.io/openwallet-foundation/acapy-agent:py3.12-1.4.0
     container_name: rx_acapy
     ports:
       - "8001:8001"
@@ -58,16 +61,21 @@ services:
         --admin-insecure-mode
         --inbound-transport http 0.0.0.0 8002
         --outbound-transport http
-        --wallet-type askar
+        --wallet-type askar-anoncreds
         --wallet-name default
         --wallet-key insecure_key_for_dev
         --no-ledger
         --auto-provision
+        --emit-new-didcomm-prefix
+        --emit-new-didcomm-mime-type
+        --public-invites
+        --requests-through-public-did
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/status"]
       interval: 15s
       timeout: 10s
       retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
