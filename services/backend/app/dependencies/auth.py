@@ -1,23 +1,34 @@
 """FastAPI authentication dependencies for protected routes."""
 
+import os
 from typing import List, Callable
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.auth import decode_token
 from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
+# Create database engine and session factory
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/prescriptions")
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 def get_db():
-    """Placeholder database session dependency.
+    """Get database session for dependency injection.
 
+    Creates a new SQLAlchemy session for each request and closes it afterwards.
     Tests will override this with test_session fixture.
-    Production will use proper database connection pool.
     """
-    raise NotImplementedError("Database session not configured for production yet")
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 async def get_current_user(
