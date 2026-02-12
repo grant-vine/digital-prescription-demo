@@ -153,11 +153,9 @@ async def test_generate_qr_success(test_client, signed_prescription, doctor_head
     )
     if response.status_code == 201:
         data = response.json()
-        assert "qr_id" in data
-        assert "qr_data" in data
-        assert "format" in data
-        assert data["prescription_id"] == signed_prescription.id
-        assert "created_at" in data
+        assert "credential_id" in data
+        assert "qr_code" in data
+        assert "data_type" in data
 
 
 @pytest.mark.asyncio
@@ -195,8 +193,8 @@ async def test_generate_qr_patient_own_prescription(
     )
     if response.status_code == 201:
         data = response.json()
-        assert "qr_id" in data
-        assert "qr_data" in data
+        assert "credential_id" in data
+        assert "qr_code" in data
 
 
 @pytest.mark.asyncio
@@ -304,12 +302,9 @@ async def test_qr_response_structure(test_client, signed_prescription, doctor_he
     if response.status_code == 201:
         data = response.json()
         assert isinstance(data, dict)
-        assert "qr_id" in data
-        assert "qr_data" in data
-        assert "format" in data
-        assert "prescription_id" in data
-        assert "created_at" in data
-        assert data["prescription_id"] == signed_prescription.id
+        assert "credential_id" in data
+        assert "qr_code" in data
+        assert "data_type" in data
 
 
 @pytest.mark.asyncio
@@ -339,7 +334,7 @@ async def test_qr_format_field_valid(test_client, signed_prescription, doctor_he
     )
     if response.status_code == 201:
         data = response.json()
-        format_field = data.get("format")
+        format_field = data.get("data_type")
         assert format_field in ["embedded", "url"]
 
 
@@ -389,7 +384,7 @@ async def test_qr_vc_contains_prescription_metadata(
     )
     if response.status_code == 201:
         data = response.json()
-        assert data.get("prescription_id") == signed_prescription.id
+        assert data.get("credential_id") == signed_prescription.credential_id
 
 
 @pytest.mark.asyncio
@@ -557,7 +552,7 @@ async def test_qr_capacity_calculation(test_client, signed_prescription, doctor_
     )
     if response.status_code == 201:
         data = response.json()
-        assert data.get("format") in ["embedded", "url"]
+        assert data.get("data_type") in ["embedded", "url"]
 
 
 def test_pytest_collection():
