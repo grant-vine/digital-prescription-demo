@@ -362,12 +362,14 @@ describe('Share Prescription Screen', () => {
       if (shareButton) {
         fireEvent.press(shareButton);
 
-        await waitFor(() => {
-          expect(api.generatePresentation).toHaveBeenCalledTimes(1);
-        });
+         await waitFor(() => {
+           // @ts-expect-error - Method will be added in implementation
+           expect(api.generatePresentation).toHaveBeenCalledTimes(1);
+         });
 
-        jest.clearAllMocks();
-        (api.generatePresentation as jest.Mock).mockResolvedValue({
+         jest.clearAllMocks();
+         // @ts-expect-error - Method will be added in implementation
+         (api.generatePresentation as jest.Mock).mockResolvedValue({
           presentation: mockPresentation,
           qrData: 'data:image/svg+xml;base64,...qr-content...',
         });
@@ -378,9 +380,10 @@ describe('Share Prescription Screen', () => {
         if (retryButton) {
           fireEvent.press(retryButton);
 
-          await waitFor(() => {
-            expect(api.generatePresentation).toHaveBeenCalled();
-          });
+           await waitFor(() => {
+             // @ts-expect-error - Method will be added in implementation
+             expect(api.generatePresentation).toHaveBeenCalled();
+           });
         }
       }
     });
