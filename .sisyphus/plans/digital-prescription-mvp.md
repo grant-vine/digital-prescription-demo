@@ -1699,7 +1699,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(pharmacist)/verify.test.tsx
 
-TASK-054:
+- [x] TASK-054:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement prescription verification screen (Part 1 - QR and Signature)
