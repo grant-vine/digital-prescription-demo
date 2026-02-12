@@ -39,22 +39,41 @@ services:
     networks:
       - prescription_network
 
+  # DID Registrar driver for cheqd testnet
+  # Required for ACA-Py to create and manage did:cheqd:testnet DIDs
+  driver-did-cheqd:
+    image: ghcr.io/cheqd/did-registrar:production-latest
+    container_name: rx_cheqd_driver
+    platform: linux/amd64
+    ports:
+      - "9089:3000"
+    restart: on-failure
+    environment:
+      - FEE_PAYER_TESTNET_MNEMONIC=${FEE_PAYER_TESTNET_MNEMONIC:-"sketch mountain erode window ask design tissue brand galaxy excuse season deny acquire merge drive resource race mountain cactus estate fabric salmon column brain hold"}
+    networks:
+      - prescription_network
+
   acapy:
-    # Upgraded from bcgovimages 0.12.2 to official OWF 1.4.0 for DIDx compatibility
-    # bcgovimages is deprecated; GHCR is the official registry
-    # 1.4.0 matches DIDx CloudAPI; 1.2.0 has askar-anoncreds bugs (fixed in 1.3.0+)
-    image: ghcr.io/openwallet-foundation/acapy-agent:py3.12-1.4.0
+    build:
+      context: ./services/acapy
+      dockerfile: Dockerfile.cheqd
     container_name: rx_acapy
     ports:
       - "8001:8001"
       - "8002:8002"
+    volumes:
+      - ./services/acapy/plugin-config.yml:/home/aries/plugin-config.yml:ro
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      driver-did-cheqd:
+        condition: service_started
     command: >
       start
+        --plugin cheqd
+        --plugin-config /home/aries/plugin-config.yml
         --label rx-acapy
         --endpoint http://localhost:8002
         --admin 0.0.0.0 8001
@@ -64,12 +83,12 @@ services:
         --wallet-type askar-anoncreds
         --wallet-name default
         --wallet-key insecure_key_for_dev
-        --no-ledger
         --auto-provision
         --emit-new-didcomm-prefix
         --emit-new-didcomm-mime-type
         --public-invites
         --requests-through-public-did
+        --no-ledger
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/status"]
       interval: 15s

@@ -1,0 +1,12 @@
+# Custom ACA-Py image with cheqd plugin support
+FROM ghcr.io/openwallet-foundation/acapy-agent:py3.13-1.5.0
+
+USER root
+
+# Install git and dependencies for building the plugin
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Install cheqd plugin from GitHub repo
+RUN pip install --no-cache-dir git+https://github.com/openwallet-foundation/acapy-plugins.git@main#subdirectory=cheqd
+
+USER aries
