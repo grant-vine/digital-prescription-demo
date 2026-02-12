@@ -2270,3 +2270,141 @@ Integration testing - wire TimeValidationService into API endpoints:
 - **Test Success Rate:** 100% (14/14 passing)
 - **Quality:** LSP clean, no warnings beyond pytest asyncio markers (pre-existing in tests)
 
+
+## [2026-02-12] TASK-059: Repeat Tracking Tests (TDD Red Phase) ✅
+
+**STATUS:** Complete - 15 tests created, all FAIL as expected
+
+### Tests Created
+
+**File:** `services/backend/app/tests/test_repeats.py` (701 lines)
+
+**Test Count:** 15 tests across 4 categories
+
+#### Category 1: Dispensing Record CRUD (5 tests)
+- `test_create_dispensing_record` - Create dispensing record with all fields
+- `test_get_dispensing_history` - Retrieve all dispensing records (chronological)
+- `test_get_latest_dispensing_record` - Get most recent dispensing for eligibility
+- `test_delete_dispensing_record` - Soft delete with audit trail
+- `test_query_dispensing_by_pharmacist` - Filter dispensings by pharmacist_id
+
+#### Category 2: Repeat Count Persistence (4 tests)
+- `test_decrement_repeat_count_in_db` - Decrement after dispense (2 → 1)
+- `test_cannot_dispense_with_zero_repeats` - Reject when repeats = 0
+- `test_repeat_count_remains_after_failed_dispense` - Rollback on failure
+- `test_track_original_vs_remaining_repeats` - Store audit trail data
+
+#### Category 3: Repeat Eligibility Integration (4 tests)
+- `test_eligibility_with_db_lookup` - Call TimeValidationService with DB data
+- `test_first_dispense_always_eligible` - No prior dispensing = eligible
+- `test_create_record_decrements_count` - Atomic dispense + decrement
+- `test_interval_enforcement_with_database` - Enforce expectedSupplyDuration
+
+#### Category 4: Edge Cases (2 tests)
+- `test_concurrent_dispense_race_condition` - Two pharmacists simultaneously
+- `test_expired_prescription_cannot_dispense_repeat` - Blocked if expired
+
+### TDD Red Phase Results
+
+**All tests FAIL:** ✅ Expected
+- 15 failed, 0 passed
+- All failures due to `ModuleNotFoundError: No module named 'app.services.dispensing'`
+- 15 LSP errors (all expected - DispensingService doesn't exist yet)
+
+### Key Design Patterns
+
+**1. Database Fixtures:**
+- `prescription_with_two_repeats` - Rx with 2 repeats allowed, valid 90 days
+- `prescription_with_fhir_repeats` - Full FHIR R4 dispenseRequest structure
+- `prescription_no_repeats` - Rx with 0 repeats (one-time only)
+- `prescription_expired` - Rx that expired yesterday
+
+**2. FHIR R4 Structure:**
+```python
+"dispenseRequest": {
+    "validityPeriod": {"start": "...", "end": "..."},
+    "numberOfRepeatsAllowed": 2,
+    "quantity": {"value": 30, "unit": "tablets"},
+    "expectedSupplyDuration": {"value": 28, "unit": "days"}
+}
+```
+
+**3. Test Independence:**
+- Each test creates own database session via `test_session` fixture
+- No shared state between tests
+- Clean schema per test (conftest creates/drops tables)
+
+**4. Timezone Handling:**
+- SAST (UTC+2) used throughout
+- `@freeze_time()` for deterministic datetime testing
+- Matches TimeValidationService conventions
+
+### Database Layer vs Service Layer
+
+**Key Distinction from TASK-057/058:**
+- TASK-057/058: Service layer (in-memory, no DB)
+  - TimeValidationService.check_repeat_eligibility() returns eligibility dict
+  - Tests use freezegun, no database
+  - Pure function testing
+
+- TASK-059/060: Data layer (database persistence)
+  - DispensingService.dispense_prescription() creates DB records
+  - Tests use SQLAlchemy with test_session fixture
+  - Integration with TimeValidationService
+  - Atomic operations (create record + decrement count)
+
+### Integration Points
+
+**TASK-059 tests expect DispensingService to:**
+1. Call TimeValidationService.check_repeat_eligibility() with DB data
+2. Get last_dispensed_at from latest Dispensing record
+3. Pass prescription FHIR to validation service
+4. Enforce atomicity: dispense + decrement or rollback
+
+**Example Usage Pattern (expected in TASK-060):**
+```python
+# In DispensingService.dispense_prescription():
+from app.services.validation import TimeValidationService
+
+service = TimeValidationService()
+
+# Get latest dispensing timestamp from DB
+latest = self.get_latest_dispensing_record(prescription_id)
+last_dispensed_at = latest.date_dispensed.isoformat() if latest else None
+
+# Check eligibility
+eligibility = service.check_repeat_eligibility(
+    prescription_fhir=prescription.fhir_data,
+    last_dispensed_at=last_dispensed_at
+)
+
+# If eligible, atomically create record + decrement count
+if eligibility["is_eligible"]:
+    dispensing = Dispensing(...)
+    prescription.repeat_count -= 1
+    session.add(dispensing)
+    session.commit()  # Both or neither
+```
+
+### Next Steps (TASK-060)
+
+**Create:** `services/backend/app/services/dispensing.py`
+
+**Implement DispensingService with methods:**
+1. `create_dispensing_record()` - INSERT with validation
+2. `get_dispensing_history()` - SELECT * ORDER BY date_dispensed
+3. `get_latest_dispensing_record()` - SELECT ... ORDER BY date LIMIT 1
+4. `delete_dispensing_record()` - Soft delete (audit trail)
+5. `get_pharmacist_dispensings()` - Filter by pharmacist_id
+6. `dispense_prescription()` - Atomic: create + decrement (MAIN METHOD)
+7. `check_repeat_eligibility()` - Call TimeValidationService with DB data
+8. `get_repeat_summary()` - Summary of repeats (original, used, remaining)
+
+### Notes
+
+- Tests are deliberately verbose (15 LSP errors expected)
+- Each docstring explains expected failure reason
+- TDD discipline: tests first, implementation next
+- Database layer complexity: atomicity, race conditions, audit trails
+- FHIR R4 compliance: numberOfRepeatsAllowed, expectedSupplyDuration fields
+
