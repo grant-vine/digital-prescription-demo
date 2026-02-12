@@ -1810,7 +1810,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/services/validation.py
 
-TASK-059:
+- [x] TASK-059:
 TYPE: test
 SCOPE: services/backend
 TITLE: Write failing repeat tracking tests
