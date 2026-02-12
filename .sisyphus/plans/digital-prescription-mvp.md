@@ -1513,7 +1513,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(patient)/scan.test.tsx
 
-TASK-044:
+- [x] TASK-044:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement prescription scanning and receipt

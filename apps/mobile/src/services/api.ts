@@ -343,8 +343,23 @@ export const api = {
     return response.data;
   },
 
-  async markPrescriptionAsGiven(prescriptionId: string): Promise<any> {
-    const response = await getClient().post(`/prescriptions/${prescriptionId}/mark-given`);
-    return response.data;
-  },
+   async markPrescriptionAsGiven(prescriptionId: string): Promise<any> {
+     const response = await getClient().post(`/prescriptions/${prescriptionId}/mark-given`);
+     return response.data;
+   },
+
+   async verifyPrescriptionCredential(qrData: any): Promise<any> {
+     const response = await getClient().post('/prescriptions/verify-credential', qrData);
+     return response.data;
+   },
+
+   async rejectPrescription(prescriptionId: string, reason: string): Promise<any> {
+     const response = await getClient().post(`/prescriptions/${prescriptionId}/reject`, { reason });
+     return response.data;
+   },
+
+   async getPrescriptionByCode(code: string): Promise<any> {
+     const response = await getClient().get(`/prescriptions/code/${code}`);
+     return response.data;
+   },
 };
