@@ -1862,7 +1862,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/tests/test_revocation.py
 
-TASK-062:
+- [x] TASK-062:
 TYPE: implementation
 SCOPE: services/backend
 TITLE: Implement revocation service
