@@ -461,7 +461,7 @@ class TestQueryInterface:
             assert log["event_type"] == "prescription.dispensed"
 
     @freeze_time("2026-02-12 10:00:00+02:00")
-    def test_filter_logs_by_date_range(self, test_session, doctor_user, now_sast):
+    def test_filter_logs_by_date_range(self, test_session, doctor_user):
         """Test filtering audit logs by date range.
 
         Expected behavior:
@@ -473,8 +473,13 @@ class TestQueryInterface:
         EXPECTED FAILURE: AuditService doesn't exist yet.
         """
         from app.services.audit import AuditService
+        from datetime import timezone
 
         service = AuditService()
+
+        # Get current time INSIDE freeze_time (fixture runs before decorator)
+        sast = timezone(timedelta(hours=2))
+        now_sast = datetime.now(sast)
 
         # Log event
         service.log_event(

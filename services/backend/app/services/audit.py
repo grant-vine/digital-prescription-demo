@@ -92,7 +92,7 @@ class AuditService:
                 resource_id=resource_id,
                 details=details or {},
                 ip_address=ip_address,
-                timestamp=datetime.now(tz=self.SAST),
+                timestamp=datetime.now(tz=self.SAST).astimezone(timezone.utc).replace(tzinfo=None),
                 tenant_id=self.tenant_id,
             )
 
@@ -175,11 +175,16 @@ class AuditService:
                 if "resource_type" in filters:
                     query = query.filter(Audit.resource_type == filters["resource_type"])
                 if "start_date" in filters:
-                    # Parse ISO format datetime
+                    # Parse ISO format datetime and normalize to naive UTC
                     start_dt = datetime.fromisoformat(filters["start_date"])
+                    if start_dt.tzinfo is not None:
+                        start_dt = start_dt.astimezone(timezone.utc).replace(tzinfo=None)
                     query = query.filter(Audit.timestamp >= start_dt)
                 if "end_date" in filters:
+                    # Parse ISO format datetime and normalize to naive UTC
                     end_dt = datetime.fromisoformat(filters["end_date"])
+                    if end_dt.tzinfo is not None:
+                        end_dt = end_dt.astimezone(timezone.utc).replace(tzinfo=None)
                     query = query.filter(Audit.timestamp <= end_dt)
 
             # Get total count before pagination
@@ -354,9 +359,13 @@ class AuditService:
                     query = query.filter(Audit.result == filters["result"])
                 if "start_date" in filters:
                     start_dt = datetime.fromisoformat(filters["start_date"])
+                    if start_dt.tzinfo is not None:
+                        start_dt = start_dt.astimezone(timezone.utc).replace(tzinfo=None)
                     query = query.filter(Audit.timestamp >= start_dt)
                 if "end_date" in filters:
                     end_dt = datetime.fromisoformat(filters["end_date"])
+                    if end_dt.tzinfo is not None:
+                        end_dt = end_dt.astimezone(timezone.utc).replace(tzinfo=None)
                     query = query.filter(Audit.timestamp <= end_dt)
                 if "correlation_id" in filters:
                     query = query.filter(Audit.correlation_id == filters["correlation_id"])
@@ -645,7 +654,7 @@ class AuditService:
         session = self.db or get_db_session()
 
         try:
-            end_date = datetime.now(tz=self.SAST)
+            end_date = datetime.now(tz=self.SAST).astimezone(timezone.utc).replace(tzinfo=None)
             start_date = end_date - timedelta(days=period_days)
 
             # Total events in period
