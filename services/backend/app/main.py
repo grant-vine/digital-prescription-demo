@@ -14,6 +14,7 @@ from app.api.v1.audit import router as audit_router
 from app.api.v1.time_validation import router as time_validation_router
 from app.api.v1.fhir import router as fhir_router
 from app.api.v1.revocation import router as revocation_router
+from app.api.v1.demo import router as demo_router
 
 app = FastAPI(
     title="Digital Prescription API",
@@ -41,6 +42,7 @@ app.include_router(admin_router, prefix="/api/v1", tags=["admin"])
 app.include_router(audit_router, prefix="/api/v1")
 app.include_router(time_validation_router, prefix="/api/v1", tags=["time-validation"])
 app.include_router(fhir_router, tags=["fhir"])
+app.include_router(demo_router, prefix="/api/v1")
 
 
 @app.get("/health")
