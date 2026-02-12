@@ -1735,7 +1735,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(pharmacist)/verify.tsx (registry checks part)
 
-TASK-055:
+- [x] TASK-055:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing dispensing screen tests
