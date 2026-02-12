@@ -53,10 +53,15 @@ def test_session(test_engine) -> Session:
 
     SessionLocal = sessionmaker(bind=test_engine)
     session = SessionLocal()
+    
+    # Set test session globally so services can access it
+    from app.db import set_test_session, reset_test_session
+    set_test_session(session)
 
     yield session
 
     session.close()
+    reset_test_session()
 
     # Drop all tables after test
     try:
