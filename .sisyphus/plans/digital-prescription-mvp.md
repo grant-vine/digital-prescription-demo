@@ -1827,7 +1827,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/tests/test_repeats.py
 
-TASK-060:
+- [x] TASK-060:
 TYPE: implementation
 SCOPE: services/backend
 TITLE: Implement repeat tracking service
