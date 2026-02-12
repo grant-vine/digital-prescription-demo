@@ -2022,7 +2022,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/api/v1/admin.py
 
-TASK-070:
+TASK-070: ✅
 TYPE: infra
 SCOPE: global
 TITLE: Write deployment documentation
@@ -2030,11 +2030,11 @@ DESCRIPTION: Create README with setup and deployment instructions.
 INPUTS: TASK-065-ITER-3
 OUTPUTS: Updated README.md
 ACCEPTANCE-CRITERIA:
-- Prerequisites listed
-- Setup instructions
-- Running locally
-- Running tests
-- Troubleshooting guide
+- ✅ Prerequisites listed
+- ✅ Setup instructions
+- ✅ Running locally
+- ✅ Running tests
+- ✅ Troubleshooting guide
 DEPENDENCIES: TASK-065-ITER-3
 ESTIMATED-SIZE: S
 PARALLELIZABLE: yes

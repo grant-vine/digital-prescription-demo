@@ -16,7 +16,7 @@ This package contains everything needed to build and deploy a digital prescripti
    - ✅ MacBook Air M1 8GB optimized
    - ✅ Contract-independent development
 
-### User Stories (23 Total)
+### User Stories (25 Total)
 
 #### MVP Phase (Weeks 1-4) - 11 Stories
 - **US-001:** Doctor Authentication & DID Setup
@@ -153,55 +153,153 @@ Each role has distinct visual identity:
 
 ---
 
-## 💻 Development Environment
+## 📋 Prerequisites
 
-### Hardware Requirements: MacBook Air M1 8GB ✅
+### Required Software
+- **Python 3.12+** - Backend runtime
+- **Node.js 20+** - Mobile app development
+- **Docker Desktop** - Infrastructure (PostgreSQL, Redis, ACA-Py)
+- **Git** - Version control
 
-**Optimized for your hardware:**
-```yaml
-# docker-compose.dev.yml (memory-optimized)
-services:
-  acapy:
-    deploy:
-      resources:
-        limits:
-          memory: 1G  # Optimized for 8GB RAM
-  
-  postgres:
-    image: postgres:15-alpine  # Smaller footprint
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-```
-
-**Memory Management:**
-- Selective service startup during development
-- Run only what you need
-- Monitor with `docker stats`
-- Keep 500MB+ free at all times
-
-### Quick Start
-
+### Verify Installation
 ```bash
-# 1. Clone repository
-git clone <your-repo>
-cd digital-prescription-demo
-
-# 2. Install dependencies
-npm install
-cd backend && pip install -r requirements.txt
-
-# 3. Start infrastructure (lightweight)
-docker-compose up postgres redis
-
-# 4. Start backend
-npm run dev
-
-# 5. Start mobile app
-npx expo start
-# Scan QR code with Expo Go app
+python --version  # Should show 3.11+
+node --version    # Should show 20+
+docker --version  # Should show 20+
 ```
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/grant-vine/digital-prescription-demo.git
+cd digital-prescription-demo
+```
+
+### 2. Infrastructure Setup
+Start the required databases and SSI infrastructure using Docker Compose:
+```bash
+docker-compose up -d db redis acapy
+```
+
+### 3. Backend Setup
+```bash
+cd services/backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment variables (optional: create .env file)
+export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/prescriptions"
+export REDIS_URL="redis://localhost:6379/0"
+export ACAPY_ADMIN_URL="http://localhost:8001"
+export SECRET_KEY="dev-secret-key-change-in-production"
+```
+
+### 4. Mobile App Setup
+```bash
+cd apps/mobile
+
+# Install dependencies
+npm install
+```
+
+---
+
+## 🚀 Running Locally
+
+### Start Backend
+```bash
+cd services/backend
+source venv/bin/activate
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+- **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Health Check**: [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
+
+### Start Mobile App
+```bash
+cd apps/mobile
+npx expo start
+```
+- Press **i** for iOS simulator (macOS only)
+- Press **a** for Android emulator
+- Scan QR code with **Expo Go** app on your physical device
+
+### Infrastructure Logs
+```bash
+docker-compose logs -f acapy  # Follow ACA-Py logs
+docker-compose logs -f db     # Follow PostgreSQL logs
+```
+
+---
+
+## 🧪 Running Tests
+
+### Backend Tests (pytest)
+```bash
+cd services/backend
+source venv/bin/activate
+pytest                              # Run all tests
+pytest app/tests/test_audit.py      # Run specific test file
+pytest --cov=app                    # Run with coverage report
+```
+
+### Mobile Tests (Jest)
+```bash
+cd apps/mobile
+npm test                            # Run all unit and component tests
+npm test -- src/components/qr       # Run tests in specific directory
+```
+
+### E2E Integration Tests
+The mobile app includes E2E tests simulating full user flows:
+```bash
+cd apps/mobile
+npm test -- e2e/doctor.spec.ts     # Test doctor workflow
+npm test -- e2e/patient.spec.ts    # Test patient workflow
+npm test -- e2e/pharmacist.spec.ts # Test pharmacist workflow
+```
+
+---
+
+## 📊 Demo Data
+
+### Seed Demo Data
+Populate the system with realistic doctors, patients, and prescriptions:
+```bash
+cd services/backend
+source venv/bin/activate
+python scripts/seed_demo_data.py
+```
+
+**Default Demo Users:**
+- **Doctor**: `sarah.johnson@hospital.co.za` / `Demo@2024`
+- **Patient**: `john.smith@example.com` / `Demo@2024`
+- **Pharmacist**: `lisa.chen@pharmacy.co.za` / `Demo@2024`
+
+### Reset Demo Environment
+Clear all data and optionally reseed via the admin API:
+```bash
+# Get auth token first (login as doctor)
+TOKEN=$(curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"sarah.johnson@hospital.co.za","password":"Demo@2024"}' \
+  | jq -r '.access_token')
+
+# Reset and reseed
+curl -X POST "http://localhost:8000/api/v1/admin/reset-demo?confirm=true&reseed=true" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
 
 ---
 
@@ -346,38 +444,47 @@ export DIDX_TOKEN=your-oauth-token
 
 ## 🆘 Troubleshooting
 
-### MacBook Air Memory Issues
+### Backend Issues
+
+#### "Connection refused" when starting backend
+- **Cause**: Database or Redis not running.
+- **Solution**: Run `docker-compose up -d db redis`.
+
+#### "ModuleNotFoundError: No module named 'app'"
+- **Cause**: Not in backend directory or venv not activated.
+- **Solution**:
+  ```bash
+  cd services/backend
+  source venv/bin/activate
+  pip install -r requirements.txt
+  ```
+
+### Mobile Issues
+
+#### "Metro bundler not starting" or Port 8081 busy
+- **Cause**: Port 8081 already in use by another process.
+- **Solution**: `npx expo start --clear` or kill the process: `lsof -ti:8081 | xargs kill`.
+
+#### "Expo Go cannot connect to computer"
+- **Cause**: Phone and computer on different networks.
+- **Solution**: Ensure your phone and computer are on the same Wi-Fi. If using a VPN or restrictive network, try tunnel mode: `npx expo start --tunnel`.
+
+### Infrastructure (SSI/DID)
+
+#### "DID not registered" or SSI errors
+- **Cause**: ACA-Py is not healthy or hasn't finished auto-provisioning.
+- **Solution**: Check logs: `docker-compose logs -f acapy`. Ensure `ACAPY_ADMIN_URL` is correctly set to `http://localhost:8001`.
+
+### Hardware Optimization
+If you experience high memory usage on a MacBook Air 8GB:
 ```bash
-# If Docker uses too much memory
-# 1. Stop unnecessary services
+# Stop ACA-Py if not testing SSI features
 docker-compose stop acapy
 
-# 2. Use minimal database only
-docker-compose -f docker-compose.minimal.yml up postgres
-
-# 3. Restart Docker Desktop
+# Clear Docker cache
 docker system prune
 
-# 4. Close browser tabs
-# 5. Quit unused apps
-```
-
-### DIDx Migration Issues
-```bash
-# Rollback to ACA-Py instantly
-export SSI_PROVIDER=acapy-local
-npm run dev
-```
-
-### Mobile App Won't Build
-```bash
-# Clear caches
-npx expo start -c
-
-# Or reset completely
-rm -rf node_modules
-npm install
-npx expo start
+# Restart Docker Desktop if needed
 ```
 
 ---
@@ -444,7 +551,7 @@ npx expo start
 ## 🎉 Summary
 
 You now have:
-- ✅ **23 comprehensive user stories**
+- ✅ **25 comprehensive user stories**
 - ✅ **3 detailed implementation plans** (v3.0 is current)
 - ✅ **Expert review** (Momus) with all issues resolved
 - ✅ **Mobile-first architecture** (React Native + Expo)
@@ -458,5 +565,5 @@ You now have:
 ---
 
 **Package Version:** 3.0  
-**Last Updated:** 11 February 2026  
+**Last Updated:** 12 February 2026  
 **Status:** ✅ Ready for Development

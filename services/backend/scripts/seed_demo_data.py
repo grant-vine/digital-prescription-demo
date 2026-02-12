@@ -167,6 +167,7 @@ def seed_doctors(session: Session, count: int = 3) -> List[User]:
         
         try:
             user = User(
+                username=doctor_data["email"],
                 email=doctor_data["email"],
                 full_name=doctor_data["full_name"],
                 password_hash=hash_password(doctor_data["password"]),
@@ -205,6 +206,7 @@ def seed_patients(session: Session, count: int = 5) -> List[User]:
         
         try:
             user = User(
+                username=patient_data["email"],
                 email=patient_data["email"],
                 full_name=patient_data["full_name"],
                 password_hash=hash_password(patient_data["password"]),
@@ -243,6 +245,7 @@ def seed_pharmacists(session: Session, count: int = 2) -> List[User]:
         
         try:
             user = User(
+                username=pharmacist_data["email"],
                 email=pharmacist_data["email"],
                 full_name=pharmacist_data["full_name"],
                 password_hash=hash_password(pharmacist_data["password"]),

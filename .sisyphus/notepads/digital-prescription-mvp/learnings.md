@@ -4015,3 +4015,15 @@ curl -X POST "http://localhost:8000/api/v1/admin/reset-demo" \
 - Endpoint ready for immediate use in development
 - Can be called between demo sessions to reset environment
 - Useful for CI/CD pipeline to reset test environments
+
+#### 2026-02-12 - Sisyphus-Junior
+
+**Tasks Completed:**
+- TASK-070: Updated README.md with comprehensive setup, running, testing, and troubleshooting instructions.
+
+**Findings:**
+- Backend uses Python 3.12 (standardized across AGENTS.md and README).
+- Mobile uses Expo SDK 49 with React Native 0.72.6.
+- Database reset endpoint is POST /api/v1/admin/reset-demo?confirm=true&reseed=true.
+- Seed script is located at services/backend/scripts/seed_demo_data.py and expects to be run from services/backend.
+- Verified user story count is 25 (numbered files in user-stories/ directory).
