@@ -1774,7 +1774,7 @@ REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(pharmacist)/prescriptions/dispens
 
 ### BATCH 8: System Features (Week 4)
 
-TASK-057:
+- [x] TASK-057:
 TYPE: test
 SCOPE: services/backend
 TITLE: Write failing time validation tests
@@ -1791,7 +1791,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/tests/test_validation.py
 
-TASK-058:
+- [x] TASK-058:
 TYPE: implementation
 SCOPE: services/backend
 TITLE: Implement time validation middleware
