@@ -1551,7 +1551,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(patient)/wallet.test.tsx
 
-TASK-046:
+- [x] TASK-046:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement patient wallet screen

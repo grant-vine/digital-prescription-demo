@@ -273,3 +273,25 @@ cat .sisyphus/plans/digital-prescription-mvp.md
 
 **Next Steps:**
 - Proceed to Medication Entry implementation (TASK-036B).
+
+#### [2026-02-12] - Sisyphus-Junior
+
+**Tasks Completed:**
+- TASK-043: Write failing prescription receipt tests
+
+**Time Taken:**
+- Start: 14:00 (Approx)
+- End: 14:15
+- Duration: ~15 minutes
+
+**Files Modified:**
+- `apps/mobile/src/app/(patient)/scan.test.tsx` - Created failing test suite
+- `apps/mobile/src/services/api.ts` - Added missing API methods (verifyCredential, acceptPrescription, markPrescriptionAsGiven) to support tests
+
+**Notes:**
+- Created comprehensive test suite for patient prescription scanning (QR, verification, acceptance).
+- Updated shared API service to include necessary methods so tests can compile and fail at runtime.
+- Verified all 13 tests fail as expected (Red phase).
+
+**Next Steps:**
+- Proceed to TASK-044 (Implement prescription scanning).
