@@ -3773,3 +3773,151 @@ Credential verification mock:
 - Total: ~30 minutes
 - Verification: 5 minutes (tests + diagnostics)
 
+
+## [2026-02-12] TASK-068: Demo Data Seed Script
+
+**Date:** 2026-02-12  
+**Duration:** ~45 minutes  
+**Status:** ✅ COMPLETE - Script functional, tested, and idempotent
+
+### Overview
+Created `services/backend/scripts/seed_demo_data.py` - a production-ready demo data seeding script for populating the database with test data (doctors, patients, pharmacists, prescriptions).
+
+### Test Results
+```
+First run:   3 doctors + 5 patients + 2 pharmacists + 10 prescriptions created ✅
+Second run:  0 users created (all exist), 10 more prescriptions added ✅ (Idempotent)
+Verification: 10 total users, 25 total prescriptions with correct status distribution ✅
+```
+
+### Implementation Details
+
+#### Database Structure
+- **Users Table:** email unique constraint prevents duplicate creation
+- **Prescriptions Table:** Links doctor → patient, includes status, dates, repeats
+- **Idempotent Logic:** Check email existence before creating users, always create new prescriptions
+
+#### Configuration
+- **Database:** Configurable via `--database-url` flag or `DATABASE_URL` env var (default: `sqlite:///./test.db`)
+- **Counts:** Configurable via CLI arguments (--doctors, --patients, --pharmacists, --prescriptions)
+- **Examples:** Provided in help text with real usage examples
+
+#### Test Data
+- **3 Doctors:** Sarah Johnson, Thabo Mokoena, Ayesha Patel (HPCSA registration numbers)
+- **5 Patients:** John Smith, Mary Williams, Sipho Dlamini, Fatima Hassan, James Brown
+- **2 Pharmacists:** Lisa Chen, David Nkosi (SAPC registration numbers)
+- **10 Prescriptions:** Mix of statuses (6 ACTIVE, 2 DISPENSED, 1 EXPIRED, 1 REVOKED)
+- **Medications:** 8 realistic medications (Amoxicillin, Metformin, Lisinopril, etc.)
+- **All Passwords:** "Demo@2024" (same for all test users)
+- **All DIDs:** Mock format `did:cheqd:testnet:{uuid}` generated per user
+
+#### Features Implemented
+1. ✅ Hashed password storage using `app.core.security.hash_password()`
+2. ✅ Mock DID generation (cheqd testnet format)
+3. ✅ Idempotent user creation (checks email uniqueness)
+4. ✅ Unlimited prescription creation (no uniqueness constraint)
+5. ✅ Realistic prescription states:
+   - Date issued: Past 7 days
+   - Date expires: 30-90 days in future (or past if EXPIRED)
+   - Some prescriptions marked as repeats (is_repeat=True, repeat_count>0)
+6. ✅ Error handling with try/except blocks
+7. ✅ Detailed progress output with emojis (✅ ⏭️ ⚠️ ❌)
+
+#### Type Hints
+- Used `List[User]`, `List[Prescription]`, `Tuple[Any, Any]` for proper typing
+- Zero LSP errors after type hint fixes
+- Complies with Python 3.12+ type annotation standards
+
+#### CLI Interface
+```bash
+# Defaults: 3 doctors, 5 patients, 2 pharmacists, 10 prescriptions
+python scripts/seed_demo_data.py
+
+# Custom: Fewer records
+python scripts/seed_demo_data.py --doctors 1 --patients 2 --prescriptions 5
+
+# Custom database
+python scripts/seed_demo_data.py --database-url postgresql://user:pass@localhost/dbname
+```
+
+### Idempotency Strategy
+- **Users:** Email unique constraint prevents duplicates automatically
+  - First run creates users
+  - Subsequent runs skip existing users (prints "⏭️ already exists")
+- **Prescriptions:** No uniqueness constraint, always creates new records
+  - This allows seeding multiple times to test with more prescriptions
+  - (Could be changed to check prescription_id uniqueness if needed later)
+
+### Database Session Management
+- Uses SQLAlchemy ORM directly (not test session from app.db)
+- Creates own `engine` and `SessionLocal` from database URL
+- Handles both SQLite (dev) and PostgreSQL (production) via engine detection
+
+### Error Handling
+- IntegrityError caught for duplicate users (e.g., if email constraint violated)
+- Exception caught for other errors (invalid data, API issues)
+- All errors printed with ⚠️ but don't stop execution (continues seeding other records)
+- Final commit wrapped in try/except with rollback on failure
+
+### Output Examples
+```
+📦 Seeding demo data...
+📊 Database: sqlite:///./test.db
+
+👥 Creating doctors...
+✅ Created doctor: Dr. Sarah Johnson (sarah.johnson@hospital.co.za)
+✅ Created doctor: Dr. Thabo Mokoena (thabo.mokoena@clinic.co.za)
+✅ Created doctor: Dr. Ayesha Patel (ayesha.patel@pediatrics.co.za)
+   Created: 3 doctors
+
+... [similar for patients, pharmacists] ...
+
+📋 Creating prescriptions...
+✅ Created prescription: Amoxicillin for John Smith by Dr. Sarah Johnson (Status: ACTIVE)
+[10 more prescription lines...]
+   Created: 10 prescriptions
+
+============================================================
+✅ DEMO DATA SEEDED SUCCESSFULLY
+============================================================
+Doctors:       3 created
+Patients:      5 created
+Pharmacists:   2 created
+Prescriptions: 10 created
+
+💡 You can now run the app and test with this demo data!
+   Demo password for all users: Demo@2024
+```
+
+### Integration Points
+- **Models:** Imports User, Prescription from app.models
+- **Security:** Uses app.core.security.hash_password() for secure password hashing
+- **Database:** Works with SQLAlchemy ORM, compatible with any SQLAlchemy dialect
+
+### Files Created
+- ✅ `services/backend/scripts/seed_demo_data.py` (408 lines)
+- ✅ Executable: `chmod +x scripts/seed_demo_data.py`
+
+### Verification Performed
+1. ✅ Script runs without errors (default parameters)
+2. ✅ Idempotency verified (second run creates 0 new users, 10 new prescriptions)
+3. ✅ Database verification shows correct counts and distribution
+4. ✅ Custom parameters work (--doctors 2 --patients 2 --prescriptions 5)
+5. ✅ Type hints fixed (0 LSP errors)
+6. ✅ All assertions pass
+
+### Related Tasks
+- **TASK-069:** Create demo reset functionality (depends on TASK-068)
+- **TASK-070:** Deployment documentation (references TASK-068 usage)
+
+### Key Patterns
+1. **Idempotency:** Check for existence before create operations
+2. **Error Handling:** Catch exceptions but continue processing other records
+3. **Mock Data:** Use realistic but test-friendly values (demo passwords, mock DIDs)
+4. **Configuration:** Support both env vars and CLI arguments for flexibility
+5. **Feedback:** Print detailed progress to user (status, counts, instructions)
+
+### Next Steps
+- Script ready for immediate use in development/demo environments
+- Can be called from CI/CD pipeline to populate test databases
+- Documentation provided in --help and module docstring

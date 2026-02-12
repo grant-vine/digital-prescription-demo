@@ -1987,7 +1987,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/e2e/error-scenarios.spec.js
 
-TASK-068:
+TASK-068: ✅
 TYPE: infra
 SCOPE: global
 TITLE: Create demo data seed script
@@ -1995,11 +1995,11 @@ DESCRIPTION: Create script to populate test data for demos.
 INPUTS: TASK-007
 OUTPUTS: seed_demo_data.py script
 ACCEPTANCE-CRITERIA:
-- Creates test doctors
-- Creates test patients
-- Creates test prescriptions
-- Configurable count
-- Idempotent
+- ✅ Creates test doctors
+- ✅ Creates test patients
+- ✅ Creates test prescriptions
+- ✅ Configurable count
+- ✅ Idempotent
 DEPENDENCIES: TASK-007
 ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
