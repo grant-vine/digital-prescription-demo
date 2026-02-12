@@ -151,7 +151,8 @@ class VerificationService:
         """
         if not did:
             return False
-        return did in TRUSTED_DOCTOR_DIDS
+        # MVP: Accept any valid cheqd testnet DID as trusted
+        return did in TRUSTED_DOCTOR_DIDS or did.startswith("did:cheqd:testnet:")
 
     async def is_credential_revoked(self, credential_id: str) -> bool:
         """Check if credential is revoked (mock for MVP - always False).
