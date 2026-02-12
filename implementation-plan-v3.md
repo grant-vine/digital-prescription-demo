@@ -1075,7 +1075,48 @@ Support multiple healthcare organizations on single deployment.
 
 ---
 
-**Plan Version:** 3.0  
+## 11. Demo Optimization & Productisation Milestone
+
+**Branch:** `milestone/demo-opt-product`  
+**Goal:** Implement post-MVP backend features with multi-tenancy baked in from the start, architecturally aligned with DIDx CloudAPI.
+
+### Completed Phases
+
+| Phase | User Story | Commit | Description | Tests Added |
+|-------|-----------|--------|-------------|-------------|
+| 0 | Multi-Tenancy Foundation | `8d061e7` | TenantMixin on all models, tenant_id in JWT, DIDx CloudAPI alignment | — |
+| 1 | US-020: Advanced Audit Trail & Reporting | `85b16d2` | Hash-chain integrity, correlation tracking, compliance reports, dashboard | 27 |
+| 2 | US-022: Advanced Time-Based Validation | `d878cc7` | Business hours, timezones, holidays, controlled substance timing, emergency overrides | 48 |
+| 3 | US-021: Advanced Revocation Workflows | `ee9a3af` | Bulk revocation, scheduled revocation, rollback, impact analysis, rules engine | 30 |
+| 4 | US-017-v2: Full FHIR R4 Implementation | `ea05f18` | MedicationRequest conversion, validation, search, Bundle support, dual-mode | 35 |
+| 5 | US-019: Demo Preparation & Test Data | pending commit | Enhanced seed script, demo management API, 6 scenario-based demo datasets | 20 |
+
+### Test Suite Progress
+
+| After Phase | Tests Passed | Pre-existing Failures | Regressions |
+|-------------|-------------|----------------------|-------------|
+| Baseline (MVP) | 246 | 19 | — |
+| + Phase 1 | 273 | 19 | 0 |
+| + Phase 2 | 321 | 19 | 0 |
+| + Phase 4 | 356 | 19 | 0 |
+| + Phase 3 | 386 | 19 | 0 |
+| + Phase 5 | 406 | 19 | 0 |
+
+### Architecture Decisions
+
+1. **Multi-tenancy aligned with DIDx CloudAPI** — `tenant_id` maps to DIDx `wallet_id`, `group_id` maps to DIDx group concept
+2. **FHIR R4 dual-mode** — existing simplified schema preserved, FHIR conversion in service layer (no model changes)
+3. **No new pip dependencies** — all features implemented with stdlib + existing deps
+4. **Backward compatible** — all new parameters have defaults, no breaking API changes
+
+### Remaining
+
+- [ ] Final milestone tag: `v1.1.0-demo-opt`
+
+---
+
+**Plan Version:** 3.1  
 **Status:** ✅ Ready for Development (Contract Independent)  
-**Last Updated:** 11 February 2026  
-**Hardware Target:** MacBook Air M1 8GB ✅
+**Last Updated:** 12 February 2026  
+**Hardware Target:** MacBook Air M1 8GB ✅  
+**Changes in v3.1:** Added Section 11 — Demo Optimization & Productisation milestone tracking (Phases 0-5)
