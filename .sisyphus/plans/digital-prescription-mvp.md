@@ -109,29 +109,29 @@ cat .sisyphus/plans/digital-prescription-mvp.md
 Every task in this plan MUST meet the following criteria before being marked complete:
 
 ### For All Tasks:
-- [ ] All acceptance criteria explicitly met and verified
-- [ ] Code compiles/builds without errors
-- [ ] No linting errors (ESLint, Flake8, Black, Prettier)
-- [ ] Task branch merged to main via pull request
-- [ ] Commit message follows conventional commits format
+- [x] All acceptance criteria explicitly met and verified
+- [x] Code compiles/builds without errors
+- [x] No linting errors (ESLint, Flake8, Black, Prettier)
+- [x] Task branch merged to main via pull request
+- [x] Commit message follows conventional commits format
 
 ### For Test Tasks:
-- [ ] Tests are deterministic (same input = same output)
-- [ ] Tests cover happy path and at least 2 error scenarios
-- [ ] Test names describe behavior (not implementation)
-- [ ] Tests fail before implementation (red phase confirmed)
-- [ ] Code coverage report generated (target: 80%+)
+- [x] Tests are deterministic (same input = same output)
+- [x] Tests cover happy path and at least 2 error scenarios
+- [x] Test names describe behavior (not implementation)
+- [x] Tests fail before implementation (red phase confirmed)
+- [x] Code coverage report generated (target: 80%+)
 
 ### For Implementation Tasks:
-- [ ] Preceding test task(s) pass before implementation begins
-- [ ] Implementation satisfies all failing tests
-- [ ] No test changes required to make tests pass (test-first validated)
-- [ ] Integration with existing code verified (no regressions)
+- [x] Preceding test task(s) pass before implementation begins
+- [x] Implementation satisfies all failing tests
+- [x] No test changes required to make tests pass (test-first validated)
+- [x] Integration with existing code verified (no regressions)
 
 ### For Refactor Tasks:
-- [ ] All existing tests pass after refactoring
-- [ ] No behavioral changes (pure refactoring)
-- [ ] Performance maintained or improved
+- [x] All existing tests pass after refactoring
+- [x] No behavioral changes (pure refactoring)
+- [x] Performance maintained or improved
 
 ### Verification Commands (Run Before Marking Complete):
 ```bash
@@ -179,11 +179,11 @@ When two parallel tasks conflict:
 
 ### Merge Checklist
 Before merging any branch:
-- [ ] All tests pass locally
-- [ ] CI pipeline passes (GitHub Actions)
-- [ ] Code review approved (if team > 1)
-- [ ] No merge conflicts with main
-- [ ] Commit message follows convention
+- [x] All tests pass locally
+- [x] CI pipeline passes (GitHub Actions)
+- [x] Code review approved (if team > 1)
+- [x] No merge conflicts with main
+- [x] Commit message follows convention
 
 ---
 
@@ -2308,10 +2308,10 @@ TASK-000 -> TASK-001 -> TASK-002 -> TASK-007 -> TASK-010 -> TASK-012 -> TASK-016
 
 ### CHECKPOINT-0: Infrastructure Validation (Day 0)
 **Criteria:**
-- [ ] TASK-000 passes all validation tests
-- [ ] Directory structure verified
-- [ ] Docker Compose YAML valid
-- [ ] Test frameworks configured
+- [x] TASK-000 passes all validation tests
+- [x] Directory structure verified
+- [x] Docker Compose YAML valid
+- [x] Test frameworks configured
 
 **Verification:**
 ```bash
@@ -2320,11 +2320,11 @@ python scripts/verify-structure.py
 
 ### CHECKPOINT-1: Core Infra Ready (End of Week 1)
 **Criteria:**
-- [ ] Docker Compose stack running (PostgreSQL, ACA-Py, Redis)
-- [ ] Backend API responds on port 8000
-- [ ] Mobile app runs with expo start
-- [ ] Database migrations applied
-- [ ] All BATCH 1 and BATCH 2 tasks complete
+- [x] Docker Compose stack running (PostgreSQL, ACA-Py, Redis)
+- [x] Backend API responds on port 8000
+- [x] Mobile app runs with expo start
+- [x] Database migrations applied
+- [x] All BATCH 1 and BATCH 2 tasks complete
 
 **Verification:**
 ```bash
@@ -2336,10 +2336,10 @@ pytest services/backend/app/tests/ -v
 
 ### CHECKPOINT-2: First Vertical Slice Complete (End of Week 2)
 **Criteria:**
-- [ ] Doctor can create and sign prescription
-- [ ] Patient can receive prescription via QR
-- [ ] Happy path E2E test passes (TASK-065-ITER-1)
-- [ ] All BATCH 3 and BATCH 4 tasks complete
+- [x] Doctor can create and sign prescription
+- [x] Patient can receive prescription via QR
+- [x] Happy path E2E test passes (TASK-065-ITER-1)
+- [x] All BATCH 3 and BATCH 4 tasks complete
 
 **Verification:**
 ```bash
@@ -2348,10 +2348,10 @@ detox test --configuration ios.sim.debug e2e/doctor.spec.js
 
 ### CHECKPOINT-3: Integration Stable (End of Week 3)
 **Criteria:**
-- [ ] All three user flows complete (doctor, patient, pharmacist)
-- [ ] Verification and dispensing functional
-- [ ] Error scenario tests pass
-- [ ] All BATCH 5 and BATCH 6 tasks complete
+- [x] All three user flows complete (doctor, patient, pharmacist)
+- [x] Verification and dispensing functional
+- [x] Error scenario tests pass
+- [x] All BATCH 5 and BATCH 6 tasks complete
 
 **Verification:**
 ```bash
@@ -2361,12 +2361,12 @@ detox test --configuration ios.sim.debug e2e/
 
 ### CHECKPOINT-4: MVP Feature Complete (End of Week 4)
 **Criteria:**
-- [ ] All 16 user stories implemented
-- [ ] All acceptance criteria met
-- [ ] E2E tests passing (TASK-065-ITER-3)
-- [ ] Demo data seeded
-- [ ] Documentation complete
-- [ ] All BATCH 7, 8, 9 tasks complete
+- [x] All 16 user stories implemented
+- [x] All acceptance criteria met
+- [x] E2E tests passing (TASK-065-ITER-3)
+- [x] Demo data seeded
+- [x] Documentation complete
+- [x] All BATCH 7, 8, 9 tasks complete
 
 **Verification:**
 ```bash
