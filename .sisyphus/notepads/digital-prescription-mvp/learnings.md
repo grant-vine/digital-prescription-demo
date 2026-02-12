@@ -2408,3 +2408,209 @@ if eligibility["is_eligible"]:
 - Database layer complexity: atomicity, race conditions, audit trails
 - FHIR R4 compliance: numberOfRepeatsAllowed, expectedSupplyDuration fields
 
+
+
+## [2026-02-12] TASK-061: Prescription Revocation Tests (TDD Red Phase)
+
+**Date:** 2026-02-12  
+**Status:** ✅ COMPLETE - Healthy TDD red phase (17 FAIL, 0 PASS)
+
+### Test Suite Overview
+- **File:** `services/backend/app/tests/test_revocation.py` (688 lines)
+- **Total Tests:** 17 (exceeds 12-15 target, comprehensive coverage)
+- **Categories:** 6 (Request, Reasons, Registry, Notification, Audit, Edge Cases)
+- **Expected State:** All tests FAIL with `ModuleNotFoundError: No module named 'app.services.revocation'`
+
+### Test Collection Results
+```
+✓ 17 tests collected
+✓ 17 LSP errors for missing RevocationService (expected)
+✓ All tests FAIL with ModuleNotFoundError (healthy red phase)
+```
+
+### Test Structure & Categories
+
+1. **TestRevocationRequest (3 tests)** - Revocation mechanics
+   - Doctor revokes with reason + status change
+   - Returns revocation_id + timestamp
+   - Notes field optional but retrievable
+
+2. **TestRevocationReasons (4 tests)** - Support multiple reasons
+   - `prescribing_error` - Doctor mistake
+   - `patient_request` - Patient asked for cancellation
+   - `adverse_reaction` - Safety event (flagged for compliance)
+   - `other` - Custom reason with notes
+
+3. **TestRevocationRegistry (3 tests)** - SSI integration placeholder
+   - Status changes to REVOKED in database
+   - `update_revocation_registry()` called (ACA-Py placeholder)
+   - Automatic registry update on revocation
+
+4. **TestPatientNotification (2 tests)** - DIDComm placeholder
+   - `notify_patient()` called with prescription ID + reason
+   - Automatic patient notification on revocation
+   - Future DIDComm integration point
+
+5. **TestRevocationAuditTrail (2 tests)** - Compliance logging
+   - Revocation logged to audit_log table
+   - Entry includes: action, user_id, prescription_id, reason, timestamp, metadata
+   - `get_revocation_history()` retrieves complete audit trail
+
+6. **TestRevocationEdgeCases (3 tests)** - Error prevention
+   - Cannot dispense revoked prescription (DispensingService check)
+   - Cannot revoke already-revoked prescription
+   - `check_revocation_status()` query method
+
+### Fixtures Created
+
+**prescription_active:** Active, valid prescription ready to be revoked
+- Issued 10 days ago, expires in 50 days
+- 2 repeats allowed
+- Used by most tests
+
+**prescription_revoked:** Prescription already revoked
+- Status = "REVOKED"
+- Used by "cannot_revoke_already_revoked" test
+- Tests idempotency / duplicate prevention
+
+**prescription_expired:** Expired prescription
+- Issued 100 days ago, expired 1 day ago
+- Used for future edge case expansion
+
+**sast_tz, now_sast:** South African timezone fixtures
+- UTC+2 timezone used throughout
+- Pattern matches existing test_repeats.py
+
+### Key Test Patterns
+
+**1. Method Signature Expected:**
+```python
+service.revoke_prescription(
+    prescription_id: int,
+    revoked_by_user_id: int,
+    reason: str,  # "prescribing_error", "patient_request", "adverse_reaction", "other", "duplicate"
+    notes: Optional[str] = None
+) -> Dict[str, Any]  # {success, prescription_id, reason, revocation_id, timestamp, ...}
+```
+
+**2. Reason Enum (Expected):**
+- `prescribing_error` - Doctor made mistake
+- `patient_request` - Patient asked to cancel
+- `adverse_reaction` - Patient had bad reaction
+- `duplicate` - Duplicate prescription issued
+- `other` - Custom reason (requires notes)
+
+**3. Integration Points (Placeholders):**
+- ACA-Py revocation registry: `update_revocation_registry(credential_id, registry_id)`
+- Patient notification: `notify_patient(prescription_id, patient_id, reason)`
+- Audit logging: Query `Audit` model with action="prescription_revoked"
+
+**4. Interdependencies:**
+- Tests 15-17 require `DispensingService.dispense_prescription()` (TASK-060)
+- Tests 8-10 require ACA-Py integration setup (TASK-062)
+- Tests 11-12 require DIDComm messaging setup (future task)
+
+### Why 17 Tests (vs Target 12-15)?
+
+**Extra coverage added:**
+1. `test_revocation_stores_notes_optional` - Optional parameter validation
+2. `test_revoke_with_duplicate_reason` (implied in TASK-061 reasons list)
+3. `test_check_revocation_status` - Status query method
+4. `test_revoke_with_other_reason` - Custom reason with notes
+
+These provide comprehensive TDD coverage for all acceptance criteria in US-015.
+
+### Expected Failures & Why
+
+All 17 tests FAIL with same error:
+```python
+ModuleNotFoundError: No module named 'app.services.revocation'
+```
+
+**Why this is correct:**
+1. ✅ RevocationService doesn't exist yet (TASK-062)
+2. ✅ LSP shows 17 errors for missing imports (healthy)
+3. ✅ Tests deliberately import non-existent module
+4. ✅ pytest fails at import time (before test code runs)
+5. ✅ All tests are "red" (failing) as expected in TDD
+
+**Not a problem:** Each test method imports service at top - this is standard TDD pattern from test_repeats.py and test_validation.py.
+
+### Database Fixtures & Persistence
+
+**Prescription Model Fields Used:**
+- `prescription.status` - Set to "REVOKED" on revocation
+- `prescription.credential_id` - Extracted for ACA-Py registry
+- `prescription.repeat_count` - Read for dispensing validation
+
+**Audit Model Fields Used:**
+- `audit.action` = "prescription_revoked"
+- `audit.resource_id` = prescription_id
+- `audit.actor_id` = revoked_by_user_id
+- `audit.details` = {reason, notes, revocation_id}
+
+**Test Session Management:**
+- Uses `test_session` fixture (SQLAlchemy session)
+- `test_session.refresh()` verifies database changes
+- `test_session.query()` for audit trail verification
+
+### SAST Timezone Pattern
+
+All tests use SAST (South African Standard Time, UTC+2):
+```python
+@freeze_time("2026-02-12 10:00:00+02:00")
+def test_something(self, now_sast):
+    # now_sast = datetime(2026, 2, 12, 10, 0, 0, tzinfo=+02:00)
+```
+
+Pattern matches `test_repeats.py` and `test_validation.py`.
+
+### Next Task (TASK-062)
+
+Implement `services/backend/app/services/revocation.py` with:
+
+**RevocationService class:**
+1. `revoke_prescription()` - Main method, atomic operation
+2. `update_revocation_registry()` - ACA-Py integration (placeholder)
+3. `notify_patient()` - Patient notification (DIDComm placeholder)
+4. `get_revocation_history()` - Audit trail retrieval
+5. `check_revocation_status()` - Status query
+
+**Requirements:**
+- Update prescription.status = "REVOKED"
+- Create audit log entry
+- Call patient notification service
+- Call ACA-Py revocation registry
+- Return comprehensive result dict
+- Handle all 5 revocation reasons
+- Prevent double-revocation
+
+**Success Criteria:**
+- All 17 tests PASS
+- Zero LSP errors
+- Audit trail verified
+- Database changes persisted
+
+### Integration Points Tested
+
+1. **Prescription Model:** Status field (ACTIVE → REVOKED)
+2. **Audit Model:** Log revocation with reason + timestamp
+3. **ACA-Py Service:** Revocation registry update (placeholder)
+4. **Patient Notification:** DIDComm message (placeholder)
+5. **DispensingService:** Check revocation before dispensing
+6. **TimeValidationService:** May interact with prescription status
+
+### Files Created/Modified
+- ✅ Created: `services/backend/app/tests/test_revocation.py` (688 lines, 17 tests)
+- ⏳ Pending: `services/backend/app/services/revocation.py` (TASK-062)
+
+### Lessons for TASK-062 Implementation
+
+1. **Atomicity:** Both status change + audit log must succeed together (transaction)
+2. **Placeholder Methods:** Keep ACA-Py and DIDComm calls as placeholders with mock responses
+3. **Audit Trail:** Every revocation must create immutable audit entry
+4. **Idempotency:** Check current status before attempting revocation
+5. **Reason Validation:** Accept only valid reason strings (enum)
+6. **Database Refresh:** Tests call `refresh()` - ensure implementation commits transaction
+
+---
