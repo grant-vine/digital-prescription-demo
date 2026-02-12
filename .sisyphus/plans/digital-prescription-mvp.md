@@ -1752,7 +1752,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(pharmacist)/prescriptions/dispense.test.tsx
 
-TASK-056:
+- [x] TASK-056:
 TYPE: implementation
 SCOPE: apps/mobile
 TITLE: Implement dispensing workflow
