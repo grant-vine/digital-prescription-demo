@@ -13,6 +13,7 @@ from app.api.v1.admin import router as admin_router
 from app.api.v1.audit import router as audit_router
 from app.api.v1.time_validation import router as time_validation_router
 from app.api.v1.fhir import router as fhir_router
+from app.api.v1.revocation import router as revocation_router
 
 app = FastAPI(
     title="Digital Prescription API",
@@ -30,6 +31,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
+app.include_router(revocation_router, prefix="/api/v1")
 app.include_router(prescriptions_router, prefix="/api/v1", tags=["prescriptions"])
 app.include_router(dids_router, tags=["dids"])
 app.include_router(signing_router, tags=["signing"])
