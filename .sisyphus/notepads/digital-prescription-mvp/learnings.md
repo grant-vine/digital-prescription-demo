@@ -1334,3 +1334,214 @@ Tests: 6 failed, 10 passed, 16 total
 - **Additional:** SAPC validation category (3 tests) - specific to pharmacist role
 - **Pattern:** Both follow same TDD structure, just with role-specific APIs and colors
 
+
+
+## [2026-02-12] TASK-053: Pharmacist Verification Screen Tests (TDD Red Phase)
+
+**Date:** 2026-02-12  
+**Duration:** ~30 minutes  
+**Status:** ✅ COMPLETE - Healthy red phase (11 FAIL, 6 PASS)
+
+### Test Suite Overview
+- **File:** `apps/mobile/src/app/(pharmacist)/verify.test.tsx`
+- **Total Tests:** 17 (16 core + 1 onboarding)
+- **Test Categories:** 6 (QR Scanning, Verification Progress, Result Display, Manual Entry, Error Handling, Navigation + Onboarding)
+- **Expected State:** All component render tests FAIL (no component yet), API/navigation tests PASS
+
+### Test Results Summary
+```
+Test Suites: 1 failed, 1 total
+Tests:       11 failed, 6 passed, 17 total
+Time:        ~6 seconds
+
+✅ PASSING (Mocks execute): 6 tests
+✕ FAILING (UI missing): 11 tests
+```
+
+### Test Breakdown by Category
+
+1. **QR Scanning (3 tests):**
+   - ✅ Request camera permission on mount (PASS - hook mock works)
+   - ✕ Render QR scanner with camera view (FAIL - UI missing)
+   - ✅ Extract prescription data from QR scan (PASS - API mock works)
+
+2. **Verification Progress (3 tests):**
+   - ✕ Display signature verification progress (FAIL - UI missing)
+   - ✅ Check trust registry during verification (PASS - API mock works)
+   - ✅ Check revocation status during verification (PASS - API mock works)
+
+3. **Result Display (3 tests):**
+   - ✕ Display success state when verified (FAIL - UI missing)
+   - ✕ Display failure state when verification fails (FAIL - UI missing)
+   - ✕ Display detailed feedback with issuer info (FAIL - UI missing)
+
+4. **Manual Entry Fallback (3 tests):**
+   - ✕ Display manual entry option (FAIL - UI missing)
+   - ✕ Render text input for code entry (FAIL - UI missing)
+   - ✅ Accept pasted verification code (PASS - API mock works)
+
+5. **Error Handling (3 tests):**
+   - ✕ Handle network errors gracefully (FAIL - UI missing)
+   - ✕ Display error for invalid QR format (FAIL - UI missing)
+   - ✕ Display error when verification fails (FAIL - UI missing)
+
+6. **Navigation (1 test):**
+   - ✅ Navigate to dispensing screen on success (PASS - router mock works)
+
+7. **Onboarding (1 test):**
+   - ✕ Display onboarding instructions (FAIL - UI missing)
+
+### Mock Data Structure (US-010 Verification)
+
+**Mock Prescription VC (W3C Verifiable Credential):**
+```typescript
+{
+  "@context": ["https://www.w3.org/2018/credentials/v1", "..."],
+  "type": ["VerifiableCredential", "PrescriptionCredential"],
+  "issuer": "did:cheqd:testnet:doctor-abc123",
+  "issuanceDate": "2026-02-12T10:00:00Z",
+  "credentialSubject": {
+    "id": "did:cheqd:testnet:patient-xyz789",
+    "prescription": {
+      "id": "rx-001",
+      "medications": [{ name: "Amoxicillin 500mg", quantity: "30 capsules", ... }],
+      "doctor": { name: "Dr. Smith", hpcsa_number: "MP12345" },
+      "patient": { name: "John Doe", id_number: "8001015009087" },
+      "issued_date": "2026-02-12",
+      "expiry_date": "2026-03-12"
+    }
+  },
+  "proof": {
+    "type": "Ed25519Signature2020",
+    "created": "2026-02-12T10:00:00Z",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:cheqd:testnet:doctor-abc123#key-1",
+    "proofValue": "z3sF5..."
+  }
+}
+```
+
+**Mock Verification Result (US-010 Acceptance Criteria):**
+```typescript
+{
+  valid: true,
+  signature_valid: true,
+  trust_registry_status: "verified",
+  revocation_status: "active",
+  issuer: {
+    did: "did:cheqd:testnet:doctor-abc123",
+    name: "Dr. Smith",
+    hpcsa_number: "MP12345",
+    verified: true
+  },
+  timestamp: "2026-02-12T10:05:00Z"
+}
+```
+
+### Mock API Methods Implemented
+```typescript
+jest.mock('../../services/api', () => ({
+  api: {
+    verifyPrescription(qrData) → { valid, signature_valid, trust_registry_status, revocation_status, issuer, timestamp }
+    checkTrustRegistry(did) → { verified, status }
+    checkRevocationStatus(prescriptionId) → { revoked, status }
+    verifyPresentation(code) → { valid, ... }
+    reset: jest.fn(),
+    init: jest.fn(),
+  },
+}));
+```
+
+### Key Patterns Applied (from TASK-051/043/045 experience)
+- ✅ Component try-catch fallback with displayName for missing component
+- ✅ Flexible selectors (regex OR testId fallback patterns)
+- ✅ Realistic mock data matching W3C VC structure
+- ✅ Clear test grouping with describe blocks
+- ✅ API mocks for data-dependent tests
+- ✅ Async handling with `waitFor()` and 500ms timeout
+- ✅ Green pharmacist theme (#059669) referenced in comments
+
+### Why Tests Pass/Fail as Expected
+
+**6 PASS (Mocks execute without rendering):**
+- `useCameraPermissions` hook tests - just check mock is defined
+- API method calls - `jest.fn()` always executes regardless of component
+- Router navigation - expo-router is fully mocked
+- Async logic that doesn't depend on UI
+
+**11 FAIL (Component doesn't exist yet):**
+- All `queryByText()` calls return null (MockVerifyScreen = () => null)
+- All `queryByTestId()` calls return null
+- Tests expecting rendered UI elements timeout after 500ms
+- This is CORRECT for TDD red phase
+
+### Implementation Guidance for TASK-054
+
+Based on test structure, component must include:
+
+1. **QR Scanner Section:**
+   - Camera view with `expo-camera`'s `CameraView`
+   - Text like "scan qr" or "scan code" (matches regex `/scan.*qr/i`)
+   - Loading indicator labeled with "verifying", "checking", etc.
+
+2. **Verification Progress Display:**
+   - Three step indicators: Signature → Trust Registry → Revocation
+   - Each shows checkmark or loading state
+   - Text matching `/verifying|checking.*signature|validating/i`
+
+3. **Result Display (Success):**
+   - Green section with "✓ Verified" or "✓ Authentic"
+   - Doctor info: "Dr. Smith" + "MP12345" (credentialSubject)
+   - "OVERALL: VERIFIED - SAFE TO DISPENSE" format from US-010
+   - Timestamp display
+
+4. **Result Display (Failure):**
+   - Red section with error message
+   - Matching regex `/failed|not.*verified|invalid/i`
+   - Retry button
+
+5. **Manual Entry Fallback:**
+   - Text input placeholder matching `/code|prescription/i`
+   - Submit button
+   - Calls `api.verifyPresentation(code)` instead of QR scan
+
+6. **Navigation:**
+   - Proceed button on success
+   - Calls `router.push()` with "dispense" or "dispensing" in path
+   - Navigates to US-011 (View Prescription Items)
+
+7. **Error States:**
+   - Network error → "Network timeout" message
+   - Invalid QR → "Invalid QR format" message
+   - Verification failed → "Signature verification failed"
+   - Retry button on all errors
+
+8. **Theme:**
+   - Green pharmacist color (#059669)
+   - Background: #F0FDF4 (light green)
+   - Text: #064E3B (dark green)
+
+### Files Created
+- ✅ Created: `apps/mobile/src/app/(pharmacist)/verify.test.tsx` (400+ lines, 17 tests)
+
+### Dependencies
+- **TASK-051:** Pharmacist auth tests (pattern reference)
+- **TASK-043:** Prescription scan tests (QR camera patterns)
+- **US-010:** Verify Prescription Authenticity (requirements)
+
+### Type Errors (Expected in TDD)
+- 15+ LSP errors for unmocked API methods (`verifyPrescription`, `checkTrustRegistry`, `checkRevocationStatus`, `verifyPresentation`)
+- **Status:** Expected and healthy - errors disappear when TASK-054 implements component and API methods are added
+- **No Impact:** Jest test execution succeeds despite TypeScript errors (test mocks override types)
+
+### Next Step (TASK-054)
+Implement `apps/mobile/src/app/(pharmacist)/verify.tsx` component to make all 17 tests pass:
+- QR scanner view with camera permissions
+- Multi-step verification progress indicators
+- Success/failure result display
+- Manual entry fallback with text input
+- Error messages and retry logic
+- Navigation to dispensing screen
+- Green pharmacist theme styling
+- All 11 failing tests should pass when implementation complete
+
