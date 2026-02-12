@@ -55,6 +55,39 @@ This package contains everything needed to build and deploy a digital prescripti
 
 ---
 
+## 🚀 Quick Start (Automated)
+
+**Just want to run the demo?** Use the automated startup script to initialize everything in one command:
+
+### macOS / Linux
+```bash
+chmod +x scripts/start-demo.sh
+./scripts/start-demo.sh
+```
+
+### Windows (PowerShell)
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-demo-windows.ps1
+```
+
+The script will:
+1. ✅ Check prerequisites (Python 3.12+, Node.js 20+, Docker)
+2. ✅ Start Docker infrastructure (PostgreSQL, Redis, ACA-Py)
+3. ✅ Setup backend (venv, dependencies, migrations, seed data)
+4. ✅ Setup mobile app (npm install)
+5. ✅ Start backend API server (http://localhost:8000)
+6. ✅ Start mobile app (Expo on port 8081)
+7. ✅ Display demo credentials
+
+**Demo Credentials** (automatically seeded):
+- **Doctor**: `sarah.johnson@hospital.co.za` / `Demo@2024`
+- **Patient**: `john.smith@example.com` / `Demo@2024`
+- **Pharmacist**: `lisa.chen@pharmacy.co.za` / `Demo@2024`
+
+> ℹ️ **First run takes 3-5 minutes** as it downloads Docker images and installs dependencies. Subsequent runs are much faster.
+
+---
+
 ## 🎯 Recommended Approach
 
 ### Timeline Options
