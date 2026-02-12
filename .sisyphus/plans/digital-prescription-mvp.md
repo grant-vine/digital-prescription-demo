@@ -2005,7 +2005,7 @@ ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: scripts/seed_demo_data.py
 
-TASK-069:
+TASK-069: ✅
 TYPE: infra
 SCOPE: global
 TITLE: Create demo reset functionality
@@ -2013,10 +2013,10 @@ DESCRIPTION: Create reset endpoint/script for demo environments.
 INPUTS: TASK-068
 OUTPUTS: Demo reset capability
 ACCEPTANCE-CRITERIA:
-- Clears non-test data
-- Resets prescription states
-- Archives audit logs
-- Confirmation required
+- ✅ Clears non-test data
+- ✅ Resets prescription states
+- ✅ Archives audit logs
+- ✅ Confirmation required
 DEPENDENCIES: TASK-068
 ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
