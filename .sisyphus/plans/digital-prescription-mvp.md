@@ -1919,7 +1919,7 @@ REQUIRES-EXCLUSIVE-FILES: services/backend/app/services/audit.py
 
 ### BATCH 9: Integration & Testing (Week 4)
 
-TASK-065-ITER-1:
+TASK-065-ITER-1: ✅
 TYPE: test
 SCOPE: global
 TITLE: Write E2E skeleton test - Doctor creates prescription
@@ -1927,10 +1927,10 @@ DESCRIPTION: Minimal E2E test verifying doctor can log in and create draft presc
 INPUTS: TASK-040
 OUTPUTS: e2e-doctor.test.ts with passing skeleton test
 ACCEPTANCE-CRITERIA:
-- Doctor login flow
-- Create prescription form
-- Save as draft
-- Test passes (not fails - this is integration validation, not TDD)
+- Doctor login flow ✅
+- Create prescription form ✅
+- Save as draft ✅
+- Test passes (not fails - this is integration validation, not TDD) ✅ (5/5 PASS)
 DEPENDENCIES: TASK-040
 ESTIMATED-SIZE: S
 PARALLELIZABLE: yes
