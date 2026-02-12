@@ -1845,7 +1845,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: services/backend/app/services/dispensing.py
 
-TASK-061:
+- [x] TASK-061:
 TYPE: test
 SCOPE: services/backend
 TITLE: Write failing revocation tests
