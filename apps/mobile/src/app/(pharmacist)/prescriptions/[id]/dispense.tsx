@@ -252,7 +252,7 @@ export default function PharmacistDispenseScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <ThemedText style={styles.title}>Dispense Prescription</ThemedText>
+      <ThemedText style={styles.title}>Pharmacist Workflow</ThemedText>
 
       {/* Prescription Display */}
       <View style={styles.card}>
@@ -359,7 +359,7 @@ export default function PharmacistDispenseScreen() {
         {!partialMode ? (
           <>
             <ThemedButton
-              title="Record Dispensed"
+              title="Mark as Complete"
               onPress={handleDispense}
               disabled={!allChecklistComplete}
               testID="dispense-button"
