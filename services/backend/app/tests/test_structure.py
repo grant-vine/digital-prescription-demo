@@ -6,7 +6,7 @@ from pathlib import Path
 
 def test_backend_directory_structure():
     """Verify all required backend directories exist."""
-    backend_root = Path("services/backend")
+    backend_root = Path(".")
     required_dirs = [
         backend_root / "app",
         backend_root / "app" / "models",
@@ -21,9 +21,9 @@ def test_backend_directory_structure():
 
 def test_requirements_file():
     """Verify requirements.txt exists and is parseable."""
-    req_path = Path("services/backend/requirements.txt")
+    req_path = Path("requirements.txt")
     
-    assert req_path.is_file(), "services/backend/requirements.txt not found"
+    assert req_path.is_file(), "requirements.txt not found"
     
     with open(req_path, 'r') as f:
         lines = f.readlines()
@@ -41,9 +41,9 @@ def test_requirements_file():
 
 def test_pytest_config():
     """Verify pytest.ini exists and is valid."""
-    pytest_path = Path("services/backend/pytest.ini")
+    pytest_path = Path("pytest.ini")
     
-    assert pytest_path.is_file(), "services/backend/pytest.ini not found"
+    assert pytest_path.is_file(), "pytest.ini not found"
     
     # Verify it's valid INI format
     import configparser
