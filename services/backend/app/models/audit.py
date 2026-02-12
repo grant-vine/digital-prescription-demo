@@ -1,6 +1,6 @@
 """Audit model for immutable compliance logging."""
 
-from sqlalchemy import Column, Integer, String, DateTime, JSON
+from sqlalchemy import Column, Integer, String, DateTime, JSON, event
 from datetime import datetime
 
 from app.models.base import Base
@@ -34,3 +34,9 @@ class Audit(Base):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._immutable = True
+
+
+@event.listens_for(Audit, "load")
+def receive_load(target, context):
+    """Set immutable flag when object is loaded from database."""
+    target._immutable = True
