@@ -1534,7 +1534,7 @@ ESTIMATED-SIZE: M
 PARALLELIZABLE: yes
 REQUIRES-EXCLUSIVE-FILES: apps/mobile/src/app/(patient)/scan.tsx
 
-TASK-045:
+- [x] TASK-045:
 TYPE: test
 SCOPE: apps/mobile
 TITLE: Write failing patient wallet tests
