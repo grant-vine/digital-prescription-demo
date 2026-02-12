@@ -1082,6 +1082,287 @@ Implement the share prescription component (`share.tsx`) that:
 7. Makes all 13 tests pass
 
 
+## [2026-02-12] TASK-061: RevocationService Implementation (TDD Green Phase)
+
+**Date:** 2026-02-12  
+**Duration:** ~75 minutes  
+**Status:** ✅ COMPLETE - 17/17 tests passing (100% success rate)
+
+### Implementation Summary
+- **File Created:** `services/backend/app/services/revocation.py` (378 lines)
+- **Class:** `RevocationService` with 5 methods
+- **Database Integration:** SQLAlchemy with atomic transactions
+- **Timezone:** SAST (UTC+2) throughout
+- **Test Coverage:** 86% overall, all edge cases handled
+
+### Files Modified
+1. **`services/backend/app/models/prescription.py`**
+   - Added `status` column: `Column(String(50), default="ACTIVE", nullable=False)`
+   - Enables status tracking: ACTIVE → REVOKED → EXPIRED → DISPENSED
+
+2. **`services/backend/app/services/dispensing.py`**
+   - Added revocation check at line 449: `if prescription.status == "REVOKED": raise ValueError(...)`
+   - Blocks dispensing after revocation (edge case handling)
+
+3. **`services/backend/app/services/revocation.py`** (NEW)
+   - `revoke_prescription()`: Core revocation with atomic status update + audit log
+   - `check_revocation_status()`: Query revocation state from database
+   - `get_revocation_history()`: Retrieve audit trail with filters
+   - `update_revocation_registry()`: ACA-Py placeholder (returns success)
+   - `notify_patient()`: DIDComm placeholder (returns success)
+
+### SQLAlchemy Column Type Safety Issue (CRITICAL LEARNING)
+
+**Challenge:** SQLAlchemy Column objects are descriptor protocols - accessing them in conditionals or as function arguments triggers type errors.
+
+**Symptoms:**
+```python
+# Error: "Column[str] is not bool"
+if prescription.credential_id:
+    ...
+
+# Error: "Column[str] cannot be assigned to str"
+function_call(prescription.credential_id)
+
+# Error: "Column[int] cannot be assigned to int"
+function_call(prescription.patient_id)
+```
+
+**Root Cause:** LSP type checker sees Column descriptors, not their runtime values.
+
+**Solution Pattern:**
+```python
+# Option 1: Use getattr with None default
+credential_id = getattr(prescription, 'credential_id', None)
+if credential_id is not None:
+    function_call(credential_id)
+
+# Option 2: Use setattr for assignment (avoids descriptor access)
+setattr(prescription, 'status', "REVOKED")
+
+# Option 3: Explicit None check for column equality
+current_status = getattr(prescription, 'status', None)
+if current_status == "REVOKED":
+    ...
+```
+
+**Applied Fixes (3 locations):**
+
+1. **Lines 109-114 (Status check and update):**
+```python
+# Before (3 LSP errors):
+if prescription.status == "REVOKED":  # ERROR: Column conditional
+prescription.status = "REVOKED"       # ERROR: Column assignment
+
+# After (0 errors):
+current_status = getattr(prescription, 'status', None)
+if current_status == "REVOKED":
+    raise ValueError("Prescription already revoked")
+setattr(prescription, 'status', "REVOKED")
+```
+
+2. **Lines 137-140 (Credential ID check):**
+```python
+# Before (2 LSP errors):
+if prescription.credential_id:  # ERROR: Column conditional
+    self.update_revocation_registry(prescription.credential_id)  # ERROR: Column to str
+
+# After (0 errors):
+credential_id = getattr(prescription, 'credential_id', None)
+if credential_id is not None:
+    self.update_revocation_registry(credential_id)
+```
+
+3. **Lines 142-148 (Patient notification):**
+```python
+# Before (1 LSP error):
+notification_result = self.notify_patient(
+    prescription_id=prescription_id,
+    patient_id=prescription.patient_id,  # ERROR: Column[int] to int
+    reason=reason
+)
+
+# After (0 errors):
+patient_id_value = getattr(prescription, 'patient_id', None)
+if patient_id_value is None:
+    raise ValueError("Prescription has no patient_id")
+
+notification_result = self.notify_patient(
+    prescription_id=prescription_id,
+    patient_id=patient_id_value,
+    reason=reason
+)
+```
+
+4. **Line 204 (Status check in check_revocation_status):**
+```python
+# Before (1 LSP error):
+is_revoked = prescription.status == "REVOKED"  # ERROR: Column conditional
+
+# After (0 errors):
+is_revoked = getattr(prescription, 'status', None) == "REVOKED"
+```
+
+### Why This Pattern Works
+
+**Runtime Behavior:** SQLAlchemy Column descriptors automatically resolve to values when accessed on model instances in regular code (e.g., `prescription.status` → `"ACTIVE"`).
+
+**Type Checker Behavior:** Static type checkers see Column class definitions, not runtime descriptors, so they flag type mismatches.
+
+**getattr() Advantage:** Bypasses descriptor protocol for type checking while still accessing the same runtime value.
+
+**setattr() Advantage:** Avoids direct assignment to Column descriptor, which LSP sees as type error.
+
+### Test Results Breakdown
+
+**Categories (17 tests total):**
+1. **Revocation Request (3 tests):** Basic revocation flow, status update, audit creation ✅
+2. **Revocation Reasons (4 tests):** All 5 reasons validated, notes tracking ✅
+3. **Status Change & Registry Update (3 tests):** Atomic status change, registry placeholder ✅
+4. **Patient Notification (2 tests):** DIDComm placeholder, success tracking ✅
+5. **Audit Trail (2 tests):** Complete audit metadata, timestamp tracking ✅
+6. **Edge Cases (3 tests):** Already revoked, not found, dispensing block ✅
+
+**Test Execution Time:** ~9 seconds total  
+**Coverage:** 86% of revocation.py (11 lines uncovered - error handling branches)
+
+### Atomic Transaction Pattern
+
+**Critical Pattern:** Revocation MUST be atomic (status + audit log in single transaction).
+
+```python
+# Correct pattern (atomic)
+try:
+    prescription.status = "REVOKED"  # Update 1
+    audit = Audit(...)               # Update 2
+    session.add(audit)
+    session.commit()                 # Both succeed or both fail
+    session.refresh(audit)
+except Exception:
+    session.rollback()               # Undo both on failure
+    raise
+```
+
+**Why Atomic Matters:** Prevents inconsistent state where prescription is revoked but no audit trail exists (or vice versa).
+
+### SAST Timezone Handling
+
+**Pattern Applied:**
+```python
+from datetime import timezone, timedelta
+
+SAST = timezone(timedelta(hours=2))
+
+now_sast = datetime.now(SAST)  # All timestamps
+```
+
+**Verification:** Tests use `@freeze_time("2026-02-12 10:00:00+02:00")` to verify SAST timezone.
+
+### Placeholder Methods (TASK-062 Dependencies)
+
+**update_revocation_registry():**
+- Currently returns `{"registry_updated": True, "registry_id": None}`
+- Future: Will call ACA-Py revocation registry API
+- Dependency: ACA-Py instance with revocation registry configured
+
+**notify_patient():**
+- Currently returns `{"patient_notified": True, "notification_id": None}`
+- Future: Will send DIDComm v2 message to patient wallet
+- Dependency: DIDComm v2 implementation (US-018)
+
+### Integration with DispensingService
+
+**Edge Case Handled:** Prevent dispensing after revocation.
+
+**Implementation (dispensing.py line 449):**
+```python
+if prescription.status == "REVOKED":
+    raise ValueError("Cannot dispense revoked prescription")
+```
+
+**Test Coverage:** `test_cannot_dispense_revoked_prescription()` verifies this behavior.
+
+### Response Format
+
+**Revocation Response (lines 147-155):**
+```python
+{
+    "success": True,
+    "prescription_id": int,
+    "revocation_id": int,        # AuditLog.id
+    "timestamp": str,            # ISO8601
+    "reason": str,
+    "notes": Optional[str],
+    "registry_updated": bool,
+    "patient_notified": bool
+}
+```
+
+**Check Status Response (lines 220-231):**
+```python
+{
+    "is_revoked": bool,
+    "timestamp": Optional[str],  # ISO8601
+    "reason": Optional[str],
+    "revoked_by": Optional[int]
+}
+```
+
+### Validation
+
+**Reason Validation:**
+- Valid reasons: `["prescribing_error", "patient_request", "adverse_reaction", "duplicate", "other"]`
+- Raises `ValueError` for invalid reasons
+- Tests verify all 5 reasons work correctly
+
+**Edge Case Validation:**
+- Prescription not found → `ValueError`
+- Already revoked → `ValueError`
+- Invalid reason → `ValueError`
+
+### Key Learnings
+
+1. **SQLAlchemy Column Access:** Use `getattr()/setattr()` for type-safe column access in conditionals and assignments.
+
+2. **Atomic Transactions Critical:** Status updates + audit logs MUST be atomic (single transaction).
+
+3. **Microtask Delay Not Needed:** Backend services don't need `Promise.resolve()` delay - only frontend React components do for test mocking.
+
+4. **Placeholders Return Success:** Placeholder methods should return success structures (not raise NotImplementedError) to allow TDD green phase.
+
+5. **LSP Diagnostics After Tests:** Run LSP diagnostics AFTER tests pass to catch type safety issues that don't affect runtime.
+
+### Next Steps (TASK-062)
+
+**ACA-Py Integration:**
+- Replace `update_revocation_registry()` placeholder
+- Call actual ACA-Py revocation registry API
+- Track registry ID in database
+
+**DIDComm Integration:**
+- Replace `notify_patient()` placeholder
+- Send actual DIDComm v2 message to patient wallet
+- Handle offline delivery scenarios
+
+**Revocation Registry Setup:**
+- Configure ACA-Py with revocation registry
+- Create registry on startup (if not exists)
+- Store registry ID in credential metadata
+
+### Performance Notes
+
+**Query Optimization:**
+- Uses `.first()` for single result queries (efficient)
+- Filters by indexed columns (prescription_id, resource_id)
+- No N+1 queries in history retrieval
+
+**Transaction Scope:**
+- Minimal transaction scope (only status + audit)
+- No external API calls within transaction
+- Fast commit/rollback
+
+---
+
 ## [2026-02-12] TASK-050: Share Prescription Implementation (US-008)
 
 **Date:** 2026-02-12  

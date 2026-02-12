@@ -446,7 +446,9 @@ class DispensingService:
             if not prescription:
                 raise ValueError("Prescription not found")
             
-            # Check eligibility
+            if prescription.status == "REVOKED":
+                raise ValueError("Cannot dispense revoked prescription")
+            
             eligibility = self.check_repeat_eligibility(prescription_id)
             if not eligibility.get("is_eligible"):
                 reason = eligibility.get("reason", "unknown")

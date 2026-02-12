@@ -29,6 +29,7 @@ class Prescription(Base):
 
     digital_signature = Column(Text, nullable=True)
     credential_id = Column(String(255), nullable=True)
+    status = Column(String(50), default="ACTIVE", nullable=False)
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
