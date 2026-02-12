@@ -54,7 +54,7 @@ async def login(credentials: LoginRequest, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token_data = {"sub": str(user.id), "username": user.username, "role": str(user.role)}
+    token_data = {"sub": str(user.id), "username": user.username, "role": str(user.role), "tenant_id": getattr(user, "tenant_id", "default")}
 
     access_token = create_access_token(token_data)
     refresh_token = create_refresh_token(token_data)
@@ -109,7 +109,7 @@ async def refresh_token(request: RefreshTokenRequest, db: Session = Depends(get_
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token_data = {"sub": str(user.id), "username": user.username, "role": str(user.role)}
+    token_data = {"sub": str(user.id), "username": user.username, "role": str(user.role), "tenant_id": getattr(user, "tenant_id", "default")}
 
     new_access_token = create_access_token(token_data)
 

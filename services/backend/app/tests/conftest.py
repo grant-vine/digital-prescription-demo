@@ -53,6 +53,12 @@ def test_session(test_engine) -> Session:
 
     SessionLocal = sessionmaker(bind=test_engine)
     session = SessionLocal()
+
+    # Create default tenant for multi-tenancy support
+    from app.models.tenant import Tenant
+    default_tenant = Tenant(id="default", name="Default Tenant", is_active=True)
+    session.add(default_tenant)
+    session.commit()
     
     # Set test session globally so services can access it
     from app.db import set_test_session, reset_test_session
@@ -240,7 +246,8 @@ def valid_jwt_token(doctor_user):
     return create_access_token({
         "sub": str(doctor_user.id),
         "username": doctor_user.username,
-        "role": str(doctor_user.role)
+        "role": str(doctor_user.role),
+        "tenant_id": getattr(doctor_user, "tenant_id", "default"),
     })
 
 
@@ -250,7 +257,8 @@ def valid_patient_jwt_token(patient_user):
     return create_access_token({
         "sub": str(patient_user.id),
         "username": patient_user.username,
-        "role": str(patient_user.role)
+        "role": str(patient_user.role),
+        "tenant_id": getattr(patient_user, "tenant_id", "default"),
     })
 
 
@@ -260,7 +268,8 @@ def valid_pharmacist_jwt_token(pharmacist_user):
     return create_access_token({
         "sub": str(pharmacist_user.id),
         "username": pharmacist_user.username,
-        "role": str(pharmacist_user.role)
+        "role": str(pharmacist_user.role),
+        "tenant_id": getattr(pharmacist_user, "tenant_id", "default"),
     })
 
 
@@ -270,7 +279,8 @@ def valid_refresh_token(doctor_user):
     return create_refresh_token({
         "sub": str(doctor_user.id),
         "username": doctor_user.username,
-        "role": str(doctor_user.role)
+        "role": str(doctor_user.role),
+        "tenant_id": getattr(doctor_user, "tenant_id", "default"),
     })
 
 

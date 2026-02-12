@@ -4,10 +4,10 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-from app.models.base import Base
+from app.models.base import Base, TenantMixin
 
 
-class Wallet(Base):
+class Wallet(TenantMixin, Base):
     """ACA-Py wallet record for users.
 
     Stores wallet_id returned by ACA-Py /wallet/did/create endpoint.

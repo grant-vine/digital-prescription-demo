@@ -32,14 +32,16 @@ class DispensingService:
     5. Audit trail for compliance
     """
     
-    def __init__(self, db_session: Optional[Session] = None):
+    def __init__(self, db_session: Optional[Session] = None, tenant_id: str = "default"):
         """Initialize with optional database session.
         
         Args:
             db_session: SQLAlchemy session for database operations.
                        If None, service will use injected session per call.
+            tenant_id: Tenant identifier for multi-tenancy scoping.
         """
         self.db = db_session
+        self.tenant_id = tenant_id
         self.validation_service = TimeValidationService()
     
     # ========================================================================

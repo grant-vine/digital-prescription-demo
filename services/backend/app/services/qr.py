@@ -17,8 +17,9 @@ QR_SIZE_THRESHOLD = 2953
 
 
 class QRService:
-    def __init__(self, base_url: Optional[str] = None):
+    def __init__(self, base_url: Optional[str] = None, tenant_id: str = "default"):
         self.base_url = base_url or "https://api.rxdistribute.com"
+        self.tenant_id = tenant_id
 
     def generate_qr(self, data: str) -> str:
         qr = qrcode.QRCode(

@@ -4,10 +4,10 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, T
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-from app.models.base import Base
+from app.models.base import Base, TenantMixin
 
 
-class Prescription(Base):
+class Prescription(TenantMixin, Base):
     __tablename__ = "prescriptions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

@@ -29,9 +29,9 @@ class TimeValidationService:
     WARNING_7_DAYS = 7 * 24  # hours
     WARNING_24_HOURS = 24    # hours
 
-    def __init__(self):
+    def __init__(self, tenant_id: str = "default"):
         """Initialize validation service."""
-        pass
+        self.tenant_id = tenant_id
 
     def check_validity_period(self, prescription_fhir: Dict[str, Any]) -> Dict[str, Any]:
         """Check if prescription is within validity period.

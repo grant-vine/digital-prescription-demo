@@ -4,10 +4,10 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-from app.models.base import Base
+from app.models.base import Base, TenantMixin
 
 
-class DID(Base):
+class DID(TenantMixin, Base):
     """Decentralized Identifier record for users.
 
     Stores DID created on cheqd testnet via ACA-Py.

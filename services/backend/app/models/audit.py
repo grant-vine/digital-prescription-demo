@@ -3,10 +3,10 @@
 from sqlalchemy import Column, Integer, String, DateTime, JSON, event
 from datetime import datetime
 
-from app.models.base import Base
+from app.models.base import Base, TenantMixin
 
 
-class Audit(Base):
+class Audit(TenantMixin, Base):
     __tablename__ = "audit_log"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

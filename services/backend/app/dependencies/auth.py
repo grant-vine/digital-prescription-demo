@@ -62,6 +62,9 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
 
+    # Attach tenant_id from JWT for downstream use
+    user._jwt_tenant_id = payload.get("tenant_id", "default")
+
     return user
 
 

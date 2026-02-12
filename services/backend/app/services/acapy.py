@@ -24,15 +24,19 @@ class ACAPyService:
     Reads ACAPY_ADMIN_URL from environment (default: http://acapy:8001).
     """
 
-    def __init__(self, admin_url: Optional[str] = None):
+    def __init__(self, admin_url: Optional[str] = None, tenant_id: str = "default", tenant_token: Optional[str] = None):
         """Initialize ACA-Py service with admin API URL.
 
         Args:
             admin_url: ACA-Py admin API base URL.
                       If None, reads from ACAPY_ADMIN_URL env var.
                       Default: http://acapy:8001
+            tenant_id: Tenant identifier for multi-tenancy scoping.
+            tenant_token: DIDx tenant JWT token for authenticated requests.
         """
         self.admin_url = admin_url or os.getenv("ACAPY_ADMIN_URL", "http://acapy:8001")
+        self.tenant_id = tenant_id
+        self.tenant_token = tenant_token
         self._client: Optional[httpx.AsyncClient] = None
 
     def _get_client(self) -> httpx.AsyncClient:

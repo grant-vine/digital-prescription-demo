@@ -22,15 +22,17 @@ class VCService:
     for digital prescriptions using Ed25519 signatures via ACA-Py.
     """
 
-    def __init__(self, acapy_service: Optional[ACAPyService] = None):
+    def __init__(self, acapy_service: Optional[ACAPyService] = None, tenant_id: str = "default"):
         """Initialize VC service with ACA-Py service.
 
         Args:
             acapy_service: Optional ACA-Py service instance.
                           If None, creates new instance.
+            tenant_id: Tenant identifier for multi-tenancy scoping.
         """
         self._acapy_service = acapy_service or ACAPyService()
         self._owns_acapy = acapy_service is None
+        self.tenant_id = tenant_id
 
     async def close(self):
         """Close ACA-Py service if owned by this instance."""

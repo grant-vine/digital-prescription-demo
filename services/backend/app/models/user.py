@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship, validates
 from datetime import datetime
 import enum
 
-from app.models.base import Base
+from app.models.base import Base, TenantMixin
 
 
 class UserRole(enum.Enum):
@@ -14,7 +14,7 @@ class UserRole(enum.Enum):
     pharmacist = "pharmacist"
 
 
-class User(Base):
+class User(TenantMixin, Base):
     __tablename__ = "users"
     __table_args__ = (
         CheckConstraint("role IN ('doctor', 'patient', 'pharmacist')", name="check_user_role"),

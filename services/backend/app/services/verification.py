@@ -34,9 +34,10 @@ class VerificationService:
     3. Check credential hasn't been revoked
     """
 
-    def __init__(self):
+    def __init__(self, tenant_id: str = "default"):
         """Initialize verification service with VCService."""
         self.vc_service = VCService()
+        self.tenant_id = tenant_id
 
     async def verify_prescription(self, prescription_id: int, db: Session) -> Dict[str, Any]:
         """Complete 3-step verification: signature + trust + revocation.
