@@ -513,3 +513,177 @@ Investigate the failing test (#3) deeper if needed, or proceed with remaining pa
 4. **Date Formatting:** ISO format (YYYY-MM-DD) is more test-friendly than localized dates
 5. **Mock Timing:** The sequence of mock setup matters - test framework has specific expectations about when mocks are available
 
+
+## [2026-02-12] TASK-047: Prescription Detail Screen Tests (TDD Red Phase)
+
+**Date:** 2026-02-12  
+**Duration:** ~20 minutes  
+**Status:** ✅ COMPLETE - Healthy red phase (11 FAIL, 1 PASS)
+
+### Test Suite Overview
+- **File:** `apps/mobile/src/app/(patient)/prescriptions/[id].test.tsx`
+- **Total Tests:** 12
+- **Categories:** 5 (Detail Rendering, Medication List, Doctor Info, Status & Dates, Share Button)
+- **Expected State:** All component render tests FAIL (no component yet), API/navigation tests PASS (1 test)
+
+### Test Results Summary
+```
+Test Suites: 1 failed, 1 total
+Tests: 11 failed, 1 passed, 12 total
+Time: ~10 seconds
+
+✅ PASSING (Mocks execute): 1 test
+✕ FAILING (UI missing): 11 tests
+```
+
+### Test Breakdown by Category
+
+1. **Detail Rendering (3 tests):**
+   - ✕ Should display patient name and prescription ID (FAIL - UI missing)
+   - ✕ Should display loading indicator (FAIL - UI missing)
+   - ✕ Should display error message on fetch failure (FAIL - UI missing)
+
+2. **Medication List (3 tests):**
+   - ✕ Should display all medications (FAIL - UI missing)
+   - ✕ Should display dosage and frequency (FAIL - UI missing)
+   - ✕ Should display instructions (FAIL - UI missing)
+
+3. **Doctor Info (2 tests):**
+   - ✕ Should display doctor name and DID (FAIL - UI missing)
+   - ✕ Should display signature verification status (FAIL - UI missing)
+
+4. **Status & Dates (2 tests):**
+   - ✕ Should display status badge (FAIL - UI missing)
+   - ✕ Should display issue/expiration dates (FAIL - UI missing)
+
+5. **Share Button (2 tests):**
+   - ✕ Should render share button (FAIL - UI missing)
+   - ✅ Should navigate to share screen when tapped (PASS - No render needed, just fireEvent + router mock)
+
+### Mock Data Structure Used
+```typescript
+mockPrescriptionDetail: {
+  id: 'rx-123',
+  patient_name: 'Test Patient',
+  doctor_name: 'Dr. Sarah Smith',
+  doctor_did: 'did:cheqd:testnet:doctor-abc123xyz',
+  medications: [
+    { name: 'Amoxicillin', dosage: '500mg', frequency: 'twice daily', ... },
+    { name: 'Ibuprofen', dosage: '200mg', frequency: 'as needed', ... }
+  ],
+  created_at: '2026-02-12T10:00:00Z',
+  expires_at: '2026-05-12T10:00:00Z',
+  status: 'active',
+  signature: 'sig-abc123def456ghi789',
+  verified: true,
+}
+```
+
+### Mock API Methods
+```typescript
+jest.mock('../../../services/api', () => ({
+  api: {
+    getPrescription: jest.fn(),     // Returns { prescription: {...} }
+    getPrescriptions: jest.fn(),    // For list operations
+    reset: jest.fn(),
+    init: jest.fn(),
+  },
+}));
+```
+
+### Mock Router Configuration
+```typescript
+jest.mock('expo-router', () => ({
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
+  useLocalSearchParams: jest.fn(() => ({ id: 'rx-123' })), // Returns prescription ID from route params
+}));
+```
+
+### Test Pattern Consistency
+**Followed established patterns from TASK-041/043/045:**
+- ✅ Component try-catch fallback with displayName for missing component
+- ✅ Flexible selectors (regex OR testId fallback patterns)
+- ✅ Realistic mock data matching W3C VC structure
+- ✅ Clear test grouping with describe blocks
+- ✅ API mocks for data-dependent tests
+- ✅ fireEvent for user interactions (tap/navigation)
+- ✅ waitFor with timeout for async operations
+
+### Import Path Fix
+**Issue:** Initial mock path was `../../services/api` (incorrect depth)  
+**Solution:** Changed to `../../../services/api` (3 levels up from `prescriptions/[id].test.tsx`)  
+**Reason:** Test file is nested 3 directories deep: `app/(patient)/prescriptions/[id].test.tsx`
+
+### Why Tests Pass/Fail as Expected
+**11 FAIL (Healthy red - component doesn't exist):**
+- queryByText/queryByTestId return null for non-existent component
+- All rendering tests depend on [id].tsx being implemented
+- Tests correctly use flexible selectors (regex patterns match multiple variations)
+
+**1 PASS (Navigation):**
+- Test only calls router.push() and checks mock was called
+- No render dependency - mock execution is sufficient
+- Will continue to pass once component exists (if properly implemented)
+
+### Key Insights for TASK-048 Implementation
+1. **Prescription Detail Header:** Patient name, prescription ID, back button
+2. **Doctor Section:** Name, DID (shortened), verification badge, signature hash
+3. **Status Badge:** Color-coded (active=green, expired=red, used=gray) with text label
+4. **Dates Section:** Issue date (ISO format) and expiration date (ISO format)
+5. **Medications List:** For each medication:
+   - Name (bold), Dosage, Frequency
+   - Duration, Quantity, Instructions
+   - Could be FlatList or ScrollView with multiple cards
+6. **Share Button:** Triggers navigation to `/patient/prescriptions/[id]/share`
+7. **Loading State:** Show spinner during api.getPrescription() call
+8. **Error State:** Show error message with retry button
+
+### Color Theme Reference
+- **Patient Primary:** Cyan #0891B2
+- **Patient Background:** Light cyan #F0F9FF
+- **Text:** Dark cyan #0C4A6E
+- **Status Badge Active:** Green #059669
+- **Status Badge Expired:** Red #DC2626
+- **Status Badge Used:** Gray #6B7280
+- **Verified/Success:** Green #059669
+- **Error:** Red #DC2626
+
+### Prescription Data Expected from API
+```typescript
+{
+  prescription: {
+    id: string,
+    patient_name: string,
+    patient_id: string,
+    doctor_name: string,
+    doctor_did: string,
+    medications: Medication[],
+    created_at: ISO8601,
+    expires_at: ISO8601,
+    status: 'active' | 'expired' | 'used',
+    signature: string,
+    verified: boolean,
+  }
+}
+```
+
+### Dependencies
+- **TASK-024 (Mobile Core):** Jest setup, mock utilities
+- **TASK-043 (Scan Tests):** Reference pattern for flexible selectors
+- **TASK-045 (Wallet Tests):** Reference pattern for list/status rendering
+- **TASK-046 (Wallet Implementation):** Reference component structure and theme usage
+
+### Next Step (TASK-048)
+Implement `apps/mobile/src/app/(patient)/prescriptions/[id].tsx` to make all 12 tests pass:
+- Import useLocalSearchParams() to get prescription ID from route
+- Fetch prescription with api.getPrescription(id)
+- Show loading spinner during fetch
+- Show error state with retry button
+- Display all prescription details (doctor, medications, dates, status)
+- Implement status badge with conditional colors
+- Render medication list (could use map() or FlatList)
+- Add share button that navigates to share screen
+- Use patient cyan theme throughout
+- Ensure date formatting matches ISO format (YYYY-MM-DD)
+
