@@ -42,8 +42,19 @@ from app.models.prescription import Prescription
 from app.models.tenant import Tenant
 from app.models.audit import Audit
 from app.models.dispensing import Dispensing
+from app.models.did import DID
+from app.models.wallet import Wallet
 from app.core.security import hash_password
 from app.services.fhir import FHIRService
+
+import hashlib
+import hmac as hmac_mod
+import json
+
+# Shared secret for demo signing — must match demo_acapy.py exactly
+DEMO_HMAC_SECRET = os.getenv(
+    "DEMO_HMAC_SECRET", "rxdistribute-demo-mode-secret-key-2026"
+).encode("utf-8")
 
 
 # =============================================================================
@@ -274,9 +285,95 @@ def generate_credential_id() -> str:
     return f"cred_{uuid.uuid4().hex[:16]}"
 
 
-def generate_digital_signature() -> str:
-    """Generate a mock digital signature."""
-    return f"sig_{uuid.uuid4().hex[:32]}"
+def generate_signed_vc(
+    prescription_id: int,
+    medication_name: str,
+    medication_code: str,
+    dosage: str,
+    quantity: int,
+    instructions: str,
+    date_issued: datetime,
+    date_expires: datetime,
+    doctor_did: str,
+    patient_did: str,
+) -> str:
+    """Generate a signed W3C Verifiable Credential for a prescription.
+
+    Creates a W3C VC JSON structure with HMAC-SHA256 proof that matches
+    the signing logic in demo_acapy.py for verifiable signatures.
+    """
+    # Build the unsigned W3C VC credential
+    credential = {
+        "@context": ["https://www.w3.org/2018/credentials/v1"],
+        "type": ["VerifiableCredential", "PrescriptionCredential"],
+        "issuer": doctor_did,
+        "issuanceDate": date_issued.isoformat() + "Z",
+        "expirationDate": date_expires.isoformat() + "Z",
+        "credentialSubject": {
+            "id": patient_did,
+            "prescription": {
+                "id": prescription_id,
+                "medication_name": medication_name,
+                "medication_code": medication_code,
+                "dosage": dosage,
+                "quantity": quantity,
+                "instructions": instructions,
+                "date_issued": date_issued.isoformat() + "Z",
+            },
+        },
+    }
+
+    # Create HMAC-SHA256 signature matching demo_acapy.py exactly
+    credential_copy = {k: v for k, v in credential.items() if k != "proof"}
+    canonical = json.dumps(credential_copy, sort_keys=True, separators=(",", ":"))
+    signature = hmac_mod.new(
+        DEMO_HMAC_SECRET, canonical.encode("utf-8"), hashlib.sha256
+    ).hexdigest()
+    proof_value = f"z{signature}"
+
+    # Add W3C proof section
+    credential["proof"] = {
+        "type": "Ed25519Signature2020",
+        "created": date_issued.isoformat() + "Z",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": f"{doctor_did}#key-1",
+        "proofValue": proof_value,
+    }
+
+    return json.dumps(credential)
+
+
+def create_did_and_wallet(session: Session, user: User) -> None:
+    """Create DID and Wallet records for a user (idempotent).
+
+    Args:
+        session: Database session
+        user: User object (must have been flushed to have an id)
+    """
+    # Create DID record if not exists
+    existing_did = session.query(DID).filter_by(user_id=user.id).first()
+    if not existing_did:
+        did_record = DID(
+            user_id=user.id,
+            did_identifier=user.did,
+            role=str(user.role),
+            tenant_id=user.tenant_id,
+        )
+        session.add(did_record)
+
+    # Create Wallet record if not exists
+    existing_wallet = session.query(Wallet).filter_by(user_id=user.id).first()
+    if not existing_wallet:
+        wallet_record = Wallet(
+            user_id=user.id,
+            wallet_id=f"wallet-demo-{uuid.uuid4().hex[:16]}",
+            status="active",
+            tenant_id=user.tenant_id,
+        )
+        session.add(wallet_record)
+
+    session.flush()
+    print(f"   Created DID and Wallet for {user.full_name}")
 
 
 def user_exists(session: Session, email: str, tenant_id: str = "default") -> bool:
@@ -335,12 +432,13 @@ def seed_doctors(session: Session, count: int = 5, tenant_id: str = "default") -
             )
             session.add(user)
             session.flush()
+            create_did_and_wallet(session, user)
             created.append(user)
             print(f"✅ Created doctor: {doctor_data['full_name']} ({doctor_data['email']})")
         except IntegrityError as e:
             session.rollback()
             print(f"⚠️  Error creating doctor '{doctor_data['email']}': {e}")
-    
+
     return created
 
 
@@ -376,12 +474,13 @@ def seed_patients(session: Session, count: int = 10, tenant_id: str = "default")
             )
             session.add(user)
             session.flush()
+            create_did_and_wallet(session, user)
             created.append(user)
             print(f"✅ Created patient: {patient_data['full_name']} ({patient_data['email']})")
         except IntegrityError as e:
             session.rollback()
             print(f"⚠️  Error creating patient '{patient_data['email']}': {e}")
-    
+
     return created
 
 
@@ -417,12 +516,13 @@ def seed_pharmacists(session: Session, count: int = 3, tenant_id: str = "default
             )
             session.add(user)
             session.flush()
+            create_did_and_wallet(session, user)
             created.append(user)
             print(f"✅ Created pharmacist: {pharmacist_data['full_name']} ({pharmacist_data['email']})")
         except IntegrityError as e:
             session.rollback()
             print(f"⚠️  Error creating pharmacist '{pharmacist_data['email']}': {e}")
-    
+
     return created
 
 
@@ -576,14 +676,27 @@ def seed_prescriptions_with_states(
         is_repeat=False,
         repeat_count=0,
         status="ACTIVE",
-        digital_signature=generate_digital_signature(),
+        digital_signature=None,
         credential_id=generate_credential_id(),
         tenant_id=tenant_id,
     )
     session.add(rx)
     session.flush()
+    # Generate signed VC now that prescription has an ID
+    rx.digital_signature = generate_signed_vc(
+        prescription_id=rx.id,
+        medication_name=med["name"],
+        medication_code=med["code"],
+        dosage=med["dosage"],
+        quantity=med["quantity"],
+        instructions=med["instructions"],
+        date_issued=rx.date_issued,
+        date_expires=rx.date_expires,
+        doctor_did=doctor.did,
+        patient_did=patient.did,
+    )
     created_by_state["ACTIVE"].append(rx)
-    
+
     # Audit: created, signed
     create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
                        "prescription", rx.id, {"medication": med["name"]}, tenant_id)
@@ -613,17 +726,29 @@ def seed_prescriptions_with_states(
             is_repeat=True,
             repeat_count=5,
             status="ACTIVE",
-            digital_signature=generate_digital_signature(),
+            digital_signature=None,
             credential_id=generate_credential_id(),
             tenant_id=tenant_id,
         )
         session.add(rx)
         session.flush()
+        rx.digital_signature = generate_signed_vc(
+            prescription_id=rx.id,
+            medication_name=med["name"],
+            medication_code=med["code"],
+            dosage=med["dosage"],
+            quantity=med["quantity"],
+            instructions=med["instructions"],
+            date_issued=rx.date_issued,
+            date_expires=rx.date_expires,
+            doctor_did=doctor.did,
+            patient_did=patient.did,
+        )
         created_by_state["ACTIVE"].append(rx)
-        
-        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
+
+        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create",
                            "prescription", rx.id, {"medication": med["name"], "scenario": "multi_medication"}, tenant_id)
-        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign", 
+        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign",
                            "prescription", rx.id, {}, tenant_id)
         print(f"✅ Created multi-med prescription {idx+1}/3: {med['name']} for {patient.full_name}")
     
@@ -645,15 +770,27 @@ def seed_prescriptions_with_states(
         date_expires=today + timedelta(days=60),
         is_repeat=True,
         repeat_count=3,
-        status="ACTIVE",  # Still active, partially dispensed
-        digital_signature=generate_digital_signature(),
+        status="ACTIVE",
+        digital_signature=None,
         credential_id=generate_credential_id(),
         tenant_id=tenant_id,
     )
     session.add(rx)
     session.flush()
+    rx.digital_signature = generate_signed_vc(
+        prescription_id=rx.id,
+        medication_name=med["name"],
+        medication_code=med["code"],
+        dosage=med["dosage"],
+        quantity=med["quantity"],
+        instructions=med["instructions"],
+        date_issued=rx.date_issued,
+        date_expires=rx.date_expires,
+        doctor_did=doctor.did,
+        patient_did=patient.did,
+    )
     created_by_state["PARTIAL"].append(rx)
-    
+
     # Audit trail for repeat prescription
     create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
                        "prescription", rx.id, {"medication": med["name"], "is_repeat": True, "repeat_count": 3}, tenant_id)
@@ -681,7 +818,7 @@ def seed_prescriptions_with_states(
     for i in range(3):
         doctor, patient = get_users(3 + i)
         med = MEDICATIONS[5 + i]  # Paracetamol, Ibuprofen, Fluconazole
-        
+
         rx = Prescription(
             patient_id=patient.id,
             doctor_id=doctor.id,
@@ -691,23 +828,35 @@ def seed_prescriptions_with_states(
             quantity=med["quantity"],
             instructions=med["instructions"],
             date_issued=today - timedelta(days=60),
-            date_expires=today - timedelta(days=30),  # Expired 30 days ago
+            date_expires=today - timedelta(days=30),
             is_repeat=False,
             repeat_count=0,
             status="EXPIRED",
-            digital_signature=generate_digital_signature(),
+            digital_signature=None,
             credential_id=generate_credential_id(),
             tenant_id=tenant_id,
         )
         session.add(rx)
         session.flush()
+        rx.digital_signature = generate_signed_vc(
+            prescription_id=rx.id,
+            medication_name=med["name"],
+            medication_code=med["code"],
+            dosage=med["dosage"],
+            quantity=med["quantity"],
+            instructions=med["instructions"],
+            date_issued=rx.date_issued,
+            date_expires=rx.date_expires,
+            doctor_did=doctor.did,
+            patient_did=patient.did,
+        )
         created_by_state["EXPIRED"].append(rx)
-        
-        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
+
+        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create",
                            "prescription", rx.id, {"medication": med["name"]}, tenant_id)
-        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign", 
+        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign",
                            "prescription", rx.id, {}, tenant_id)
-        create_audit_entry(session, "prescription.expired", 0, "system", "expire", 
+        create_audit_entry(session, "prescription.expired", 0, "system", "expire",
                            "prescription", rx.id, {"reason": "past_expiry_date"}, tenant_id)
         print(f"✅ Created expired prescription: {med['name']} for {patient.full_name}")
     
@@ -718,7 +867,7 @@ def seed_prescriptions_with_states(
         doctor, patient = get_users(6 + i)
         med = MEDICATIONS[7 + i] if i < 2 else MEDICATIONS[0]
         med = MEDICATIONS[i % len(MEDICATIONS)]
-        
+
         rx = Prescription(
             patient_id=patient.id,
             doctor_id=doctor.id,
@@ -732,22 +881,34 @@ def seed_prescriptions_with_states(
             is_repeat=False,
             repeat_count=0,
             status="REVOKED",
-            digital_signature=generate_digital_signature(),
+            digital_signature=None,
             credential_id=generate_credential_id(),
             tenant_id=tenant_id,
         )
         session.add(rx)
         session.flush()
+        rx.digital_signature = generate_signed_vc(
+            prescription_id=rx.id,
+            medication_name=med["name"],
+            medication_code=med["code"],
+            dosage=med["dosage"],
+            quantity=med["quantity"],
+            instructions=med["instructions"],
+            date_issued=rx.date_issued,
+            date_expires=rx.date_expires,
+            doctor_did=doctor.did,
+            patient_did=patient.did,
+        )
         created_by_state["REVOKED"].append(rx)
-        
+
         # Full audit trail for revoked prescription
-        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
+        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create",
                            "prescription", rx.id, {"medication": med["name"]}, tenant_id)
-        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign", 
+        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign",
                            "prescription", rx.id, {}, tenant_id)
-        
+
         reasons = ["prescribing_error", "adverse_reaction"]
-        create_audit_entry(session, "prescription.revoked", doctor.id, "doctor", "revoke", 
+        create_audit_entry(session, "prescription.revoked", doctor.id, "doctor", "revoke",
                            "prescription", rx.id, {"reason": reasons[i], "notes": "Revoked during demo"}, tenant_id)
         print(f"✅ Created revoked prescription: {med['name']} for {patient.full_name} (reason: {reasons[i]})")
     
@@ -759,7 +920,7 @@ def seed_prescriptions_with_states(
     for i in range(remaining_active):
         doctor, patient = get_users(8 + i)
         med = MEDICATIONS[i % len(MEDICATIONS)]
-        
+
         rx = Prescription(
             patient_id=patient.id,
             doctor_id=doctor.id,
@@ -773,28 +934,40 @@ def seed_prescriptions_with_states(
             is_repeat=(i % 3 == 0),
             repeat_count=(2 if (i % 3 == 0) else 0),
             status="ACTIVE",
-            digital_signature=generate_digital_signature(),
+            digital_signature=None,
             credential_id=generate_credential_id(),
             tenant_id=tenant_id,
         )
         session.add(rx)
         session.flush()
+        rx.digital_signature = generate_signed_vc(
+            prescription_id=rx.id,
+            medication_name=med["name"],
+            medication_code=med["code"],
+            dosage=med["dosage"],
+            quantity=med["quantity"],
+            instructions=med["instructions"],
+            date_issued=rx.date_issued,
+            date_expires=rx.date_expires,
+            doctor_did=doctor.did,
+            patient_did=patient.did,
+        )
         created_by_state["ACTIVE"].append(rx)
-        
-        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
+
+        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create",
                            "prescription", rx.id, {"medication": med["name"]}, tenant_id)
-        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign", 
+        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign",
                            "prescription", rx.id, {}, tenant_id)
-    
+
     print(f"✅ Created {remaining_active} additional ACTIVE prescriptions")
     
     # =============================================================================
-    # Create DRAFT prescriptions (5)
+    # Create DRAFT prescriptions (5) - DRAFT prescriptions have no signature
     # =============================================================================
     for i in range(5):
         doctor, patient = get_users(10 + i)
         med = MEDICATIONS[(i + 3) % len(MEDICATIONS)]
-        
+
         rx = Prescription(
             patient_id=patient.id,
             doctor_id=doctor.id,
@@ -807,7 +980,7 @@ def seed_prescriptions_with_states(
             date_expires=today + timedelta(days=30),
             is_repeat=False,
             repeat_count=0,
-            status="DRAFT",  # Not yet signed
+            status="DRAFT",
             digital_signature=None,
             credential_id=None,
             tenant_id=tenant_id,
@@ -815,8 +988,8 @@ def seed_prescriptions_with_states(
         session.add(rx)
         session.flush()
         created_by_state["DRAFT"].append(rx)
-        
-        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
+
+        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create",
                            "prescription", rx.id, {"medication": med["name"], "status": "draft"}, tenant_id)
         print(f"✅ Created DRAFT prescription: {med['name']} for {patient.full_name}")
     
@@ -827,7 +1000,7 @@ def seed_prescriptions_with_states(
         doctor, patient = get_users(15 + i)
         med = MEDICATIONS[(i + 5) % len(MEDICATIONS)]
         pharmacist = pharmacists[i % len(pharmacists)]
-        
+
         rx = Prescription(
             patient_id=patient.id,
             doctor_id=doctor.id,
@@ -841,30 +1014,42 @@ def seed_prescriptions_with_states(
             is_repeat=(i % 2 == 0),
             repeat_count=(1 if (i % 2 == 0) else 0),
             status="DISPENSED",
-            digital_signature=generate_digital_signature(),
+            digital_signature=None,
             credential_id=generate_credential_id(),
             tenant_id=tenant_id,
         )
         session.add(rx)
         session.flush()
+        rx.digital_signature = generate_signed_vc(
+            prescription_id=rx.id,
+            medication_name=med["name"],
+            medication_code=med["code"],
+            dosage=med["dosage"],
+            quantity=med["quantity"],
+            instructions=med["instructions"],
+            date_issued=rx.date_issued,
+            date_expires=rx.date_expires,
+            doctor_did=doctor.did,
+            patient_did=patient.did,
+        )
         created_by_state["DISPENSED"].append(rx)
-        
+
         # Audit trail
-        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
+        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create",
                            "prescription", rx.id, {"medication": med["name"]}, tenant_id)
-        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign", 
+        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign",
                            "prescription", rx.id, {}, tenant_id)
-        create_audit_entry(session, "prescription.shared", patient.id, "patient", "share", 
+        create_audit_entry(session, "prescription.shared", patient.id, "patient", "share",
                            "prescription", rx.id, {}, tenant_id)
-        create_audit_entry(session, "prescription.verified", pharmacist.id, "pharmacist", "verify", 
+        create_audit_entry(session, "prescription.verified", pharmacist.id, "pharmacist", "verify",
                            "prescription", rx.id, {"verification_result": "valid"}, tenant_id)
-        
+
         # Dispensing record
-        dispensing = create_dispensing_record(session, rx.id, pharmacist.id, med["quantity"], True, 
+        dispensing = create_dispensing_record(session, rx.id, pharmacist.id, med["quantity"], True,
                                               "Fully dispensed", tenant_id)
-        create_audit_entry(session, "prescription.dispensed", pharmacist.id, "pharmacist", "dispense", 
+        create_audit_entry(session, "prescription.dispensed", pharmacist.id, "pharmacist", "dispense",
                            "prescription", rx.id, {"quantity_dispensed": med["quantity"], "fully_dispensed": True}, tenant_id)
-        
+
         print(f"✅ Created DISPENSED prescription: {med['name']} for {patient.full_name}")
     
     # =============================================================================
@@ -875,7 +1060,7 @@ def seed_prescriptions_with_states(
         doctor, patient = get_users(20 + i)
         med = MEDICATIONS[(i + 7) % len(MEDICATIONS)]
         pharmacist = pharmacists[i % len(pharmacists)]
-        
+
         rx = Prescription(
             patient_id=patient.id,
             doctor_id=doctor.id,
@@ -888,28 +1073,40 @@ def seed_prescriptions_with_states(
             date_expires=today + timedelta(days=40),
             is_repeat=True,
             repeat_count=3,
-            status="ACTIVE",  # Still active, partially dispensed
-            digital_signature=generate_digital_signature(),
+            status="ACTIVE",
+            digital_signature=None,
             credential_id=generate_credential_id(),
             tenant_id=tenant_id,
         )
         session.add(rx)
         session.flush()
+        rx.digital_signature = generate_signed_vc(
+            prescription_id=rx.id,
+            medication_name=med["name"],
+            medication_code=med["code"],
+            dosage=med["dosage"],
+            quantity=med["quantity"],
+            instructions=med["instructions"],
+            date_issued=rx.date_issued,
+            date_expires=rx.date_expires,
+            doctor_did=doctor.did,
+            patient_did=patient.did,
+        )
         created_by_state["PARTIAL"].append(rx)
-        
+
         # Audit trail
-        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
+        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create",
                            "prescription", rx.id, {"medication": med["name"], "is_repeat": True}, tenant_id)
-        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign", 
+        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign",
                            "prescription", rx.id, {}, tenant_id)
-        
+
         # Partial dispensing (half the quantity)
         partial_qty = med["quantity"] // 2
-        dispensing = create_dispensing_record(session, rx.id, pharmacist.id, partial_qty, True, 
+        dispensing = create_dispensing_record(session, rx.id, pharmacist.id, partial_qty, True,
                                               f"Partial dispense - {partial_qty} of {med['quantity']}", tenant_id)
-        create_audit_entry(session, "prescription.dispensed", pharmacist.id, "pharmacist", "dispense", 
+        create_audit_entry(session, "prescription.dispensed", pharmacist.id, "pharmacist", "dispense",
                            "prescription", rx.id, {"quantity_dispensed": partial_qty, "partial": True}, tenant_id)
-        
+
         print(f"✅ Created PARTIAL dispensed prescription: {med['name']} for {patient.full_name}")
     
     # =============================================================================
@@ -918,7 +1115,7 @@ def seed_prescriptions_with_states(
     for i in range(3):
         doctor, patient = get_users(24 + i)
         med = MEDICATIONS[i % len(MEDICATIONS)]
-        
+
         rx = Prescription(
             patient_id=patient.id,
             doctor_id=doctor.id,
@@ -932,17 +1129,29 @@ def seed_prescriptions_with_states(
             is_repeat=False,
             repeat_count=0,
             status="ACTIVE",
-            digital_signature=generate_digital_signature(),
+            digital_signature=None,
             credential_id=generate_credential_id(),
             tenant_id=tenant_id,
         )
         session.add(rx)
         session.flush()
-        
+        rx.digital_signature = generate_signed_vc(
+            prescription_id=rx.id,
+            medication_name=med["name"],
+            medication_code=med["code"],
+            dosage=med["dosage"],
+            quantity=med["quantity"],
+            instructions=med["instructions"],
+            date_issued=rx.date_issued,
+            date_expires=rx.date_expires,
+            doctor_did=doctor.did,
+            patient_did=patient.did,
+        )
+
         # Create audit entries
-        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create", 
+        create_audit_entry(session, "prescription.created", doctor.id, "doctor", "create",
                            "prescription", rx.id, {"medication": med["name"]}, tenant_id)
-        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign", 
+        create_audit_entry(session, "prescription.signed", doctor.id, "doctor", "sign",
                            "prescription", rx.id, {}, tenant_id)
         
         # Schedule revocation for future date
