@@ -58,6 +58,54 @@ git tag -l
 
 ---
 
+#### 2026-02-12 21:28 - Sisyphus (Demo Mode Implementation)
+
+**Tasks Completed:**
+- Phase 0: Configuration & Environment Wiring (`USE_DEMO` env var, conditional ACA-Py startup)
+- Phase 1: Mock SSI Service (`DemoACAPyService` with HMAC-SHA256 signing/verification)
+- Phase 2: Service Factory pattern (`get_acapy_service()` swaps real/demo based on env)
+- Phase 3: Signing bug fix (stored bare signature → now stores full W3C VC JSON) + QR fix
+- Phase 4: Seed script rework (DID/Wallet records, W3C VCs with HMAC proofs, idempotency)
+- Phase 5: VCService fallback aligned with HMAC-SHA256 for demo mode
+- Phase 6: New test suites (20 unit tests + 5 integration tests, all passing)
+- Phase 7: conftest.py monkeypatch fix for module-level import caching
+- Phase 8: Full test suite verification (448 passed, 2 pre-existing failures, 1 xfailed)
+
+**Time Taken:**
+- Duration: Multiple sessions across 2026-02-12
+
+**Files Created:**
+- `services/backend/app/services/demo_acapy.py` - DemoACAPyService with HMAC-SHA256 W3C VC signing
+- `services/backend/app/services/factory.py` - get_acapy_service() factory (USE_DEMO routing)
+- `services/backend/app/tests/test_demo_acapy.py` - 20 unit tests for demo service
+- `services/backend/app/tests/test_demo_signing_integration.py` - 5 integration tests for demo signing flow
+
+**Files Modified:**
+- `services/backend/app/main.py` - USE_DEMO env var, app.state.use_demo, startup audit log
+- `docker-compose.yml` - USE_DEMO environment variable passthrough
+- `scripts/start-demo.sh` - Conditional ACA-Py startup (skip when USE_DEMO=true)
+- `services/backend/app/api/v1/signing.py` - BUG FIX: store full VC JSON + factory imports
+- `services/backend/app/api/v1/dids.py` - Factory imports
+- `services/backend/app/services/vc.py` - Factory + HMAC fallback for demo mode
+- `services/backend/app/services/qr.py` - Handle full VC JSON in digital_signature field
+- `services/backend/scripts/seed_demo_data.py` - DID/Wallet creation, W3C VC signatures, RoleProxy fix, idempotency
+- `services/backend/app/tests/conftest.py` - Factory monkeypatch + module-level import patching
+- `services/backend/app/tests/test_signing.py` - Removed 4 @pytest.mark.xfail markers
+
+**Notes:**
+- `USE_DEMO=true` enables full end-to-end demo without ACA-Py or any external SSI infrastructure
+- HMAC-SHA256 with deterministic secret produces technically accurate W3C Verifiable Credentials
+- Signing bug (Phase 3) was critical: `digital_signature` stored bare hex string instead of full VC JSON, breaking QR code generation and verification
+- conftest.py required patching at 3 module namespaces due to Python's module-level import caching
+- 2 pre-existing test failures in test_audit_advanced.py confirmed via git stash (not caused by this work)
+
+**Next Steps:**
+- Run full end-to-end demo with `USE_DEMO=true ./scripts/start-demo.sh`
+- Optional: Create `scripts/test-demo-mode.sh` automated E2E validation script
+- Optional: Update `.sisyphus/plans/demo-mode.md` to mark all tasks complete
+
+---
+
 ### Entry Template
 
 ```markdown

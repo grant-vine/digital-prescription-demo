@@ -1,10 +1,7 @@
 {
-  "active_plan": "/Users/grantv/Code/rxdistribute/.sisyphus/plans/digital-prescription-mvp.md",
-  "started_at": "2026-02-11T12:54:10.055Z",
-  "session_ids": [
-    "ses_3b33bd6b2ffeBld7eP09L4MXvi",
-    "ses_3b24959b2ffeJU6T6XGDxVLguv"
-  ],
-  "plan_name": "digital-prescription-mvp",
+  "active_plan": "/Users/grantv/Code/rxdistribute/.sisyphus/plans/demo-mode.md",
+  "started_at": "2026-02-12T19:28:00.000Z",
+  "session_ids": [],
+  "plan_name": "demo-mode",
   "agent": "atlas"
 }
