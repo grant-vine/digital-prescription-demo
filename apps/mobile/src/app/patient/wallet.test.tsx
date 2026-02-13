@@ -48,7 +48,6 @@ jest.mock('../../services/api', () => ({
 
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../../services/api';
 
 describe('Patient Wallet Screen', () => {

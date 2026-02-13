@@ -60,53 +60,10 @@ jest.mock('../../services/api', () => ({
 
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../../services/api';
 
 describe('PharmacistVerifyScreen', () => {
   let VerifyScreen: any;
-
-  // Mock prescription credential (W3C VC from QR code)
-  const mockPrescriptionVC = {
-    '@context': [
-      'https://www.w3.org/2018/credentials/v1',
-      'https://w3id.org/security/suites/ed25519-2020/v1',
-    ],
-    type: ['VerifiableCredential', 'PrescriptionCredential'],
-    issuer: 'did:cheqd:testnet:doctor-abc123',
-    issuanceDate: '2026-02-12T10:00:00Z',
-    credentialSubject: {
-      id: 'did:cheqd:testnet:patient-xyz789',
-      prescription: {
-        id: 'rx-001',
-        medications: [
-          {
-            name: 'Amoxicillin 500mg',
-            quantity: '30 capsules',
-            frequency: 'twice daily',
-            duration: '7 days',
-          },
-        ],
-        doctor: {
-          name: 'Dr. Smith',
-          hpcsa_number: 'MP12345',
-        },
-        patient: {
-          name: 'John Doe',
-          id_number: '8001015009087',
-        },
-        issued_date: '2026-02-12',
-        expiry_date: '2026-03-12',
-      },
-    },
-    proof: {
-      type: 'Ed25519Signature2020',
-      created: '2026-02-12T10:00:00Z',
-      proofPurpose: 'assertionMethod',
-      verificationMethod: 'did:cheqd:testnet:doctor-abc123#key-1',
-      proofValue: 'z3sF5ArtTu2Lzc8f5k9K2m4P7r1Q3s6U8w...',
-    },
-  };
 
   // Mock verification result
   const mockVerificationResult = {
@@ -165,7 +122,7 @@ describe('PharmacistVerifyScreen', () => {
     });
 
     it('should extract prescription data from QR code scan', async () => {
-      const { queryByTestId } = render(<VerifyScreen />);
+      render(<VerifyScreen />);
 
       (api.verifyPrescription as jest.Mock).mockResolvedValueOnce(
         mockVerificationResult
@@ -190,7 +147,7 @@ describe('PharmacistVerifyScreen', () => {
     });
 
     it('should check trust registry status during verification', async () => {
-      const { queryByTestId } = render(<VerifyScreen />);
+      render(<VerifyScreen />);
 
       (api.checkTrustRegistry as jest.Mock).mockResolvedValueOnce({
         verified: true,
@@ -203,7 +160,7 @@ describe('PharmacistVerifyScreen', () => {
     });
 
     it('should check revocation status during verification', async () => {
-      const { queryByTestId } = render(<VerifyScreen />);
+      render(<VerifyScreen />);
 
       (api.checkRevocationStatus as jest.Mock).mockResolvedValueOnce({
         revoked: false,

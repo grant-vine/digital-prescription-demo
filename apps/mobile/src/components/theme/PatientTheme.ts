@@ -1,6 +1,7 @@
 export const PatientTheme = {
   colors: {
     primary: '#0891B2',        // Cyan (main action color)
+    secondary: '#0e7490',      // Darker cyan (secondary actions)
     background: '#F0F9FF',     // Light cyan background
     surface: '#FFFFFF',        // White cards
     text: '#0C4A6E',          // Dark cyan text
@@ -18,24 +19,23 @@ export const PatientTheme = {
     xl: 32,
   },
   typography: {
+    h1: { fontSize: 32, fontWeight: 'bold' as const },
+    h2: { fontSize: 24, fontWeight: 'bold' as const },
+    h3: { fontSize: 20, fontWeight: '600' as const },
+    body: { fontSize: 16, fontWeight: '400' as const },
+    small: { fontSize: 14, fontWeight: '400' as const },
     title: {
       fontSize: 28,
-      fontWeight: 'bold',
+      fontWeight: 'bold' as const,
     },
     heading: {
       fontSize: 20,
-      fontWeight: '600',
-    },
-    body: {
-      fontSize: 16,
+      fontWeight: '600' as const,
     },
     caption: {
       fontSize: 14,
       color: '#64748B',
     },
-    // Keep backward compatibility just in case
-    h1: { fontSize: 32, fontWeight: 'bold' },
-    h2: { fontSize: 24, fontWeight: 'bold' },
   },
 };
 

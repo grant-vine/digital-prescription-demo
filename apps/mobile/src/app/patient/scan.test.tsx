@@ -61,50 +61,10 @@ jest.mock('../../services/api', () => ({
 
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../../services/api';
 
 describe('Prescription Scan Screen', () => {
   let PrescriptionScanScreen: any;
-
-  // Mock prescription credential (what comes from QR code)
-  const mockPrescriptionCredential = {
-    '@context': [
-      'https://www.w3.org/2018/credentials/v1',
-      'https://w3id.org/security/suites/ed25519-2020/v1',
-    ],
-    type: ['VerifiableCredential', 'MedicalPrescription'],
-    issuer: 'did:cheqd:testnet:doctor-xyz',
-    issuanceDate: '2026-02-12T10:00:00Z',
-    expirationDate: '2026-05-12T10:00:00Z',
-    credentialSubject: {
-      id: 'patient-101',
-      prescriptionId: 'rx-123',
-      patientName: 'Test Patient',
-      medications: [
-        {
-          name: 'Amoxicillin',
-          dosage: '500mg',
-          frequency: 'twice daily',
-          duration: '7 days',
-          quantity: '14 capsules',
-          instructions: 'Take with food',
-        },
-      ],
-      repeatsAllowed: 0,
-      issuedAt: '2026-02-12T10:00:00Z',
-    },
-    proof: {
-      type: 'Ed25519Signature2020',
-      created: '2026-02-12T10:00:00Z',
-      proofPurpose: 'assertionMethod',
-      verificationMethod: 'did:cheqd:testnet:doctor-xyz#key-1',
-      proofValue: 'z58DAdFfa9SkqZMVPxAQpDm1234567890abcdef...',
-    },
-  };
-
-  // Mock QR code data (stringified credential)
-  const mockQRData = JSON.stringify(mockPrescriptionCredential);
 
   // Mock verification response
   const mockVerificationResponse = {
@@ -201,7 +161,7 @@ describe('Prescription Scan Screen', () => {
 
   describe('QR Scanning', () => {
     it('should successfully scan and parse QR code', async () => {
-      const { queryByTestId } = render(<PrescriptionScanScreen />);
+      render(<PrescriptionScanScreen />);
 
       (api.verifyPrescriptionCredential as jest.Mock).mockResolvedValueOnce(
         mockVerificationResponse
@@ -244,7 +204,7 @@ describe('Prescription Scan Screen', () => {
 
   describe('Credential Verification', () => {
     it('should call verifyPrescriptionCredential API after scan', async () => {
-      const { queryByTestId } = render(<PrescriptionScanScreen />);
+      render(<PrescriptionScanScreen />);
 
       (api.verifyPrescriptionCredential as jest.Mock).mockResolvedValueOnce(
         mockVerificationResponse

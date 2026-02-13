@@ -57,15 +57,6 @@ import { api } from '../../services/api';
 describe('Pharmacist Authentication Screen', () => {
   let PharmacistAuthScreen: any;
 
-  // Mock pharmacist data response
-  const mockPharmacist = {
-    id: 'pharmacist-456',
-    email: 'pharmacist@pharmacy.com',
-    name: 'John Doe',
-    pharmacy_id: 'pharmacy-789',
-    auth_token: 'token-pharmacist-xyz789',
-  };
-
   // Mock pharmacy setup response
   const mockPharmacySetupResponse = {
     pharmacy_id: 'pharmacy-789',
@@ -285,7 +276,7 @@ describe('Pharmacist Authentication Screen', () => {
 
   describe('DID Creation', () => {
     it('should automatically generate pharmacist DID after profile setup', async () => {
-      const { queryByText, queryByTestId } = render(<PharmacistAuthScreen />);
+      const { queryByText } = render(<PharmacistAuthScreen />);
 
       (api.setupPharmacy as jest.Mock).mockResolvedValueOnce(mockPharmacySetupResponse);
       (api.createPharmacistDID as jest.Mock).mockResolvedValueOnce(mockDIDSetupResponse);
@@ -301,19 +292,18 @@ describe('Pharmacist Authentication Screen', () => {
     });
 
     it('should display generated DID to pharmacist', async () => {
-      const { queryByText, queryByTestId } = render(<PharmacistAuthScreen />);
+      const { queryByText } = render(<PharmacistAuthScreen />);
 
       await waitFor(() => {
         expect(
           queryByText(/did:cheqd|identifier|decentralized.*id|your.*did/i) ||
-          queryByText(/did.*testnet|pharmacist-def789/i) ||
-          queryByTestId('pharmacist-did-display')
+          queryByText(/did.*testnet|pharmacist-def789/i)
         ).toBeTruthy();
       });
     });
 
     it('should store DID in AsyncStorage after setup', async () => {
-      const { queryByText, queryByTestId } = render(<PharmacistAuthScreen />);
+      const { queryByText } = render(<PharmacistAuthScreen />);
 
       (api.setupPharmacy as jest.Mock).mockResolvedValueOnce(mockPharmacySetupResponse);
       (api.createPharmacistDID as jest.Mock).mockResolvedValueOnce(mockDIDSetupResponse);

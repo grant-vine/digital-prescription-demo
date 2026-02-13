@@ -311,7 +311,7 @@ describe('Patient Authentication Screen', () => {
           await waitFor(() => {
             expect(
               queryByText(/error|network|connection|unable|timeout|failed/i) ||
-              queryByTestId('error-message')
+              queryByText('error-message')
             ).toBeTruthy();
           });
         }

@@ -85,52 +85,6 @@ describe('Prescription Detail Screen', () => {
     verified: true,
   };
 
-  const mockExpiredPrescription = {
-    id: 'rx-124',
-    patient_name: 'Test Patient',
-    patient_id: '1234567890',
-    doctor_name: 'Dr. James Brown',
-    doctor_did: 'did:cheqd:testnet:doctor-xyz789',
-    medications: [
-      {
-        name: 'Metformin',
-        dosage: '500mg',
-        frequency: 'once daily',
-        duration: '30 days',
-        quantity: '30 tablets',
-        instructions: 'Take with breakfast',
-      },
-    ],
-    created_at: '2026-01-12T10:00:00Z',
-    expires_at: '2026-02-12T10:00:00Z',
-    status: 'expired',
-    signature: 'sig-def456',
-    verified: true,
-  };
-
-  const mockUsedPrescription = {
-    id: 'rx-125',
-    patient_name: 'Test Patient',
-    patient_id: '1234567890',
-    doctor_name: 'Dr. Lisa Johnson',
-    doctor_did: 'did:cheqd:testnet:doctor-pqr123',
-    medications: [
-      {
-        name: 'Omeprazole',
-        dosage: '20mg',
-        frequency: 'once daily',
-        duration: '14 days',
-        quantity: '14 tablets',
-        instructions: 'Take 30 minutes before food',
-      },
-    ],
-    created_at: '2026-01-01T10:00:00Z',
-    expires_at: '2026-04-01T10:00:00Z',
-    status: 'used',
-    signature: 'sig-ghi789',
-    verified: true,
-  };
-
   beforeAll(() => {
     try {
       PrescriptionDetailScreen = require('./[id]').default;

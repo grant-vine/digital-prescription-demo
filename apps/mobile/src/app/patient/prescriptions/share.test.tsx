@@ -124,7 +124,6 @@ describe('Share Prescription Screen', () => {
     (api.getPrescription as jest.Mock).mockResolvedValue({
       prescription: mockPrescription,
     });
-    // @ts-expect-error - Method will be added in implementation
     (api.generatePresentation as jest.Mock).mockResolvedValue({
       presentation: mockPresentation,
       qrData: 'data:image/svg+xml;base64,...qr-content...',
@@ -165,7 +164,6 @@ describe('Share Prescription Screen', () => {
         fireEvent.press(shareButton);
 
         await waitFor(() => {
-          // @ts-expect-error - Method will be added in implementation
           expect(api.generatePresentation).toHaveBeenCalledWith('rx-123');
         });
       }
@@ -300,7 +298,6 @@ describe('Share Prescription Screen', () => {
         fireEvent.press(shareButton);
 
         await waitFor(() => {
-          // @ts-expect-error - Method will be added in implementation
           expect(api.generatePresentation).toHaveBeenCalled();
         });
 
@@ -320,7 +317,6 @@ describe('Share Prescription Screen', () => {
 
   describe('Error Handling', () => {
     it('should display error message if presentation generation fails', async () => {
-      // @ts-expect-error - Method will be added in implementation
       (api.generatePresentation as jest.Mock).mockRejectedValueOnce(
         new Error('Failed to generate presentation')
       );
@@ -343,7 +339,6 @@ describe('Share Prescription Screen', () => {
 
     it('should allow retry after QR generation failure', async () => {
       let callCount = 0;
-      // @ts-expect-error - Method will be added in implementation
       (api.generatePresentation as jest.Mock).mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
@@ -362,14 +357,12 @@ describe('Share Prescription Screen', () => {
       if (shareButton) {
         fireEvent.press(shareButton);
 
-         await waitFor(() => {
-           // @ts-expect-error - Method will be added in implementation
-           expect(api.generatePresentation).toHaveBeenCalledTimes(1);
-         });
+          await waitFor(() => {
+            expect(api.generatePresentation).toHaveBeenCalledTimes(1);
+          });
 
-         jest.clearAllMocks();
-         // @ts-expect-error - Method will be added in implementation
-         (api.generatePresentation as jest.Mock).mockResolvedValue({
+          jest.clearAllMocks();
+          (api.generatePresentation as jest.Mock).mockResolvedValue({
           presentation: mockPresentation,
           qrData: 'data:image/svg+xml;base64,...qr-content...',
         });
@@ -381,8 +374,7 @@ describe('Share Prescription Screen', () => {
           fireEvent.press(retryButton);
 
            await waitFor(() => {
-             // @ts-expect-error - Method will be added in implementation
-             expect(api.generatePresentation).toHaveBeenCalled();
+              expect(api.generatePresentation).toHaveBeenCalled();
            });
         }
       }
