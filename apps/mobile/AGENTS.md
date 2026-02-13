@@ -28,7 +28,15 @@ apps/mobile/
 │   │       └── prescriptions/[id]/dispense.tsx
 │   ├── components/
 │   │   ├── qr/                  # QRDisplay.tsx, QRScanner.tsx, ManualEntry.tsx
-│   │   └── theme/               # ThemeProvider.tsx, DoctorTheme.ts, PatientTheme.ts, PharmacistTheme.ts, index.ts
+│   │   ├── theme/               # ThemeProvider.tsx, DoctorTheme.ts, PatientTheme.ts, PharmacistTheme.ts, index.ts
+│   │   ├── ThemedInput.tsx       # Text input with validation, icons, helper text
+│   │   ├── InfoTooltip.tsx       # Modal-based help tooltip
+│   │   ├── CardContainer.tsx     # Responsive card wrapper with shadow
+│   │   ├── DemoLoginButtons.tsx  # Demo credential selector (DEMO_MODE only)
+│   │   ├── StepIndicator.tsx     # Horizontal progress indicator
+│   │   ├── ErrorBoundary.tsx     # App-wide crash protection
+│   │   ├── RoleCard.tsx          # Expandable role selector card
+│   │   └── WorkflowDiagram.tsx   # Responsive workflow visualization
 │   ├── services/
 │   │   └── api.ts               # Single axios client — all backend calls
 │   └── tests/
@@ -82,3 +90,22 @@ npm test -- src/app/(doctor)/    # Tests in directory
 npm test -- e2e/doctor.spec.ts   # E2E spec
 npx tsc --noEmit                 # Type check
 ```
+
+## DEMO MODE COMPONENTS
+
+### Shared Components (Phases 1-2)
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| ThemedInput | Text input with validation, icons, helper text | `src/components/ThemedInput.tsx` |
+| InfoTooltip | Modal-based help tooltip | `src/components/InfoTooltip.tsx` |
+| CardContainer | Responsive card wrapper with shadow | `src/components/CardContainer.tsx` |
+| DemoLoginButtons | Demo credential selector (DEMO_MODE only) | `src/components/DemoLoginButtons.tsx` |
+| StepIndicator | Horizontal progress indicator | `src/components/StepIndicator.tsx` |
+| ErrorBoundary | App-wide crash protection | `src/components/ErrorBoundary.tsx` |
+| RoleCard | Expandable role selector card | `src/components/RoleCard.tsx` |
+| WorkflowDiagram | Responsive workflow visualization | `src/components/WorkflowDiagram.tsx` |
+
+### Demo Configuration
+
+Environment variable `EXPO_PUBLIC_DEMO_MODE` controls demo features visibility. Set via Expo config `extra.demoMode` or directly as an environment variable during development.

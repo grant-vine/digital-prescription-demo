@@ -1088,3 +1088,39 @@ bitrate: 13.26 kbps
 - Task start: 2026-02-13 22:37 UTC
 - Task complete: 2026-02-13 22:45 UTC
 - Execution context: Haiku-4.5 (limited reasoning, dense task instruction)
+
+---
+
+## Task: Update Mobile AGENTS.md with Demo Components (2026-02-13)
+
+### What Was Done
+Updated `apps/mobile/AGENTS.md` to document 8 new demo components created in Phases 1-2.
+
+### Changes Made
+1. **STRUCTURE Section** - Updated components/ tree to list:
+   - ThemedInput.tsx (text input with validation)
+   - InfoTooltip.tsx (modal-based help tooltip)
+   - CardContainer.tsx (responsive card wrapper)
+   - DemoLoginButtons.tsx (demo credential selector)
+   - StepIndicator.tsx (horizontal progress indicator)
+   - ErrorBoundary.tsx (app-wide crash protection)
+   - RoleCard.tsx (expandable role selector card)
+   - WorkflowDiagram.tsx (responsive workflow visualization)
+
+2. **New "DEMO MODE COMPONENTS" Section** - Added after COMMANDS:
+   - Table documenting all 8 components with purpose and location
+   - Demo Configuration subsection explaining EXPO_PUBLIC_DEMO_MODE env var
+
+### Files Modified
+- `apps/mobile/AGENTS.md` - Added 26 lines of documentation (111 total lines)
+
+### Key Patterns
+- Component tree structure uses consistent indentation (pipes and dashes)
+- Component comments follow pattern: "Purpose description"
+- Table format follows markdown convention: | Name | Purpose | Location |
+- Demo configuration explains env var control mechanism
+
+### Next Steps
+- Components are ready for use in screens
+- DEMO_MODE control via EXPO_PUBLIC_DEMO_MODE env var
+- Documentation now matches Phase 1-2 implementation

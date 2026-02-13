@@ -1398,7 +1398,7 @@ Don't have a number? Use demo: SAPC123456
 - [x] Task 36: Compress with ffmpeg
 
 ### Phase 7: Documentation (1-2 hours)
-- [ ] Task 37: Update apps/mobile/AGENTS.md
+- [x] Task 37: Update apps/mobile/AGENTS.md
 - [ ] Task 38: Update root README.md
 - [ ] Task 39: Create docs/DEMO.md (with platform support section)
 - [ ] Task 40: Add JSDoc comments
