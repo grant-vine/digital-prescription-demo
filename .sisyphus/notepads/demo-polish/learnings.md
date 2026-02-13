@@ -1,69 +1,184 @@
-# Demo Polish - Learnings & Conventions
 
-This notepad tracks cumulative wisdom from the demo polish project.
 
 ---
 
-## Environment Verification (2026-02-13)
+## Phase 2 - Index Page Enhancements (2026-02-13)
 
-### Backend Status
-- **Running**: ✅ Yes, on port 8000
-- **Health endpoint**: ✅ Working at http://localhost:8000/health → `{"status": "healthy"}`
-- **CORS**: ✅ Working - OPTIONS request to /health returns 200 OK
-- **Database**: Using SQLite at `services/backend/test.db`
-- **Environment variables**: Not explicitly set (using defaults)
+### Components Created (12-16)
+All 4 components/sections successfully created:
 
-### Demo Data Status  
-- **Seeding capability**: ✅ Working - idempotent script can run safely
-- **Data exists**: ✅ 18 users (5 doctors, 10 patients, 3 pharmacists) + 34 prescriptions
-- **Demo accounts**: All standard accounts already created and accessible
-  - Doctor: sarah.johnson@hospital.co.za / Demo@2024
-  - Patient: john.smith@example.com / Demo@2024
-  - Pharmacist: lisa.chen@pharmacy.co.za / Demo@2024
+1. **RoleCard.tsx** - Card component with expand/collapse animation
+2. **WorkflowDiagram.tsx** - Responsive workflow visualization
+3. **Updated index.tsx** - New layout with all components integrated
+4. **QuickStartGuide** - FAQ accordion component (inline in index.tsx)
 
-### Expo Web / Mobile
-- **Status**: Not running on port 8081
-- **Build system**: ✅ Expo Metro bundler configured
-- **Camera packages**: ✅ expo-camera in dependencies
-- **App config**: app.json properly configured with camera plugin
+### RoleCard Component Details
 
-### DEMO_MODE Protection
-- **Implementation**: ✅ Added guard to seed_demo_data.py
-- **Behavior**: Script exits gracefully with helpful message if DEMO_MODE != "true"
-- **Usage**: `DEMO_MODE=true python scripts/seed_demo_data.py`
-- **Safety**: Prevents accidental demo account creation in production environments
+**Features:**
+- Role color accent border on left (4px)
+- Header with icon, title, and estimated time badge
+- Description always visible
+- Smooth expand/collapse animation using Animated API
+- "Continue as [role]" action button
+- Responsive max-width constraints
 
-### LSP/TypeScript Camera Issues
-- **Status**: No active errors detected in:
-  - `apps/mobile/src/app/patient/scan.tsx`
-  - `apps/mobile/src/components/qr/QRScanner.tsx`
-- **Note**: Errors may appear at runtime if expo-camera version mismatch exists
-- **Resolution**: Phase 6 will address camera fallback implementation
+**Animation Implementation:**
+```typescript
+const heightAnim = useRef(new Animated.Value(0)).current;
+const opacityAnim = useRef(new Animated.Value(0)).current;
 
+useEffect(() => {
+  if (expanded) {
+    Animated.parallel([
+      Animated.timing(heightAnim, { toValue: contentHeight, duration: 300 }),
+      Animated.timing(opacityAnim, { toValue: 1, duration: 200, delay: 100 }),
+    ]).start();
+  }
+}, [expanded, contentHeight]);
+```
 
-## Phase 0 Completion Summary (2026-02-13)
+**Key Pattern:** Measure content height with onLayout, then animate to that value. Never use fixed heights for animated content.
 
-### Tasks Completed (1-5)
-1. ✅ Expo Web build verified - configured and ready to start
-2. ✅ Camera access verified - expo-camera installed, plugins configured
-3. ✅ Demo data seeded - 18 users, 34 prescriptions in database
-4. ✅ Backend CORS tested - OPTIONS preflight working correctly
-5. ✅ DEMO_MODE protection added to seed script
+**Data Structure:**
+```typescript
+export const ROLE_INFO: RoleInfo[] = [
+  { id: 'doctor', title: 'Healthcare Provider', color: '#2563EB', icon: '👨‍⚕️', ... },
+  { id: 'patient', title: 'Patient', color: '#0891B2', icon: '🤒', ... },
+  { id: 'pharmacist', title: 'Pharmacist', color: '#059669', icon: '💊', ... },
+];
+```
+
+### WorkflowDiagram Component Details
+
+**Responsive Breakpoints:**
+- Mobile (<768px): Vertical layout with vertical connecting lines
+- Desktop (>=768px): Horizontal layout with arrow connectors
+- Uses useWindowDimensions hook for real-time responsiveness
+
+**Color Coding:**
+- Doctor: Blue (#2563EB)
+- Patient: Cyan (#0891B2)
+- Pharmacist: Green (#059669)
+- System: Gray (#64748b)
+
+**Key Pattern for Responsive Design:**
+```typescript
+const { width } = useWindowDimensions();
+const isMobile = width < 768;
+
+// Style arrays with conditional styles
+style={[
+  styles.stepContainer,
+  isMobile ? styles.stepContainerMobile : styles.stepContainerDesktop,
+]}
+```
+
+### QuickStartGuide Component Details
+
+**Implementation:** Inline component within index.tsx (not separate file per spec)
+
+**Features:**
+- Accordion-style FAQ items
+- Smooth expand/collapse animation
+- Only one item expanded at a time
+- Gray background to distinguish from main content
+
+**State Management:**
+```typescript
+const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+const handleToggle = (index: number): void => {
+  setExpandedIndex(expandedIndex === index ? null : index);
+};
+```
+
+### Responsive Layout Patterns
+
+**Container Breakpoints:**
+```typescript
+const isDesktop = width >= 1024;  // 3 columns
+const isTablet = width >= 768 && width < 1024;  // 2 columns
+const isMobile = width < 768;  // 1 column
+```
+
+**Role Cards Grid:**
+- Desktop: `flexDirection: 'row'`, 3 cards in row with gap
+- Tablet: `flexDirection: 'row'`, 2 cards per row
+- Mobile: Stacked vertically
+
+### Animation Best Practices Learned
+
+1. **Measure before animating:** Use onLayout to get content height
+2. **Absolute positioning for measurement:** Content wrapper needs `position: 'absolute'` while measuring
+3. **Parallel animations:** Use Animated.parallel for height + opacity
+4. **Cleanup on collapse:** Animate both height and opacity down simultaneously
+5. **Native driver limitations:** Cannot use native driver for height animations
+
+### TypeScript Patterns
+
+**Interface Documentation:**
+- All interfaces have JSDoc comments
+- Properties documented with inline /** */ comments
+- @example blocks for exported constants
+
+**Component Return Types:**
+```typescript
+export function RoleCard({ ...props }): React.ReactElement { }
+function FAQAccordionItem({ ...props }): React.ReactElement { }
+```
+
+### Accessibility Implementation
+
+**RoleCard:**
+- `accessibilityRole="button"` on touchable elements
+- `accessibilityLabel` describing action
+- `accessibilityState={{ expanded }}` for expand state
+
+**FAQAccordionItem:**
+- `accessibilityLabel={`FAQ ${index + 1}: ${item.question}`}`
+- `accessibilityState={{ expanded }}`
+
+### Testing Responsive Breakpoints
+
+**Verified widths:**
+- 375px (iPhone SE): Vertical workflow, stacked cards
+- 768px (iPad portrait): Horizontal workflow starts, 2-column cards
+- 1024px+ (Desktop): Full horizontal, 3-column cards
+
+**Method:**
+Use `useWindowDimensions()` hook which provides real-time updates when window resizes.
+
+### Files Changed
+
+**Created:**
+- `apps/mobile/src/components/RoleCard.tsx`
+- `apps/mobile/src/components/WorkflowDiagram.tsx`
+
+**Modified:**
+- `apps/mobile/src/app/index.tsx` - Complete rewrite with new layout
 
 ### Verification Results
-- **Backend tests**: ✅ All 450 tests passing
-- **TypeScript errors**: Pre-existing camera import issues (Phase 6 work item)
-- **Manual review**: DEMO_MODE protection correctly implemented with guard clause
+
+- **RoleCard.tsx**: ✅ Zero TypeScript errors
+- **WorkflowDiagram.tsx**: ✅ Zero TypeScript errors
+- **index.tsx**: ✅ Zero TypeScript errors
+- **Type check**: ✅ All new files pass (pre-existing camera errors in other files)
 
 ### Key Decisions
-- Expo Web is the target platform (not native) - confirmed by user
-- Camera fallback will use "Copy QR as Text" approach (Phase 6)
-- DEMO_MODE guard exits gracefully with helpful message
+
+1. **Inline QuickStartGuide:** Kept as inline component in index.tsx per spec (not separate file)
+2. **ROLE_INFO export:** Exported from RoleCard.tsx for reuse by parent
+3. **Responsibility keys:** Used responsibility text as key (stable since static data) instead of index
+4. **Animation timing:** 300ms for expand, 250ms for collapse (feels responsive)
+5. **Max content height:** Limited responsibilities list to maxHeight: 150 with ScrollView
 
 ### Time Taken
-- Estimated: 2 hours
-- Actual: ~2.5 hours (including verification and documentation)
+
+- Estimated: 5.5 hours
+- Actual: ~3.5 hours
 
 ### Next Steps
-- Phase 1: Create 6 shared components (ThemedInput, InfoTooltip, CardContainer, DemoLoginButtons, StepIndicator, ErrorBoundary)
-- Priority: ThemedInput and CardContainer (used by multiple later phases)
+
+- Phase 3: Patient auth redesign using ThemedInput, DemoLoginButtons, StepIndicator
+- Phase 4: Pharmacist auth redesign
+- Phase 5: Doctor auth redesign
+- Phase 6: Camera fallback implementation
