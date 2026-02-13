@@ -10,8 +10,8 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { RoleCard, ROLE_INFO } from '@/components/RoleCard';
-import { WorkflowDiagram } from '@/components/WorkflowDiagram';
+import { RoleCard, ROLE_INFO } from '../components/RoleCard';
+import { WorkflowDiagram } from '../components/WorkflowDiagram';
 
 /**
  * FAQ item data structure

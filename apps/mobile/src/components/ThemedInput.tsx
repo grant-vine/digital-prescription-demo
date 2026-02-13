@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TextInputProps,
 } from 'react-native';
-import { PatientTheme } from '@/components/theme/PatientTheme';
+import { PatientTheme } from './theme/PatientTheme';
 
 /**
  * Props for the ThemedInput component

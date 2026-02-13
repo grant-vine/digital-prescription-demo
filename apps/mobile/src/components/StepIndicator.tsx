@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { PatientTheme } from '@/components/theme/PatientTheme';
+import { PatientTheme } from './theme/PatientTheme';
 
 /**
  * Step definition for the step indicator

@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Constants from 'expo-constants';
-import { PatientTheme } from '@/components/theme/PatientTheme';
-import { DoctorTheme } from '@/components/theme/DoctorTheme';
-import { PharmacistTheme } from '@/components/theme/PharmacistTheme';
+import { PatientTheme } from './theme/PatientTheme';
+import { DoctorTheme } from './theme/DoctorTheme';
+import { PharmacistTheme } from './theme/PharmacistTheme';
 
 /** Role type for demo credentials */
 type Role = 'doctor' | 'patient' | 'pharmacist';

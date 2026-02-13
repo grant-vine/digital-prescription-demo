@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
 } from 'react-native';
-import { PatientTheme } from '@/components/theme/PatientTheme';
+import { PatientTheme } from './theme/PatientTheme';
 
 /**
  * Props for the InfoTooltip component

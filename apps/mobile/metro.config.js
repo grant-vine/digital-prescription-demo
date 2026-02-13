@@ -19,4 +19,10 @@ config.resolver.blockList = [
   /.*\/e2e\/.*/,
 ];
 
+const resolverAlias = {
+  '@': path.resolve(projectRoot, 'src'),
+};
+
+Object.assign(config.resolver.extraNodeModules, resolverAlias);
+
 module.exports = config;

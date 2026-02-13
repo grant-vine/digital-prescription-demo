@@ -8,9 +8,9 @@ import {
   useWindowDimensions,
   ScrollView,
 } from 'react-native';
-import { DoctorTheme } from '@/components/theme/DoctorTheme';
-import { PatientTheme } from '@/components/theme/PatientTheme';
-import { PharmacistTheme } from '@/components/theme/PharmacistTheme';
+import { DoctorTheme } from './theme/DoctorTheme';
+import { PatientTheme } from './theme/PatientTheme';
+import { PharmacistTheme } from './theme/PharmacistTheme';
 
 /**
  * Represents information about a user role in the system
