@@ -1,146 +1,381 @@
-import { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Animated,
+  useWindowDimensions,
+  SafeAreaView,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import { RoleCard, ROLE_INFO } from '@/components/RoleCard';
+import { WorkflowDiagram } from '@/components/WorkflowDiagram';
 
-type Role = 'doctor' | 'patient' | 'pharmacist' | null;
+/**
+ * FAQ item data structure
+ * @interface FAQItem
+ */
+interface FAQItem {
+  /** Question text */
+  question: string;
+  /** Answer text */
+  answer: string;
+}
 
-export default function RoleSelector() {
-  const [selectedRole, setSelectedRole] = useState<Role>(null);
-  const router = useRouter();
+/**
+ * FAQ data for the Quick Start guide
+ */
+const FAQ_ITEMS: FAQItem[] = [
+  {
+    question: 'How the Demo Works',
+    answer:
+      'This demo showcases Self-Sovereign Identity (SSI) technology for digital prescriptions. Choose a role, complete the authentication flow, and experience the secure prescription workflow from creation to dispensing.',
+  },
+  {
+    question: 'What is SSI?',
+    answer:
+      'Self-Sovereign Identity allows individuals to own and control their digital identities without relying on centralized authorities. In this demo, doctors, patients, and pharmacists each have decentralized identifiers (DIDs) for secure, verifiable interactions.',
+  },
+  {
+    question: 'QR Code Flow',
+    answer:
+      'Prescriptions are shared via QR codes containing encrypted verifiable credentials. Patients scan to receive, pharmacists scan to verify. All interactions are cryptographically signed and auditable.',
+  },
+  {
+    question: 'Total Demo Time',
+    answer:
+      '3-5 minutes for complete workflow (doctor creates, patient receives, pharmacist dispenses)',
+  },
+];
 
-  const roles = [
-    {
-      id: 'doctor',
-      name: 'Doctor',
-      color: '#2563EB',
-      description: 'Create and sign prescriptions',
-    },
-    {
-      id: 'patient',
-      name: 'Patient',
-      color: '#0891B2',
-      description: 'Receive and manage prescriptions',
-    },
-    {
-      id: 'pharmacist',
-      name: 'Pharmacist',
-      color: '#059669',
-      description: 'Verify and dispense medications',
-    },
-  ];
+/**
+ * Props for individual FAQ accordion item
+ * @interface FAQAccordionItemProps
+ */
+interface FAQAccordionItemProps {
+  /** FAQ item data */
+  item: FAQItem;
+  /** Whether this item is expanded */
+  expanded: boolean;
+  /** Callback to toggle expansion */
+  onToggle: () => void;
+  /** Index for accessibility labeling */
+  index: number;
+}
+
+/**
+ * Individual FAQ accordion item with expand/collapse animation
+ */
+function FAQAccordionItem({
+  item,
+  expanded,
+  onToggle,
+  index,
+}: FAQAccordionItemProps): React.ReactElement {
+  const heightAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const [contentHeight, setContentHeight] = useState(0);
+
+  useEffect(() => {
+    if (expanded) {
+      Animated.parallel([
+        Animated.timing(heightAnim, {
+          toValue: contentHeight,
+          duration: 250,
+          useNativeDriver: false,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 200,
+          delay: 50,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(heightAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: false,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }
+  }, [expanded, contentHeight, heightAnim, opacityAnim]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Digital Prescription Demo</Text>
-      <Text style={styles.subtitle}>Select your role to continue</Text>
-
-      <View style={styles.rolesContainer}>
-        {roles.map((role) => (
-          <TouchableOpacity
-            key={role.id}
-            style={[
-              styles.roleButton,
-              {
-                backgroundColor:
-                  selectedRole === role.id ? role.color : '#f0f0f0',
-                borderColor: role.color,
-              },
-            ]}
-            onPress={() => setSelectedRole(role.id as Role)}
-          >
-            <Text
-              style={[
-                styles.roleName,
-                {
-                  color: selectedRole === role.id ? '#fff' : role.color,
-                },
-              ]}
-            >
-              {role.name}
-            </Text>
-            <Text
-              style={[
-                styles.roleDescription,
-                {
-                  color: selectedRole === role.id ? '#fff' : '#666',
-                },
-              ]}
-            >
-              {role.description}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {selectedRole && (
-        <TouchableOpacity
-          style={[
-            styles.continueButton,
-            {
-              backgroundColor:
-                roles.find((r) => r.id === selectedRole)?.color || '#2563EB',
-            },
-          ]}
-          onPress={() => router.push(`/${selectedRole}/auth`)}
+    <View style={styles.faqItem}>
+      <TouchableOpacity
+        style={styles.faqQuestionContainer}
+        onPress={onToggle}
+        accessibilityLabel={`FAQ ${index + 1}: ${item.question}`}
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+      >
+        <Text style={styles.faqQuestion}>{item.question}</Text>
+        <Text style={[styles.faqChevron, expanded && styles.faqChevronExpanded]}>
+          ▼
+        </Text>
+      </TouchableOpacity>
+      <Animated.View style={[styles.faqAnswerContainer, { height: heightAnim }]}>
+        <View
+          style={styles.faqAnswerWrapper}
+          onLayout={(event): void => {
+            setContentHeight(event.nativeEvent.layout.height);
+          }}
         >
-          <Text style={styles.continueButtonText}>Continue as {selectedRole}</Text>
-        </TouchableOpacity>
-      )}
+          <Text style={styles.faqAnswer}>{item.answer}</Text>
+        </View>
+      </Animated.View>
     </View>
   );
 }
 
+/**
+ * Quick Start guide component with FAQ accordion
+ */
+function QuickStartGuide(): React.ReactElement {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+  const handleToggle = (index: number): void => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
+
+  return (
+    <View style={styles.quickStartContainer}>
+      <Text style={styles.quickStartTitle}>Quick Start Guide</Text>
+      <View style={styles.faqContainer}>
+        {FAQ_ITEMS.map((item, index) => (
+          <FAQAccordionItem
+            key={item.question}
+            item={item}
+            index={index}
+            expanded={expandedIndex === index}
+            onToggle={() => handleToggle(index)}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/**
+ * Main role selector screen component
+ *
+ * Features:
+ * - Workflow diagram showing the prescription process
+ * - Role cards with expand/collapse for detailed information
+ * - Quick Start FAQ guide with accordion
+ * - Responsive layout adapting to mobile, tablet, and desktop
+ * - Accessible navigation to role-specific flows
+ */
+export default function RoleSelector(): React.ReactElement {
+  const [expandedRole, setExpandedRole] = useState<string | null>(null);
+  const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= 1024;
+  const isTablet = width >= 768 && width < 1024;
+
+  const navigateToRole = (roleId: string): void => {
+    router.push(`/${roleId}/auth`);
+  };
+
+  const handleToggleExpand = (roleId: string): void => {
+    setExpandedRole(expandedRole === roleId ? null : roleId);
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Digital Prescription Demo</Text>
+          <Text style={styles.subtitle}>
+            Experience the future of secure, verifiable digital prescriptions
+          </Text>
+        </View>
+
+        {/* Workflow Diagram */}
+        <WorkflowDiagram />
+
+        {/* Role Cards Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Choose Your Role</Text>
+          <View
+            style={[
+              styles.rolesContainer,
+              isDesktop && styles.rolesContainerDesktop,
+              isTablet && styles.rolesContainerTablet,
+            ]}
+          >
+            {ROLE_INFO.map((role) => (
+              <RoleCard
+                key={role.id}
+                role={role}
+                expanded={expandedRole === role.id}
+                onToggleExpand={() => handleToggleExpand(role.id)}
+                onPress={() => navigateToRole(role.id)}
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* Quick Start Guide */}
+        <QuickStartGuide />
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Powered by Self-Sovereign Identity (SSI) Technology
+          </Text>
+          <Text style={styles.footerSubtext}>W3C Verifiable Credentials • Decentralized Identifiers</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 32,
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 16,
     alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 12,
+    color: '#1e293b',
+    marginBottom: 8,
     textAlign: 'center',
-    color: '#000',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 32,
+    color: '#64748b',
+    textAlign: 'center',
+    maxWidth: 500,
+  },
+  section: {
+    marginTop: 8,
+    paddingHorizontal: 16,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 16,
     textAlign: 'center',
   },
   rolesContainer: {
     width: '100%',
-    marginBottom: 24,
   },
-  roleButton: {
-    borderWidth: 2,
-    borderRadius: 12,
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    alignItems: 'center',
+  rolesContainerTablet: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
-  roleName: {
+  rolesContainerDesktop: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 20,
+    maxWidth: 1280,
+    alignSelf: 'center',
+  },
+  quickStartContainer: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 16,
+    padding: 24,
+    marginHorizontal: 16,
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  quickStartTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  roleDescription: {
-    fontSize: 14,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 16,
     textAlign: 'center',
   },
-  continueButton: {
-    width: '100%',
-    paddingVertical: 16,
-    borderRadius: 8,
+  faqContainer: {
+    gap: 8,
+  },
+  faqItem: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  faqQuestionContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  faqQuestion: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1e293b',
+    flex: 1,
+  },
+  faqChevron: {
+    fontSize: 14,
+    color: '#64748b',
+    marginLeft: 8,
+    transform: [{ rotate: '0deg' }],
+  },
+  faqChevronExpanded: {
+    transform: [{ rotate: '180deg' }],
+  },
+  faqAnswerContainer: {
+    overflow: 'hidden',
+  },
+  faqAnswerWrapper: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  faqAnswer: {
+    fontSize: 14,
+    color: '#64748b',
+    lineHeight: 20,
+  },
+  footer: {
+    marginTop: 24,
+    paddingHorizontal: 24,
     alignItems: 'center',
   },
-  continueButtonText: {
-    color: '#fff',
-    fontSize: 16,
+  footerText: {
+    fontSize: 14,
     fontWeight: '600',
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  footerSubtext: {
+    fontSize: 12,
+    color: '#94a3b8',
+    textAlign: 'center',
   },
 });
