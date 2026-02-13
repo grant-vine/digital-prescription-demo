@@ -427,6 +427,12 @@ class AuditService:
         session = self.db or get_db_session()
 
         try:
+            # Normalize aware datetimes to naive UTC (matching log_event storage)
+            if start_date.tzinfo is not None:
+                start_date = start_date.astimezone(timezone.utc).replace(tzinfo=None)
+            if end_date.tzinfo is not None:
+                end_date = end_date.astimezone(timezone.utc).replace(tzinfo=None)
+
             # Query prescription events within date range
             query = (
                 session.query(Audit)
@@ -505,6 +511,12 @@ class AuditService:
         session = self.db or get_db_session()
 
         try:
+            # Normalize aware datetimes to naive UTC (matching log_event storage)
+            if start_date.tzinfo is not None:
+                start_date = start_date.astimezone(timezone.utc).replace(tzinfo=None)
+            if end_date.tzinfo is not None:
+                end_date = end_date.astimezone(timezone.utc).replace(tzinfo=None)
+
             # Query all events in date range
             query = (
                 session.query(Audit)
@@ -580,6 +592,12 @@ class AuditService:
         session = self.db or get_db_session()
 
         try:
+            # Normalize aware datetimes to naive UTC (matching log_event storage)
+            if start_date.tzinfo is not None:
+                start_date = start_date.astimezone(timezone.utc).replace(tzinfo=None)
+            if end_date.tzinfo is not None:
+                end_date = end_date.astimezone(timezone.utc).replace(tzinfo=None)
+
             # Query all events in date range
             query = (
                 session.query(Audit)
