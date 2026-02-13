@@ -314,8 +314,14 @@ def mock_acapy_service(monkeypatch):
         async def close(self):
             pass
     
+    import app.services.factory as factory_module
+    import app.services.vc as vc_module
     import app.api.v1.dids as dids_module
-    monkeypatch.setattr(dids_module, "ACAPyService", MockACAPyService)
+    mock_instance = MockACAPyService()
+    mock_factory = lambda **kwargs: mock_instance
+    monkeypatch.setattr(factory_module, "get_acapy_service", mock_factory)
+    monkeypatch.setattr(vc_module, "get_acapy_service", mock_factory)
+    monkeypatch.setattr(dids_module, "get_acapy_service", mock_factory)
     return MockACAPyService
 
 
@@ -413,10 +419,14 @@ def mock_acapy_signing_service(monkeypatch):
         async def close(self):
             pass
     
-    import app.services.acapy as acapy_module
+    import app.services.factory as factory_module
     import app.services.vc as vc_module
-    monkeypatch.setattr(acapy_module, "ACAPyService", MockACAPyService)
-    monkeypatch.setattr(vc_module, "ACAPyService", MockACAPyService)
+    import app.api.v1.dids as dids_module
+    mock_instance = MockACAPyService()
+    mock_factory = lambda **kwargs: mock_instance
+    monkeypatch.setattr(factory_module, "get_acapy_service", mock_factory)
+    monkeypatch.setattr(vc_module, "get_acapy_service", mock_factory)
+    monkeypatch.setattr(dids_module, "get_acapy_service", mock_factory)
     return MockACAPyService
 
 

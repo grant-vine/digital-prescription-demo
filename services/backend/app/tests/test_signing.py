@@ -365,7 +365,6 @@ async def test_sign_prescription_already_signed(
 # ============================================================================
 
 
-@pytest.mark.xfail(reason="Verification service returns 500 - needs debugging")
 @pytest.mark.asyncio
 async def test_verify_prescription_success(
     test_client, auth_headers_doctor, auth_headers_pharmacist,
@@ -729,7 +728,6 @@ async def test_signature_is_base64_encoded(
         pytest.fail("Signature is not valid base64 encoding")
 
 
-@pytest.mark.xfail(reason="Verification service returns 500 - needs debugging")
 @pytest.mark.asyncio
 async def test_signature_algorithm_ed25519(
     test_client, auth_headers_doctor, auth_headers_pharmacist,
@@ -767,7 +765,6 @@ async def test_signature_algorithm_ed25519(
     assert "verified" in verify_data
 
 
-@pytest.mark.xfail(reason="Verification service returns 500 - needs debugging")
 @pytest.mark.asyncio
 async def test_signature_verification_returns_valid_true(
     test_client, auth_headers_doctor, auth_headers_pharmacist,
@@ -889,7 +886,6 @@ async def test_only_doctor_can_sign_prescription(
     assert pharmacist_sign.status_code == 403
 
 
-@pytest.mark.xfail(reason="Verification service returns 500 - needs debugging")
 @pytest.mark.asyncio
 async def test_verify_available_to_all_roles(
     test_client, auth_headers_doctor, auth_headers_patient,
