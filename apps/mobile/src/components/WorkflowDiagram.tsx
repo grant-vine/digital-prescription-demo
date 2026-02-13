@@ -84,24 +84,41 @@ export interface WorkflowDiagramProps {
 }
 
 /**
- * A responsive workflow diagram showing the digital prescription process.
+ * WorkflowDiagram - A responsive workflow diagram showing the digital prescription process.
  *
  * Features:
- * - Mobile (<768px): Vertical layout with connecting lines
- * - Desktop (>=768px): Horizontal layout with arrow connectors
+ * - Mobile (<768px): Vertical layout with connecting lines between steps
+ * - Desktop (>=768px): Horizontal layout with arrow connectors between steps
  * - Color-coded steps by role (doctor=blue, patient=cyan, pharmacist=green, system=gray)
- * - Accessible with proper labels
- * - Step numbers and icons for visual clarity
- * - Smooth transitions between breakpoints
+ * - Fully accessible with ARIA labels for each step
+ * - Step numbers, icons, and descriptions for visual clarity
+ * - Smooth responsive transitions between mobile and desktop layouts
+ * - Self-contained with predefined workflow steps
+ *
+ * @param {string} [testID] - Optional test ID for testing purposes
+ * @returns {React.ReactElement} The responsive workflow diagram component
  *
  * @example
  * ```tsx
- * function DemoPage() {
+ * // Basic usage
+ * <WorkflowDiagram />
+ * 
+ * // In a scrollable container
+ * <ScrollView>
+ *   <Text style={{ fontSize: 24, fontWeight: 'bold' }}>How Digital Prescriptions Work</Text>
+ *   <WorkflowDiagram testID="prescription-workflow" />
+ *   <Text>Each step is verified and recorded in the audit trail.</Text>
+ * </ScrollView>
+ * 
+ * // On role selection screen
+ * function RoleSelectionPage() {
  *   return (
- *     <ScrollView>
- *       <Text>How it works:</Text>
+ *     <View style={{ flex: 1 }}>
  *       <WorkflowDiagram />
- *     </ScrollView>
+ *       <RoleCard role={doctorRole} onPress={handleDoctorSelect} />
+ *       <RoleCard role={patientRole} onPress={handlePatientSelect} />
+ *       <RoleCard role={pharmacistRole} onPress={handlePharmacistSelect} />
+ *     </View>
  *   );
  * }
  * ```

@@ -30,14 +30,24 @@ export interface ThemedInputProps extends TextInputProps {
 }
 
 /**
- * A themed input component with validation support, icons, and helper text.
+ * ThemedInput - A text input component with validation, icons, and helper text.
  * 
- * Features:
- * - Label above input
- * - Optional icon on left side
- * - Border color changes based on validation/error state
- * - Helper or error text below input
- * - Validation checkmark indicator when valid
+ * Provides consistent input styling across roles with support for:
+ * - Real-time validation states (valid/invalid)
+ * - Icon prefixes for visual context
+ * - Helper text and error messages
+ * - Border color changes based on state
+ * - Checkmark indicator when valid
+ * 
+ * @param {React.ReactNode} [label] - Input field label displayed above the input
+ * @param {string} [helperText] - Helper text displayed below the input
+ * @param {string} [error] - Error message displayed below the input (overrides helperText)
+ * @param {string} [icon] - Icon name to display (mail, lock, user, search, info, check, alert)
+ * @param {Object} [validation] - Validation state with validity flag and message
+ * @param {boolean} [validation.isValid] - Whether the input is valid
+ * @param {string} [validation.message] - Validation message to display
+ * @param {StyleProp<TextStyle>} [style] - Additional styles to apply to the TextInput
+ * @returns {React.ReactElement} The themed input component
  * 
  * @example
  * ```tsx
@@ -46,11 +56,13 @@ export interface ThemedInputProps extends TextInputProps {
  *   placeholder="Enter your email"
  *   value={email}
  *   onChangeText={setEmail}
+ *   icon="mail"
  *   validation={{ isValid: true, message: 'Email looks good' }}
  * />
  * 
  * <ThemedInput
  *   label="Password"
+ *   placeholder="Enter password"
  *   secureTextEntry
  *   error="Password is required"
  *   value={password}

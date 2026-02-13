@@ -31,20 +31,45 @@ interface State {
 }
 
 /**
- * An error boundary component that catches JavaScript errors in child components.
+ * ErrorBoundary - An error boundary component that catches JavaScript errors in child components.
  * 
  * Features:
  * - Catches errors using React class component lifecycle methods
- * - Displays user-friendly error screen
- * - Shows error details in development mode
- * - Provides restart button to reload the app
+ * - Displays user-friendly error screen with restart button
+ * - Shows detailed error information in development mode
  * - Follows React best practices for error boundaries
+ * - Scrollable error details for long stack traces
+ * - Accessible with proper ARIA labels and roles
+ * 
+ * @param {React.ReactNode} children - Child components to render and monitor for errors
+ * @returns {React.ReactNode} Either the children if no error, or error UI if error caught
  * 
  * @example
  * ```tsx
+ * // Wrap your entire app
  * <ErrorBoundary>
  *   <YourApp />
  * </ErrorBoundary>
+ * 
+ * // Wrap specific sections
+ * <View>
+ *   <ErrorBoundary>
+ *     <ComplexFeature />
+ *   </ErrorBoundary>
+ *   <OtherFeature />
+ * </View>
+ * 
+ * // In your app entry point
+ * export default function RootLayout() {
+ *   return (
+ *     <ErrorBoundary>
+ *       <Stack>
+ *         <Stack.Screen name="index" component={HomeScreen} />
+ *         <Stack.Screen name="details" component={DetailsScreen} />
+ *       </Stack>
+ *     </ErrorBoundary>
+ *   );
+ * }
  * ```
  */
 export class ErrorBoundary extends React.Component<Props, State> {

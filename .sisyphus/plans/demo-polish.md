@@ -1401,7 +1401,7 @@ Don't have a number? Use demo: SAPC123456
 - [x] Task 37: Update apps/mobile/AGENTS.md
 - [x] Task 38: Update root README.md
 - [x] Task 39: Create docs/DEMO.md (with platform support section)
-- [ ] Task 40: Add JSDoc comments
+- [x] Task 40: Add JSDoc comments
 
 ### Phase 8: Final Verification (2-3 hours)
 - [ ] Task 41: Test all 3 role flows manually
@@ -1412,7 +1412,7 @@ Don't have a number? Use demo: SAPC123456
 - [ ] Task 46: Final video review
 
 **TOTAL: 28-32 hours (~4 developer days)**
-**PROGRESS: 29/46 tasks complete (63%)**
+**PROGRESS: 40/46 tasks complete (87%)**
 
 ---
 

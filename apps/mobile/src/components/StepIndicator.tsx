@@ -29,7 +29,7 @@ export interface StepIndicatorProps {
 }
 
 /**
- * A horizontal step indicator component showing progress through a multi-step process.
+ * StepIndicator - A horizontal step indicator component showing progress through a multi-step process.
  * 
  * Features:
  * - Horizontal layout with connecting progress bar
@@ -37,7 +37,13 @@ export interface StepIndicatorProps {
  * - Active step highlighted with filled circle and bold text
  * - Completed steps show checkmark icon
  * - Inactive steps are grayed out
- * - Tappable steps when onStepPress is provided
+ * - Tappable steps when onStepPress callback is provided
+ * - Accessible with ARIA labels and roles
+ * 
+ * @param {Step[]} steps - Array of step definitions with id, label, and icon
+ * @param {string} currentStep - ID of the currently active step
+ * @param {Function} [onStepPress] - Optional callback when a step is pressed, receives stepId (enables navigation)
+ * @returns {React.ReactElement} The step indicator component with progress bar
  * 
  * @example
  * ```tsx
@@ -50,7 +56,16 @@ export interface StepIndicatorProps {
  * <StepIndicator
  *   steps={steps}
  *   currentStep="verify"
- *   onStepPress={(stepId) => console.log('Navigate to', stepId)}
+ *   onStepPress={(stepId) => {
+ *     console.log('Navigate to', stepId);
+ *     router.push(`/flow/${stepId}`);
+ *   }}
+ * />
+ * 
+ * // Without click handling
+ * <StepIndicator
+ *   steps={steps}
+ *   currentStep="auth"
  * />
  * ```
  */

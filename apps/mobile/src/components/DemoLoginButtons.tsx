@@ -76,7 +76,7 @@ const getRoleTheme = (role: Role) => {
 };
 
 /**
- * A component that displays demo login buttons for each role.
+ * DemoLoginButtons - A component that displays demo login buttons for each role.
  * 
  * Features:
  * - Warning banner indicating demo mode
@@ -84,6 +84,12 @@ const getRoleTheme = (role: Role) => {
  * - Active state highlighting for current role
  * - Helper text explaining functionality
  * - Only renders when demoMode is enabled in Expo config
+ * - Role-specific color theming
+ * - Accessible with proper ARIA labels and roles
+ * 
+ * @param {Function} onSelect - Callback when a demo credential is selected, receives DemoCredentials object
+ * @param {'doctor' | 'patient' | 'pharmacist'} [currentRole] - Currently selected role (for highlighting active state)
+ * @returns {React.ReactElement | null} The demo buttons component, or null if demo mode is not enabled
  * 
  * @example
  * ```tsx
@@ -91,9 +97,35 @@ const getRoleTheme = (role: Role) => {
  *   onSelect={(creds) => {
  *     setEmail(creds.email);
  *     setPassword(creds.password);
+ *     setRole(creds.role);
  *   }}
  *   currentRole="patient"
  * />
+ * 
+ * // Using with state management
+ * function LoginScreen() {
+ *   const [email, setEmail] = useState('');
+ *   const [password, setPassword] = useState('');
+ *   const [role, setRole] = useState<'doctor' | 'patient' | 'pharmacist'>('patient');
+ * 
+ *   return (
+ *     <View>
+ *       <DemoLoginButtons
+ *         onSelect={(creds) => {
+ *           setEmail(creds.email);
+ *           setPassword(creds.password);
+ *           setRole(creds.role);
+ *         }}
+ *         currentRole={role}
+ *       />
+ *       <ThemedInput
+ *         label="Email"
+ *         value={email}
+ *         onChangeText={setEmail}
+ *       />
+ *     </View>
+ *   );
+ * }
  * ```
  */
 export function DemoLoginButtons({

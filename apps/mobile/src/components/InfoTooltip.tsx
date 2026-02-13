@@ -27,13 +27,19 @@ export interface InfoTooltipProps {
 const { height: screenHeight } = Dimensions.get('window');
 
 /**
- * A tooltip component that displays information in a modal when pressed.
+ * InfoTooltip - A tooltip component that displays information in a modal when pressed.
  * 
  * Features:
  * - Small circular button with icon
  * - Opens a modal with title and scrollable content
  * - Semi-transparent backdrop
  * - Close button at the bottom
+ * - Accessible with proper ARIA labels
+ * 
+ * @param {string} title - Title displayed in the modal header
+ * @param {string} content - Content text displayed in the modal (scrollable)
+ * @param {'info' | 'help' | 'alert'} [icon='info'] - Icon type to display (info, help, or alert)
+ * @returns {React.ReactElement} The tooltip button and modal component
  * 
  * @example
  * ```tsx
@@ -47,6 +53,15 @@ const { height: screenHeight } = Dimensions.get('window');
  *   content="Your data is encrypted and stored securely."
  *   icon="alert"
  * />
+ * 
+ * <View style={{ flexDirection: 'row' }}>
+ *   <Text>What is a DID?</Text>
+ *   <InfoTooltip
+ *     title="Decentralized Identifier"
+ *     content="A DID (Decentralized Identifier) is a unique identifier that you control..."
+ *     icon="help"
+ *   />
+ * </View>
  * ```
  */
 export function InfoTooltip({

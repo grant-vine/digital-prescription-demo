@@ -116,17 +116,24 @@ export const ROLE_INFO: RoleInfo[] = [
 ];
 
 /**
- * A card component displaying role information with expand/collapse functionality.
+ * RoleCard - A card component displaying role information with expand/collapse functionality.
  *
  * Features:
  * - Role color accent border on left (4px)
- * - Header with icon, title, and estimated time
+ * - Header with icon, title, and estimated completion time
  * - Always-visible description
- * - Expand/collapse animation for responsibilities
+ * - Expand/collapse animation for responsibilities list
  * - "Continue as [role]" action button
- * - Responsive design that adapts to screen width
- * - Smooth height animation using Animated API
- * - Accessible with proper labels and roles
+ * - Responsive design adapts to screen width (mobile/desktop)
+ * - Smooth height animation using React Animated API
+ * - Fully accessible with ARIA labels and expanded state
+ *
+ * @param {RoleInfo} role - Role information object with id, title, description, color, icon, responsibilities, estimatedTime
+ * @param {Function} onPress - Callback when Continue button is pressed, typically navigates to role flow
+ * @param {boolean} [expanded=false] - Whether the card is currently expanded showing responsibilities
+ * @param {Function} [onToggleExpand] - Callback when expand/collapse button is pressed
+ * @param {string} [testID] - Optional test ID for testing purposes
+ * @returns {React.ReactElement} The role card component with animation support
  *
  * @example
  * ```tsx
@@ -144,12 +151,21 @@ export const ROLE_INFO: RoleInfo[] = [
  *           onToggleExpand={() => setExpandedRole(
  *             expandedRole === role.id ? null : role.id
  *           )}
- *           onPress={() => router.push(`/${role.id}`)}
+ *           onPress={() => router.push(`/${role.id}/auth`)}
+ *           testID={`role-card-${role.id}`}
  *         />
  *       ))}
  *     </View>
  *   );
  * }
+ * 
+ * // Single role card
+ * <RoleCard
+ *   role={ROLE_INFO[0]}
+ *   expanded
+ *   onToggleExpand={() => setExpanded(!expanded)}
+ *   onPress={() => navigateToDoctor()}
+ * />
  * ```
  */
 export function RoleCard({

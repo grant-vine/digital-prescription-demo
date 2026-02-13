@@ -16,23 +16,37 @@ export interface CardContainerProps {
 const { width: screenWidth } = Dimensions.get('window');
 
 /**
- * A container component that wraps content in a styled card.
+ * CardContainer - A responsive container component that wraps content in a styled card.
  * 
  * Features:
- * - White background with subtle shadow
- * - Rounded corners
- * - Consistent padding
+ * - White/themed background with subtle shadow
+ * - Rounded corners (12px)
+ * - Consistent padding (24px)
  * - Max-width constraint that's centered on larger screens
- * - Responsive to screen size
+ * - Responsive to screen size (adapts to mobile/tablet/desktop)
+ * - Elevation effect for depth
+ * 
+ * @param {React.ReactNode} children - Child elements to render inside the card
+ * @param {number} [maxWidth=480] - Maximum width of the card in pixels (default: 480)
+ * @returns {React.ReactElement} The styled card container component
  * 
  * @example
  * ```tsx
  * <CardContainer>
- *   <Text>Your content here</Text>
+ *   <Text style={{ fontSize: 18, fontWeight: '600' }}>Your content here</Text>
  * </CardContainer>
  * 
  * <CardContainer maxWidth={600}>
- *   <Text>Wider card for larger content</Text>
+ *   <View>
+ *     <Text>Title</Text>
+ *     <Text>Wider card for larger content layouts</Text>
+ *   </View>
+ * </CardContainer>
+ * 
+ * <CardContainer maxWidth={500}>
+ *   <ScrollView>
+ *     <Text>Scrollable content inside a card</Text>
+ *   </ScrollView>
  * </CardContainer>
  * ```
  */
