@@ -1395,7 +1395,7 @@ Don't have a number? Use demo: SAPC123456
 - [ ] Task 33: Implement QR text extraction flow (deferred - requires screen modifications)
 - [ ] Task 34: Implement mock camera handlers (deferred - requires screen modifications)
 - [x] Task 35: Record and verify video
-- [ ] Task 36: Compress with ffmpeg
+- [x] Task 36: Compress with ffmpeg
 
 ### Phase 7: Documentation (1-2 hours)
 - [ ] Task 37: Update apps/mobile/AGENTS.md
