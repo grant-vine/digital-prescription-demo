@@ -96,8 +96,7 @@ export default function PharmacistDispenseScreen() {
     try {
       setLoading(true);
       setError('');
-      const apiAny = api as any;
-      const result = await apiAny.getVerifiedPrescription(id);
+      const result = await api.getVerifiedPrescription(id as string);
       setPrescription(result || null);
     } catch (err: any) {
       setError(err.message || 'Failed to load prescription');
@@ -114,10 +113,9 @@ export default function PharmacistDispenseScreen() {
     setDispensing(true);
     setError('');
     try {
-      const apiAny = api as any;
-      await apiAny.dispenseMedication(id);
-      await apiAny.logDispensingAction({
-        prescriptionId: id,
+      await api.dispenseMedication(id as string);
+      await api.logDispensingAction({
+        prescriptionId: id as string,
         action: 'dispensed',
         timestamp: new Date().toISOString(),
       });
@@ -140,10 +138,9 @@ export default function PharmacistDispenseScreen() {
     setDispensing(true);
     setError('');
     try {
-      const apiAny = api as any;
-      await apiAny.partialDispense(id, selectedMeds);
-      await apiAny.logDispensingAction({
-        prescriptionId: id,
+      await api.partialDispense(id as string, selectedMeds);
+      await api.logDispensingAction({
+        prescriptionId: id as string,
         action: 'partial',
         items: selectedMeds,
         timestamp: new Date().toISOString(),

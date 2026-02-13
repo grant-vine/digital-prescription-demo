@@ -39,6 +39,24 @@ export interface Prescription {
   updated_at: string;
 }
 
+export interface ExtendedPrescription extends Prescription {
+  patient_name?: string;
+  doctor_name?: string;
+  doctor_did?: string;
+  medications?: Array<{
+    name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+    quantity: string;
+    instructions: string;
+  }>;
+  expires_at?: string;
+  status?: 'active' | 'expired' | 'used';
+  signature?: string;
+  verified?: boolean;
+}
+
 export interface PrescriptionCreate {
   patient_id: number;
   medication_name: string;
@@ -104,6 +122,29 @@ export interface SignPrescriptionResponse {
   prescription_id: string;
   signature: string;
   signed_at?: string;
+}
+
+export interface VerifiablePresentation {
+  '@context': string[];
+  type: string;
+  id?: string;
+  created?: string;
+  expiresAt?: string;
+  holder?: string;
+  verifiableCredential?: any[];
+  proof?: any;
+}
+
+export interface PresentationResponse {
+  presentation: VerifiablePresentation;
+  qrData?: string;
+}
+
+export interface DispensingAction {
+  prescriptionId: string | string[];
+  action: string;
+  items?: string[];
+  timestamp: string;
 }
 
 // --- Axios Instance ---
@@ -277,7 +318,7 @@ export const api = {
     return response.data;
   },
 
-  async getPrescription(id: number): Promise<Prescription> {
+  async getPrescription(id: number | string): Promise<ExtendedPrescription> {
     const response = await getClient().get(`/prescriptions/${id}`);
     return response.data;
   },
@@ -400,6 +441,38 @@ export const api = {
 
   async verifyPresentation(code: string): Promise<{ valid: boolean; issuer: any; trust_registry_status: string; revocation_status: string; error?: string }> {
     const response = await getClient().post('/verify/presentation', { code });
+    return response.data;
+  },
+
+  async generatePresentation(prescriptionId: string | string[]): Promise<PresentationResponse> {
+    const response = await getClient().post(`/prescriptions/${prescriptionId}/presentation`);
+    return response.data;
+  },
+
+  async selectPharmacy(pharmacyId: string): Promise<{ success: boolean }> {
+    const response = await getClient().post('/pharmacies/select', { pharmacy_id: pharmacyId });
+    return response.data;
+  },
+
+  async getVerifiedPrescription(prescriptionId: string | string[]): Promise<any> {
+    const response = await getClient().get(`/prescriptions/${prescriptionId}/verified`);
+    return response.data;
+  },
+
+  async dispenseMedication(prescriptionId: string | string[]): Promise<{ success: boolean }> {
+    const response = await getClient().post(`/prescriptions/${prescriptionId}/dispense`);
+    return response.data;
+  },
+
+  async partialDispense(prescriptionId: string | string[], medicationNames: string[]): Promise<{ success: boolean }> {
+    const response = await getClient().post(`/prescriptions/${prescriptionId}/partial-dispense`, {
+      medications: medicationNames,
+    });
+    return response.data;
+  },
+
+  async logDispensingAction(action: DispensingAction): Promise<{ success: boolean }> {
+    const response = await getClient().post('/dispensing/log', action);
     return response.data;
   },
 };

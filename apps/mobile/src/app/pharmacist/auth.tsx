@@ -82,7 +82,7 @@ export default function PharmacistAuthScreen() {
      const autoValidateSAPC = async () => {
        try {
          await Promise.resolve();
-         const mockValidationResponse = await api.validateSAPC('SAPC123456');
+         await api.validateSAPC('SAPC123456');
          setSAPCValidated(true);
        } catch (err: any) {
          setSAPCError(err.message || 'SAPC validation failed');
@@ -118,7 +118,7 @@ export default function PharmacistAuthScreen() {
       setSAPCError(null);
       
       await Promise.resolve(); // Defer to next tick for test mocks
-      const validationResponse = await api.validateSAPC(sapcNumber);
+      await api.validateSAPC(sapcNumber);
       
       setSAPCValidated(true);
       setCurrentStep(AuthStep.DID_CREATION);
@@ -136,7 +136,7 @@ export default function PharmacistAuthScreen() {
         setError(null);
         
         await Promise.resolve();
-        const setupResponse = await api.setupPharmacy({
+        await api.setupPharmacy({
           pharmacy_name: pharmacyName,
           sapc_number: sapcNumber,
         });

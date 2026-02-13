@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { DoctorTheme } from '../../../components/theme/DoctorTheme';
-import { api } from '../../../services/api';
+import { api, PrescriptionCreate } from '../../../services/api';
 
 const ThemedText = ({ children, style, ...props }: any) => (
   <Text style={[{ color: DoctorTheme.colors.text, ...DoctorTheme.typography.body }, style]} {...props}>
@@ -103,11 +103,18 @@ export default function RepeatConfigScreen() {
 
   const handleSaveDraft = async () => {
     try {
-      await api.createPrescription({ 
-        status: 'draft',
-        repeats: repeatCount ? parseInt(repeatCount, 10) : 0,
-        interval
-      } as any);
+      const draftData: Partial<PrescriptionCreate> = {
+        patient_id: 0,
+        medication_name: 'Draft',
+        medication_code: '',
+        dosage: '',
+        quantity: 0,
+        instructions: `Draft - Repeats: ${repeatCount || 0}, Interval: ${interval}`,
+        date_expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        is_repeat: repeatCount ? parseInt(repeatCount, 10) > 0 : false,
+        repeat_count: repeatCount ? parseInt(repeatCount, 10) : 0,
+      };
+      await api.createPrescription(draftData as PrescriptionCreate);
       setFeedbackMessage('Draft saved successfully');
       Alert.alert('Draft Saved', 'Prescription draft has been saved.');
       setTimeout(() => setFeedbackMessage(''), 3000);

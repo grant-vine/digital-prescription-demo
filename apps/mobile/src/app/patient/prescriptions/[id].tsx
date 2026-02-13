@@ -21,21 +21,19 @@ interface Medication {
 }
 
 interface Prescription {
-  id: string;
+  id: string | number;
   patient_name: string;
-  patient_id: string;
+  patient_id: string | number;
   doctor_name: string;
   doctor_did: string;
   medications: Medication[];
   created_at: string;
-  expires_at: string;
+  expires_at?: string;
+  date_expires?: string;
   status: 'active' | 'expired' | 'used';
-  signature: string;
+  signature?: string;
+  digital_signature?: string;
   verified: boolean;
-}
-
-interface ApiResponse {
-  prescription: Prescription;
 }
 
 const ThemedText = ({ children, style, ...props }: any) => (
@@ -65,9 +63,8 @@ export default function PrescriptionDetailScreen() {
     try {
       setLoading(true);
       setError('');
-      const result = await (api.getPrescription as any)(id);
-      const data: ApiResponse = result || { prescription: null };
-      setPrescription(data.prescription || null);
+      const result = await api.getPrescription(id as string);
+      setPrescription(result as Prescription);
     } catch (err: any) {
       setError(err.message || 'Failed to load prescription');
       setPrescription(null);
@@ -140,7 +137,7 @@ export default function PrescriptionDetailScreen() {
   }
 
   const issueDate = prescription.created_at.split('T')[0];
-  const expiryDate = prescription.expires_at.split('T')[0];
+  const expiryDate = (prescription.expires_at || prescription.date_expires || '').split('T')[0];
 
   const shortenedDid = prescription.doctor_did.length > 15
     ? `...${prescription.doctor_did.slice(-15)}`

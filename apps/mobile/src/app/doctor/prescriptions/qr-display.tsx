@@ -64,16 +64,11 @@ export default function QRDisplayScreen() {
   }, [prescriptionId, loadPrescription]);
 
   const handleMarkAsGiven = async () => {
+    if (!prescriptionId) return;
     try {
       setMarkingAsGiven(true);
-      // TASK-041 will implement the actual API call
-      if ((api as any).markPrescriptionAsGiven) {
-        await (api as any).markPrescriptionAsGiven(prescriptionId);
-      } else {
-        // Placeholder behavior
-      }
+      await api.markPrescriptionAsGiven(prescriptionId);
     } catch (err) {
-      // Ignore errors for the placeholder
     } finally {
       setMarkingAsGiven(false);
     }

@@ -23,19 +23,17 @@ interface Medication {
 }
 
 interface Prescription {
-  id: string;
+  id: string | number;
   patient_name: string;
   doctor_name: string;
   doctor_did: string;
   medications: Medication[];
   created_at: string;
-  expires_at: string;
+  expires_at?: string;
+  date_expires?: string;
   status: 'active' | 'expired' | 'used';
-  signature: string;
-}
-
-interface ApiResponse {
-  prescriptions: Prescription[];
+  signature?: string;
+  digital_signature?: string;
 }
 
 const ThemedText = ({ children, style, ...props }: any) => (
@@ -66,9 +64,8 @@ export default function PatientWalletScreen() {
     try {
       setLoading(true);
       setError('');
-      const result = await (api.getPrescriptions as any)();
-      const data: ApiResponse = result || { prescriptions: [] };
-      setPrescriptions(data.prescriptions || []);
+      const result = await api.getPrescriptions();
+      setPrescriptions((result.items || []) as unknown as Prescription[]);
     } catch (err: any) {
       setError('Failed to load prescriptions');
       setPrescriptions([]);
@@ -177,7 +174,7 @@ export default function PatientWalletScreen() {
              {item.created_at.split('T')[0]} • {item.doctor_name}
            </ThemedText>
            <ThemedText style={styles.smallText}>
-             Expires: {item.expires_at.split('T')[0]}
+             Expires: {(item.expires_at || item.date_expires || '').split('T')[0]}
            </ThemedText>
          </View>
       </TouchableOpacity>
@@ -227,7 +224,7 @@ export default function PatientWalletScreen() {
         <FlatList
           data={filteredPrescriptions}
           renderItem={renderPrescriptionCard}
-          keyExtractor={(p) => p.id}
+          keyExtractor={(p) => String(p.id)}
           scrollEnabled={false}
         />
       </ScrollView>

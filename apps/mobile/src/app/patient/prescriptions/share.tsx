@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import QRCode from 'react-native-qrcode-svg';
-import { api } from '../../../services/api';
+import { api, VerifiablePresentation } from '../../../services/api';
 import { PatientTheme } from '../../../components/theme/PatientTheme';
 
 interface Medication {
@@ -22,37 +22,19 @@ interface Medication {
 }
 
 interface Prescription {
-  id: string;
+  id: string | number;
   patient_name: string;
-  patient_id: string;
+  patient_id: string | number;
   doctor_name: string;
   doctor_did: string;
   medications: Medication[];
   created_at: string;
-  expires_at: string;
+  expires_at?: string;
+  date_expires?: string;
   status: 'active' | 'expired' | 'used';
-  signature: string;
+  signature?: string;
+  digital_signature?: string;
   verified: boolean;
-}
-
-interface ApiResponse {
-  prescription: Prescription;
-}
-
-interface VerifiablePresentation {
-  '@context': string[];
-  type: string;
-  id?: string;
-  created?: string;
-  expiresAt?: string;
-  holder?: string;
-  verifiableCredential?: any[];
-  proof?: any;
-}
-
-interface PresentationResponse {
-  presentation: VerifiablePresentation;
-  qrData?: string;
 }
 
 const PHARMACIES = [
@@ -92,9 +74,8 @@ export default function SharePrescriptionScreen() {
     try {
       setLoading(true);
       setError('');
-      const result = await (api.getPrescription as any)(id);
-      const data: ApiResponse = result || { prescription: null };
-      setPrescription(data.prescription || null);
+      const result = await api.getPrescription(id as string);
+      setPrescription(result as Prescription);
     } catch (err: any) {
       setError(err.message || 'Failed to load prescription');
       setPrescription(null);
@@ -125,11 +106,9 @@ export default function SharePrescriptionScreen() {
     try {
       setLoading(true);
       setError('');
-      const apiAny = api as any;
-      const result = await apiAny.generatePresentation(id);
-      const data: PresentationResponse = result || { presentation: null };
-      if (data.presentation) {
-        setPresentation(data.presentation);
+      const result = await api.generatePresentation(id as string);
+      if (result.presentation) {
+        setPresentation(result.presentation);
         setTimeRemaining(900);
       }
     } catch (err: any) {
@@ -142,8 +121,7 @@ export default function SharePrescriptionScreen() {
   const handlePharmacySelect = async (pharmacyId: string) => {
     setSelectedPharmacy(pharmacyId);
     try {
-      const apiAny = api as any;
-      await apiAny.selectPharmacy(pharmacyId);
+      await api.selectPharmacy(pharmacyId);
     } catch (err) {
     }
   };

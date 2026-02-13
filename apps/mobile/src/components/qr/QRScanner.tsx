@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Camera, useCameraPermissions } from 'expo-camera';
-
-const BarCodeScanner = {
-  Constants: {
-    BarCodeType: {
-      qr: 'qr' as const,
-    },
-  },
-};
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
 export interface VerifiableCredential {
   '@context'?: string[];
@@ -113,18 +105,14 @@ export default function QRScanner({ onQRCodeScanned, onError }: QRScannerProps) 
     );
   }
 
-  // Type assertion for Camera component to satisfy TypeScript
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CameraComponent = Camera as any;
-
   return (
     <View style={styles.container}>
-      <CameraComponent
+      <CameraView
         testID="camera-component"
         style={styles.camera}
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-        barCodeScannerSettings={{
-          barCodeTypes: [BarCodeScanner.Constants.BarCodeType.qr],
+        barcodeScannerSettings={{
+          barcodeTypes: ['qr'],
         }}
       />
       <View style={styles.overlay}>
