@@ -1394,7 +1394,7 @@ Don't have a number? Use demo: SAPC123456
 - [x] Task 32: Create demo-video.spec.ts
 - [ ] Task 33: Implement QR text extraction flow (deferred - requires screen modifications)
 - [ ] Task 34: Implement mock camera handlers (deferred - requires screen modifications)
-- [ ] Task 35: Record and verify video
+- [x] Task 35: Record and verify video
 - [ ] Task 36: Compress with ffmpeg
 
 ### Phase 7: Documentation (1-2 hours)
