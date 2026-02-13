@@ -47,7 +47,7 @@ This package contains everything needed to build and deploy a digital prescripti
 - **US-027:** Multi-Tenancy ← NEW
 
 ### Reviews
-- **[Momus Review Report](/momus-review-report.md)**
+- **Momus Review Report** (incorporated into v3.0 plan)
   - 5 critical issues (all resolved in v3.0)
   - 12 major concerns
   - 13 minor suggestions
@@ -527,12 +527,15 @@ docker system prune
 | Document | Purpose |
 |----------|---------|
 | `implementation-plan-v3.md` | **Main plan - start here** |
-| `implementation-plan-v2.md` | Previous version (for reference) |
+| `docs/plans/implementation-plan-v1.md` | Original plan (archived) |
+| `docs/plans/implementation-plan-v2.md` | Previous version (archived) |
 | `user-stories/README.md` | Index of all user stories |
 | `user-stories/001-*.md` to `027-*.md` | Individual user stories |
-| `momus-review-report.md` | Expert review and recommendations |
-| `docs/architecture.md` | Detailed architecture (create as needed) |
-| `docs/deployment.md` | Deployment guides (create as needed) |
+| `docs/DEMO-TESTING.md` | Demo testing guide |
+| `docs/testing/TEST_FIXES_REPORT.md` | Test fix documentation |
+| `docs/testing/VERIFICATION_INVESTIGATION.md` | Verification investigation |
+| `docs/reports/DIDX-COMPATIBILITY-REPORT.md` | DIDx compatibility report |
+| `docs/archive/CHEQD_INTEGRATION_STATUS.md` | Cheqd integration (archived) |
 
 ---
 

@@ -362,7 +362,7 @@ Total: 6 weeks (no delay)
 3. ✅ **Enabled DIDComm flags** 
 4. ✅ **Ran full test suite** (246 pass / 19 pre-existing failures)
 5. ✅ **Verified Docker services** (all healthy)
-6. ✅ **Updated documentation** (this report, DEMO-TESTING.md)
+6. ✅ **Updated documentation** (this report, docs/DEMO-TESTING.md)
 
 ---
 

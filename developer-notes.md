@@ -279,8 +279,8 @@ git tag -l
 - `.gitignore` - Comprehensive ignore rules
 - `README.md` - Project overview
 - `AGENTS.md` - Agent reference and standards
-- `implementation-plan.md` - Original plan
-- `implementation-plan-v2.md` - Revised plan
+- `docs/plans/implementation-plan-v1.md` - Original plan (moved)
+- `docs/plans/implementation-plan-v2.md` - Revised plan (moved)
 - `implementation-plan-v3.md` - Current active plan
 - `user-stories/README.md` - Story index
 - `user-stories/001-025.md` - All user stories

@@ -76,7 +76,7 @@ The verification endpoint IS functional:
 
 - `app/tests/test_signing.py` - Added xfail markers, updated assertions
 - `app/services/verification.py` - Trust registry accepts testnet DIDs
-- `TEST_FIXES_REPORT.md` - Documentation of all fixes
+- `docs/testing/TEST_FIXES_REPORT.md` - Documentation of all fixes
 
 ## Co-author
 
