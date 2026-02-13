@@ -1391,9 +1391,9 @@ Don't have a number? Use demo: SAPC123456
 - [x] Task 31: Verify video recording works
 
 ### Phase 6: E2E Test & Video (4-5 hours)
-- [ ] Task 32: Create demo-video.spec.ts
-- [ ] Task 33: Implement QR text extraction flow
-- [ ] Task 34: Implement mock camera handlers
+- [x] Task 32: Create demo-video.spec.ts
+- [ ] Task 33: Implement QR text extraction flow (deferred - requires screen modifications)
+- [ ] Task 34: Implement mock camera handlers (deferred - requires screen modifications)
 - [ ] Task 35: Record and verify video
 - [ ] Task 36: Compress with ffmpeg
 
@@ -1412,7 +1412,7 @@ Don't have a number? Use demo: SAPC123456
 - [ ] Task 46: Final video review
 
 **TOTAL: 28-32 hours (~4 developer days)**
-**PROGRESS: 28/46 tasks complete (61%)**
+**PROGRESS: 29/46 tasks complete (63%)**
 
 ---
 
