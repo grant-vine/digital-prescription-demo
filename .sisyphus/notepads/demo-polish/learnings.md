@@ -195,3 +195,239 @@ const [showPassword, setShowPassword] = useState(false);
 - Phase 4: Pharmacist auth redesign (similar pattern)
 - Phase 5: Doctor auth redesign (similar pattern)
 - Phase 6: Camera fallback implementation
+
+---
+
+## Phase 4 - Pharmacist Auth Redesign (2026-02-13)
+
+### Overview
+Complete redesign of the pharmacist authentication screen with a modern 4-step flow using shared components from Phase 1 and Phase 3 patterns.
+
+### Features Implemented
+
+1. **CardContainer Wrapper**
+   - Entire auth flow wrapped in responsive card (maxWidth: 480)
+   - Centered on larger screens with shadow and rounded corners
+   - Uses PharmacistTheme colors (green #059669) for consistent theming
+
+2. **StepIndicator Integration**
+   - 4 steps: Login → Profile → SAPC → Identity (DID)
+   - Horizontal progress bar showing completion status
+   - Allow navigation to previous steps (backward only)
+   - Step icons: 🔐 (Login), 👤 (Profile), 🛡️ (SAPC), 🔑 (Identity)
+
+3. **Four Step Views**
+   
+   **LoginFormView:**
+   - ThemedInput for email (with mail icon)
+   - ThemedInput for password (with lock icon)
+   - Password visibility toggle (👁️/🙈 icons) positioned absolutely
+   - Login button with loading state
+   - Error banner with warning icon
+   
+   **ProfileSetupView:**
+   - Large pharmacy icon (🏥)
+   - ThemedInput for pharmacy name
+   - ThemedInput for optional pharmacy registration number
+   - Info box explaining profile usage
+   - Continue button (disabled until pharmacy name entered)
+   
+   **SAPCValidationView:**
+   - SAPC shield icon (🛡️)
+   - Label row with "SAPC Number" + InfoTooltip button
+   - ThemedInput for SAPC with real-time validation
+   - Format hint: "SAPC followed by 6 digits"
+   - Success banner when validated
+   - Validation checkmark on ThemedInput
+   - **InfoTooltip Integration:**
+     ```typescript
+     <InfoTooltip
+       title="What is SAPC?"
+       content={SAPC_HELP_TEXT}
+       icon="help"
+     />
+     ```
+   - Real-time format validation: `/^SAPC\d{6}$/`
+   
+   **DIDCreationView:**
+   - Key icon (🔑)
+   - Info box explaining DID purpose
+   - Loading spinner while creating
+   - Success view with DID display
+   - "Continue to Dashboard" button
+
+4. **InfoTooltip for SAPC Field**
+   - Comprehensive help text explaining SAPC registration
+   - Modal with title, scrollable content, close button
+   - Triggered by info button next to SAPC label
+   - Content includes:
+     - What SAPC is
+     - Why it's required (4 bullet points)
+     - Format specification
+     - Example
+     - Contact information
+
+5. **DemoLoginButtons Integration**
+   - Shows at bottom of card
+   - Auto-fills pharmacist credentials (lisa.chen@pharmacy.co.za / Demo@2024)
+   - Automatically navigates to login step if not already there
+   - Only renders when DEMO_MODE enabled in Expo config
+   - Highlights current role (pharmacist) with green theme
+
+6. **Smooth Animations (Same as Patient Auth)**
+   - Step transitions use fade + slide animation
+   - Animated.sequence for coordinated transitions
+   - 150ms fade out, 200ms fade in with slide
+   - Uses useNativeDriver for performance
+   - Same exact pattern as Patient auth for consistency
+
+### SAPC Validation Implementation
+
+**Format Validation:**
+```typescript
+const validateSAPCFormat = useCallback((value: string): boolean => {
+  return /^SAPC\d{6}$/.test(value);
+}, []);
+```
+
+**Real-time Validation:**
+```typescript
+const handleSAPCChange = useCallback((value: string) => {
+  setSapcNumber(value);
+  const isValid = validateSAPCFormat(value);
+  setSAPCValidated(isValid);
+  if (isValid) {
+    setSAPCError(null);
+  }
+}, [validateSAPCFormat]);
+```
+
+**ThemedInput with Validation:**
+```typescript
+<ThemedInput
+  placeholder="SAPC123456"
+  value={sapcNumber}
+  onChangeText={handleSAPCChange}
+  icon="info"
+  validation={sapcValidated ? { isValid: true, message: 'Valid SAPC format' } : undefined}
+/>
+```
+
+### Preserved API Contracts
+
+All existing API calls preserved:
+- `api.authenticatePharmacist(email, password)` - Login
+- `api.setupPharmacy({ pharmacy_name, sapc_number })` - Profile setup
+- `api.validateSAPC(sapcNumber)` - Server-side SAPC validation
+- `api.createPharmacistDID(pharmacistId)` - DID creation
+
+### TypeScript Strict Compliance
+
+- ✅ No `as any` or `@ts-ignore` usage
+- ✅ Explicit return types: `React.ReactElement`
+- ✅ Proper error handling with `unknown` type
+- ✅ Interface documentation for all component props
+- ✅ Zero LSP errors
+
+### Component Architecture
+
+**Four Inline Sub-Components:**
+```typescript
+function LoginFormView({ email, password, ... }: LoginFormViewProps): React.ReactElement { }
+function ProfileSetupView({ pharmacyName, ... }: ProfileSetupViewProps): React.ReactElement { }
+function SAPCValidationView({ sapcNumber, ... }: SAPCValidationViewProps): React.ReactElement { }
+function DIDCreationView({ did, ... }: DIDCreationViewProps): React.ReactElement { }
+```
+
+Benefits:
+- Clear separation of concerns per step
+- Step-specific state and validation logic
+- Easy to test independently
+- Consistent with Patient auth pattern
+
+### InfoTooltip Usage Pattern
+
+**Label Row with Tooltip:**
+```typescript
+<View style={stepStyles.labelRow}>
+  <Text style={[stepStyles.labelText, { color: theme.colors.text }]}>
+    SAPC Number
+  </Text>
+  <InfoTooltip
+    title="What is SAPC?"
+    content={SAPC_HELP_TEXT}
+    icon="help"
+  />
+</View>
+```
+
+**Comprehensive Help Text:**
+```typescript
+const SAPC_HELP_TEXT = `South African Pharmacy Council (SAPC) Registration
+
+The SAPC number is your official registration identifier issued by the South African Pharmacy Council...
+
+Why it's required:
+• Legal requirement for all practicing pharmacists
+• Ensures only qualified professionals dispense
+• Required for digital prescription verification
+• Part of compliance audit trail
+
+Format: SAPC followed by 6 digits
+Example: SAPC123456`;
+```
+
+### Error Handling Pattern
+
+**Per-step Error States:**
+- Separate error state for login (`error`)
+- Separate error state for SAPC (`sapcError`)
+- Error banners with warning icon (⚠️)
+- Type-safe error extraction
+
+### Key Differences from Patient Auth
+
+1. **4 steps instead of 3** - Added SAPC validation step
+2. **InfoTooltip integration** - First use of InfoTooltip component
+3. **Real-time validation** - SAPC format validated on every keystroke
+4. **Pharmacy-specific fields** - Pharmacy name and registration number
+5. **Different step order** - Login comes first (patient has Welcome first)
+
+### Files Modified
+
+- `apps/mobile/src/app/pharmacist/auth.tsx` - Complete rewrite (430 → 800+ lines)
+
+### Verification Results
+
+- ✅ TypeScript strict compliance
+- ✅ Zero LSP errors
+- ✅ All existing testIDs preserved
+- ✅ Existing API contracts maintained
+- ✅ InfoTooltip renders correctly
+- ✅ SAPC validation works (client-side)
+- ✅ Server-side SAPC validation preserved
+
+### Technical Debt / Notes
+
+1. **InfoTooltip uses PatientTheme:** The component is hardcoded to use PatientTheme colors - this is acceptable as it's visually neutral but should be noted
+2. **SAPC regex client-side only:** Format validation happens client-side before server validation - good UX, but server is source of truth
+3. **Step indicator navigation:** Only backward navigation allowed (intentional)
+
+### Lessons Learned
+
+1. **4-step flow complexity:** Each additional step adds ~200 lines - keep steps focused
+2. **InfoTooltip integration:** Label row pattern works well for field-level help
+3. **Real-time validation:** Great UX but requires careful state management
+4. **Consistent patterns:** Following Patient auth pattern exactly made implementation faster
+5. **Validation state:** Separate client-side format validation from server validation
+
+### Time Taken
+
+- Estimated: 4-5 hours
+- Actual: ~2 hours (benefited from Patient auth pattern)
+
+### Next Steps
+
+- Phase 5: Doctor auth redesign (similar 3-4 step pattern)
+- Phase 6: Camera fallback implementation
+- Verify all auth flows work end-to-end
