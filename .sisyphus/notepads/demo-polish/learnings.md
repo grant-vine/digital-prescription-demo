@@ -2,183 +2,196 @@
 
 ---
 
-## Phase 2 - Index Page Enhancements (2026-02-13)
+## Phase 3 - Patient Auth Redesign (2026-02-13)
 
-### Components Created (12-16)
-All 4 components/sections successfully created:
+### Overview
+Complete redesign of the patient authentication screen with a modern 3-step flow using shared components from Phase 1.
 
-1. **RoleCard.tsx** - Card component with expand/collapse animation
-2. **WorkflowDiagram.tsx** - Responsive workflow visualization
-3. **Updated index.tsx** - New layout with all components integrated
-4. **QuickStartGuide** - FAQ accordion component (inline in index.tsx)
+### Features Implemented
 
-### RoleCard Component Details
+1. **CardContainer Wrapper**
+   - Entire auth flow wrapped in responsive card (maxWidth: 480)
+   - Centered on larger screens with shadow and rounded corners
+   - Uses PatientTheme colors for consistent theming
 
-**Features:**
-- Role color accent border on left (4px)
-- Header with icon, title, and estimated time badge
-- Description always visible
-- Smooth expand/collapse animation using Animated API
-- "Continue as [role]" action button
-- Responsive max-width constraints
+2. **StepIndicator Integration**
+   - 3 steps: Welcome → Create Wallet → Login
+   - Horizontal progress bar showing completion status
+   - Allow navigation to previous steps (backward only)
+   - Step icons: 👋 (Welcome), 👛 (Wallet), 🔐 (Login)
 
-**Animation Implementation:**
+3. **Three Step Views**
+   
+   **WelcomeView:**
+   - Large patient icon (👤)
+   - Welcome message and description
+   - 3 benefit items with icons (secure, accessible, verifiable)
+   - Two buttons: "Create New Wallet" (primary) and "I Already Have a Wallet" (secondary)
+   
+   **WalletCreationView:**
+   - Loading state with spinner and "Creating your secure wallet..." text
+   - Error banner with warning icon
+   - Success state with checkmark icon
+   - Wallet ID display in monospace font
+   - DID display with truncated formatting
+   - "Continue to Login" button
+   
+   **LoginFormView:**
+   - ThemedInput for email (with mail icon)
+   - ThemedInput for password (with lock icon)
+   - Password visibility toggle (👁️/🙈 icons)
+   - Loading state with ActivityIndicator
+   - Error banner for login failures
+
+4. **DemoLoginButtons Integration**
+   - Shows at bottom of card
+   - Auto-fills patient credentials on selection
+   - Automatically navigates to login step
+   - Only renders when DEMO_MODE enabled in Expo config
+
+5. **Smooth Animations**
+   - Step transitions use fade + slide animation
+   - Animated.sequence for coordinated transitions
+   - 150ms fade out, 200ms fade in with slide
+   - Uses useNativeDriver for performance
+   
+   **Animation Pattern:**
+   ```typescript
+   const animateStepTransition = (direction: 'forward' | 'backward'): void => {
+     const toValue = direction === 'forward' ? -20 : 20;
+     
+     Animated.sequence([
+       Animated.parallel([
+         Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
+         Animated.timing(translateAnim, { toValue, duration: 150, useNativeDriver: true }),
+       ]),
+       Animated.parallel([
+         Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
+         Animated.timing(translateAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+       ]),
+     ]).start();
+   };
+   ```
+
+### TypeScript Strict Compliance
+
+- ✅ No `as any` or `@ts-ignore` usage
+- ✅ Explicit return types: `React.ReactElement`
+- ✅ Proper error handling with `unknown` type
+- ✅ Interface documentation for all component props
+- ✅ Zero LSP errors after fixes
+
+### Component Architecture
+
+**Inline Sub-Components Pattern:**
 ```typescript
-const heightAnim = useRef(new Animated.Value(0)).current;
-const opacityAnim = useRef(new Animated.Value(0)).current;
-
-useEffect(() => {
-  if (expanded) {
-    Animated.parallel([
-      Animated.timing(heightAnim, { toValue: contentHeight, duration: 300 }),
-      Animated.timing(opacityAnim, { toValue: 1, duration: 200, delay: 100 }),
-    ]).start();
-  }
-}, [expanded, contentHeight]);
+function WelcomeView({ onCreateWallet, onExistingWallet }: WelcomeViewProps): React.ReactElement { }
+function WalletCreationView({ walletId, did, loading, error, onContinue }: WalletCreationViewProps): React.ReactElement { }
+function LoginFormView({ email, password, loading, error, ... }: LoginFormViewProps): React.ReactElement { }
 ```
 
-**Key Pattern:** Measure content height with onLayout, then animate to that value. Never use fixed heights for animated content.
+Benefits:
+- Encapsulated step logic
+- Clear props interface
+- Easy to test independently
+- Keeps main component focused on state management
 
-**Data Structure:**
+### ThemedInput Usage
+
+**Email Input:**
 ```typescript
-export const ROLE_INFO: RoleInfo[] = [
-  { id: 'doctor', title: 'Healthcare Provider', color: '#2563EB', icon: '👨‍⚕️', ... },
-  { id: 'patient', title: 'Patient', color: '#0891B2', icon: '🤒', ... },
-  { id: 'pharmacist', title: 'Pharmacist', color: '#059669', icon: '💊', ... },
-];
+<ThemedInput
+  label="Email Address"
+  placeholder="john.smith@example.com"
+  value={email}
+  onChangeText={setEmail}
+  icon="mail"
+  autoCapitalize="none"
+  keyboardType="email-address"
+/>
 ```
 
-### WorkflowDiagram Component Details
-
-**Responsive Breakpoints:**
-- Mobile (<768px): Vertical layout with vertical connecting lines
-- Desktop (>=768px): Horizontal layout with arrow connectors
-- Uses useWindowDimensions hook for real-time responsiveness
-
-**Color Coding:**
-- Doctor: Blue (#2563EB)
-- Patient: Cyan (#0891B2)
-- Pharmacist: Green (#059669)
-- System: Gray (#64748b)
-
-**Key Pattern for Responsive Design:**
+**Password Input with Visibility Toggle:**
 ```typescript
-const { width } = useWindowDimensions();
-const isMobile = width < 768;
-
-// Style arrays with conditional styles
-style={[
-  styles.stepContainer,
-  isMobile ? styles.stepContainerMobile : styles.stepContainerDesktop,
-]}
+const [showPassword, setShowPassword] = useState(false);
+// ...
+<ThemedInput
+  label="Password"
+  placeholder="Enter your password"
+  value={password}
+  onChangeText={setPassword}
+  icon="lock"
+  secureTextEntry={!showPassword}
+/>
+<TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+  <Text>{showPassword ? '🙈' : '👁️'}</Text>
+</TouchableOpacity>
 ```
 
-### QuickStartGuide Component Details
+### Error Handling Pattern
 
-**Implementation:** Inline component within index.tsx (not separate file per spec)
+**Error State Management:**
+- Local error state per step
+- Error banner with warning icon (⚠️)
+- Auto-clear on new action attempt
+- Type-safe error extraction: `err instanceof Error ? err.message : 'Failed'`
 
-**Features:**
-- Accordion-style FAQ items
-- Smooth expand/collapse animation
-- Only one item expanded at a time
-- Gray background to distinguish from main content
+### Keyboard Handling
 
-**State Management:**
 ```typescript
-const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-const handleToggle = (index: number): void => {
-  setExpandedIndex(expandedIndex === index ? null : index);
-};
+<KeyboardAvoidingView
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  style={styles.keyboardAvoidingView}
+>
+  <ScrollView
+    contentContainerStyle={styles.scrollContent}
+    keyboardShouldPersistTaps="handled"
+  >
+    {/* Content */}
+  </ScrollView>
+</KeyboardAvoidingView>
 ```
 
-### Responsive Layout Patterns
+### Accessibility Features
 
-**Container Breakpoints:**
-```typescript
-const isDesktop = width >= 1024;  // 3 columns
-const isTablet = width >= 768 && width < 1024;  // 2 columns
-const isMobile = width < 768;  // 1 column
-```
-
-**Role Cards Grid:**
-- Desktop: `flexDirection: 'row'`, 3 cards in row with gap
-- Tablet: `flexDirection: 'row'`, 2 cards per row
-- Mobile: Stacked vertically
-
-### Animation Best Practices Learned
-
-1. **Measure before animating:** Use onLayout to get content height
-2. **Absolute positioning for measurement:** Content wrapper needs `position: 'absolute'` while measuring
-3. **Parallel animations:** Use Animated.parallel for height + opacity
-4. **Cleanup on collapse:** Animate both height and opacity down simultaneously
-5. **Native driver limitations:** Cannot use native driver for height animations
-
-### TypeScript Patterns
-
-**Interface Documentation:**
-- All interfaces have JSDoc comments
-- Properties documented with inline /** */ comments
-- @example blocks for exported constants
-
-**Component Return Types:**
-```typescript
-export function RoleCard({ ...props }): React.ReactElement { }
-function FAQAccordionItem({ ...props }): React.ReactElement { }
-```
-
-### Accessibility Implementation
-
-**RoleCard:**
-- `accessibilityRole="button"` on touchable elements
+- `accessibilityRole="button"` on all interactive elements
 - `accessibilityLabel` describing action
-- `accessibilityState={{ expanded }}` for expand state
+- `accessibilityState={{ disabled: loading }}` for loading states
+- `testID` props for testing (preserved from original)
 
-**FAQAccordionItem:**
-- `accessibilityLabel={`FAQ ${index + 1}: ${item.question}`}`
-- `accessibilityState={{ expanded }}`
+### Files Modified
 
-### Testing Responsive Breakpoints
-
-**Verified widths:**
-- 375px (iPhone SE): Vertical workflow, stacked cards
-- 768px (iPad portrait): Horizontal workflow starts, 2-column cards
-- 1024px+ (Desktop): Full horizontal, 3-column cards
-
-**Method:**
-Use `useWindowDimensions()` hook which provides real-time updates when window resizes.
-
-### Files Changed
-
-**Created:**
-- `apps/mobile/src/components/RoleCard.tsx`
-- `apps/mobile/src/components/WorkflowDiagram.tsx`
-
-**Modified:**
-- `apps/mobile/src/app/index.tsx` - Complete rewrite with new layout
+- `apps/mobile/src/app/patient/auth.tsx` - Complete rewrite (243 → 748 lines)
 
 ### Verification Results
 
-- **RoleCard.tsx**: ✅ Zero TypeScript errors
-- **WorkflowDiagram.tsx**: ✅ Zero TypeScript errors
-- **index.tsx**: ✅ Zero TypeScript errors
-- **Type check**: ✅ All new files pass (pre-existing camera errors in other files)
+- ✅ TypeScript strict compliance
+- ✅ Zero LSP errors
+- ✅ All existing testIDs preserved
+- ✅ Existing API contracts maintained
+- ✅ No breaking changes to navigation
 
-### Key Decisions
+### Technical Debt / Notes
 
-1. **Inline QuickStartGuide:** Kept as inline component in index.tsx per spec (not separate file)
-2. **ROLE_INFO export:** Exported from RoleCard.tsx for reuse by parent
-3. **Responsibility keys:** Used responsibility text as key (stable since static data) instead of index
-4. **Animation timing:** 300ms for expand, 250ms for collapse (feels responsive)
-5. **Max content height:** Limited responsibilities list to maxHeight: 150 with ScrollView
+1. **Password visibility toggle position:** Absolute positioned over ThemedInput - may need adjustment if ThemedInput internal structure changes
+2. **Step indicator click handler:** Only allows backward navigation (intentional UX decision)
+3. **Demo credentials:** Auto-navigates to login step on selection (improves UX)
+
+### Lessons Learned
+
+1. **Inline sub-components:** Better than separate files for tightly coupled views
+2. **Animation sequences:** Use Animated.sequence for coordinated multi-step animations
+3. **Error type safety:** Use `err instanceof Error` pattern for type-safe error messages
+4. **Theme consistency:** Always use theme constants - no hard-coded hex values
+5. **Prop drilling:** Acceptable for 2-level depth; consider context for deeper nesting
 
 ### Time Taken
 
-- Estimated: 5.5 hours
-- Actual: ~3.5 hours
+- Estimated: 4-5 hours
+- Actual: ~2 hours
 
 ### Next Steps
 
-- Phase 3: Patient auth redesign using ThemedInput, DemoLoginButtons, StepIndicator
-- Phase 4: Pharmacist auth redesign
-- Phase 5: Doctor auth redesign
+- Phase 4: Pharmacist auth redesign (similar pattern)
+- Phase 5: Doctor auth redesign (similar pattern)
 - Phase 6: Camera fallback implementation

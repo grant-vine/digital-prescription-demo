@@ -1363,19 +1363,19 @@ Don't have a number? Use demo: SAPC123456
 - [x] Task 11: Create ErrorBoundary component (+1h)
 
 ### Phase 2: Index Page (4-5 hours)
-- [ ] Task 12: Create RoleCard component with expand/collapse
-- [ ] Task 13: Create WorkflowDiagram component (responsive)
-- [ ] Task 14: Update index.tsx with new layout
-- [ ] Task 15: Add Quick Start guide section
-- [ ] Task 16: Test responsive breakpoints
+- [x] Task 12: Create RoleCard component with expand/collapse
+- [x] Task 13: Create WorkflowDiagram component (responsive)
+- [x] Task 14: Update index.tsx with new layout
+- [x] Task 15: Add Quick Start guide section
+- [x] Task 16: Test responsive breakpoints
 
 ### Phase 3: Patient Auth Redesign (5-6 hours)
-- [ ] Task 17: Redesign Patient auth screen with step indicator
-- [ ] Task 18: Add Welcome view
-- [ ] Task 19: Add Wallet creation view
-- [ ] Task 20: Add Login form with ThemedInput
-- [ ] Task 21: Integrate DemoLoginButtons
-- [ ] Task 22: Add animations and polish
+- [x] Task 17: Redesign Patient auth screen with step indicator
+- [x] Task 18: Add Welcome view
+- [x] Task 19: Add Wallet creation view
+- [x] Task 20: Add Login form with ThemedInput
+- [x] Task 21: Integrate DemoLoginButtons
+- [x] Task 22: Add animations and polish
 
 ### Phase 4: Pharmacist Auth Redesign (5-6 hours)
 - [ ] Task 23: Redesign Pharmacist auth with step indicator
