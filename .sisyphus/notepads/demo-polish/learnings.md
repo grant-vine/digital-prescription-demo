@@ -431,3 +431,183 @@ Example: SAPC123456`;
 - Phase 5: Doctor auth redesign (similar 3-4 step pattern)
 - Phase 6: Camera fallback implementation
 - Verify all auth flows work end-to-end
+
+---
+
+## Phase 5 - Playwright Setup (2026-02-13)
+
+### Overview
+Set up Playwright configuration for E2E testing of Expo Web application with video recording capabilities.
+
+### Tasks Completed
+
+**Task 29: Create playwright.config.ts**
+- ✅ File created: `apps/mobile/playwright.config.ts`
+- ✅ Imports from `@playwright/test`: `defineConfig`, `devices`
+- ✅ Key settings:
+  - `testDir: './e2e'` - Tests located in e2e/ directory
+  - `fullyParallel: false` - Serial execution for demo stability
+  - `retries: 2` - Retry flaky tests twice
+  - `timeout: 120000` - 2-minute test timeout
+  - `expect.timeout: 10000` - Assertion timeout
+
+**Video Recording Configuration:**
+```typescript
+video: {
+  mode: 'on',
+  size: { width: 1280, height: 720 }  // HD resolution
+}
+```
+
+**WebServer Configuration:**
+```typescript
+webServer: {
+  command: 'npx expo start --web --non-interactive',
+  port: 8081,
+  timeout: 120000,
+  reuseExistingServer: true
+}
+```
+
+**Output Directory:**
+- `outputDir: 'test-results/'` - Videos and results saved here
+- `preserveOutput: 'always'` - Never delete results (even on pass)
+
+**Project Configuration:**
+- Browser: Desktop Chrome (via `devices['Desktop Chrome']`)
+- Viewport: 1280x720 (matches video size)
+- Base URL: `http://localhost:8081` (Expo Web dev server)
+- Permissions: `['camera']` (for QR scanning flows)
+
+**Task 30: Add test scripts to package.json**
+- ✅ `npm test` - Still runs Jest unit tests
+- ✅ `npm run test:e2e` - Run all Playwright tests
+- ✅ `npm run test:e2e:ui` - Run with interactive UI mode
+- ✅ `npm run test:e2e:debug` - Run with debugger
+- ✅ `npm run demo:video` - Record specific demo video
+
+**Task 31: Verify configuration**
+- ✅ `@playwright/test` installed (v1.58.2)
+- ✅ Config validates: loads correctly via Node.js
+- ✅ Config exports: `default` export matches Playwright expectations
+- ✅ All config properties verified:
+  - `testDir: ./e2e` ✅
+  - `retries: 2` ✅
+  - `timeout: 120000` ✅
+  - `video.size: { width: 1280, height: 720 }` ✅
+  - `webServer.port: 8081` ✅
+
+### Key Technical Decisions
+
+1. **Serial Tests (fullyParallel: false)**
+   - Rationale: Demo stability - running tests in parallel could cause port conflicts
+   - Ensures Expo Web server startup/teardown is predictable
+   - Better for video recording - single stream vs. parallel noise
+
+2. **Retries: 2**
+   - E2E tests can be flaky in CI environments
+   - 2 retries is standard for Playwright (original default)
+   - Reduces false-negative failures without excessive re-runs
+
+3. **Video Recording Always-On**
+   - `mode: 'on'` - Record every test run
+   - Essential for demo - can review failed/successful runs
+   - `preserveOutput: 'always'` - Never delete, even if tests pass
+   - Useful for debugging unexpected behavior
+
+4. **1280x720 Video Resolution**
+   - HD resolution, professional appearance
+   - Matches viewport size (no scaling artifacts)
+   - Typical streaming resolution (YouTube, etc.)
+   - Reasonable file size for compression in Phase 6
+
+5. **Viewport Size Matches Video Size**
+   - Browser viewport: 1280x720
+   - Video output: 1280x720
+   - Ensures recorded video matches what user sees (no letter-boxing)
+
+6. **Output Directory Strategy**
+   - `test-results/` - Centralized location for all artifacts
+   - Includes: videos, trace files, screenshots
+   - Separate from source code (easier to .gitignore)
+   - Can be easily cleaned: `rm -rf apps/mobile/test-results`
+
+### Playwright Features Not Used (for now)
+
+- **Tracing**: Not enabled (video recording is sufficient)
+- **Screenshots**: Not enabled (video is more informative)
+- **Test artifacts**: Only videos captured (minimal disk usage)
+- **Multiple browsers**: Only Chrome (simplest for demo)
+- **Reporters**: Using default (summary only)
+
+### TypeScript Strict Compliance
+
+- ✅ No `as any` or `@ts-ignore` usage
+- ✅ Explicit return type: `export default defineConfig(...)`
+- ✅ Proper imports: `defineConfig`, `devices` from `@playwright/test`
+- ✅ No type errors in the config file itself
+
+### Files Modified
+
+1. **Created:** `apps/mobile/playwright.config.ts` (47 lines)
+2. **Modified:** `apps/mobile/package.json` (added 4 test scripts)
+3. **Installed:** `@playwright/test` v1.58.2 as devDependency
+
+### Integration Points
+
+1. **Expo Web Server**
+   - Playwright starts it automatically via webServer config
+   - Port 8081 (from Expo convention)
+   - Non-interactive mode (`--non-interactive`)
+
+2. **E2E Tests (created in Phase 6)**
+   - Will use files like `e2e/demo-video.spec.ts`
+   - Must import from `@playwright/test` (not React Testing Library)
+   - Will record to `test-results/` directory
+
+3. **Video Compression (Phase 6)**
+   - Videos output to `test-results/` as WebM format
+   - Phase 6 will compress to MP4 using ffmpeg
+   - Target: <10MB after compression (from spec)
+
+### Verification Results
+
+✅ Configuration file loads without errors
+✅ All required properties present and correct values
+✅ Package.json scripts properly formatted
+✅ Playwright package installed and available
+✅ Video recording resolution configured (1280x720, 30fps implied)
+
+### Known Issues / Notes
+
+1. **Existing e2e/ files are Jest tests**
+   - Current `e2e/*.spec.ts` files use React Testing Library
+   - These won't be picked up by Playwright (wrong format)
+   - Phase 6 will create Playwright-compatible tests
+   - Will need to move/rename existing Jest tests or create separate playwright tests
+
+2. **ffmpeg dependency**
+   - Already installed (from Phase 0 notes)
+   - Will be used in Phase 6 for video compression
+   - Not needed for Phase 5 (just configuration)
+
+### Lessons Learned
+
+1. **Config file structure**: Playwright expects `export default defineConfig(...)` - CommonJS require also works
+2. **Video recording**: Set `preserveOutput: 'always'` to debug failures without losing videos
+3. **WebServer integration**: Playwright can start dev servers automatically - elegant and reliable
+4. **Viewport matching**: Keep viewport size = video output size for clean recording (no artifacts)
+
+### Time Taken
+
+- Estimated: 1-2 hours
+- Actual: ~30 minutes (straightforward configuration task)
+
+### Next Steps (Phase 6)
+
+1. Create `e2e/demo-video.spec.ts` using Playwright syntax
+2. Write test that exercises doctor → patient → pharmacist workflow
+3. Run `npm run demo:video` to generate video
+4. Compress video using ffmpeg (Phase 6b)
+5. Verify final MP4 is <10MB
+

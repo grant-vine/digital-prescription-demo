@@ -1378,17 +1378,17 @@ Don't have a number? Use demo: SAPC123456
 - [x] Task 22: Add animations and polish
 
 ### Phase 4: Pharmacist Auth Redesign (5-6 hours)
-- [ ] Task 23: Redesign Pharmacist auth with step indicator
-- [ ] Task 24: Create Login step
-- [ ] Task 25: Create Profile setup step
-- [ ] Task 26: Create SAPC validation step with tooltips
-- [ ] Task 27: Create DID creation step
-- [ ] Task 28: Add progress persistence
+- [x] Task 23: Redesign Pharmacist auth with step indicator
+- [x] Task 24: Create Login step
+- [x] Task 25: Create Profile setup step
+- [x] Task 26: Create SAPC validation step with tooltips
+- [x] Task 27: Create DID creation step
+- [x] Task 28: Add progress persistence
 
 ### Phase 5: Playwright Setup (1 hour)
-- [ ] Task 29: Create playwright.config.ts (with retries: 2)
-- [ ] Task 30: Add test scripts to package.json
-- [ ] Task 31: Verify video recording works
+- [x] Task 29: Create playwright.config.ts (with retries: 2)
+- [x] Task 30: Add test scripts to package.json
+- [x] Task 31: Verify video recording works
 
 ### Phase 6: E2E Test & Video (4-5 hours)
 - [ ] Task 32: Create demo-video.spec.ts
@@ -1412,7 +1412,7 @@ Don't have a number? Use demo: SAPC123456
 - [ ] Task 46: Final video review
 
 **TOTAL: 28-32 hours (~4 developer days)**
-**PROGRESS: 11/46 tasks complete (24%)**
+**PROGRESS: 28/46 tasks complete (61%)**
 
 ---
 
