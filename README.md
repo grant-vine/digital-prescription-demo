@@ -88,6 +88,46 @@ The script will:
 
 ---
 
+## 🎬 Investor Demo
+
+Ready to impress investors? Generate a professional 3-panel demo video showing all three roles in action.
+
+### Quick Start
+```bash
+./scripts/start-demo.sh
+```
+This single command sets up the entire demo environment with:
+- PostgreSQL database with demo data
+- Redis cache
+- ACA-Py SSI infrastructure
+- FastAPI backend (http://localhost:8000)
+- React Native mobile app (http://localhost:8081)
+- Pre-seeded demo credentials
+
+### Demo Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Doctor** | `sarah.johnson@hospital.co.za` | `Demo@2024` |
+| **Patient** | `john.smith@example.com` | `Demo@2024` |
+| **Pharmacist** | `lisa.chen@pharmacy.co.za` | `Demo@2024` |
+
+### Video Demo
+
+Generate a professional side-by-side demo video (3-panel layout):
+```bash
+cd apps/mobile
+npm run demo:video
+```
+
+**Output:** `demo-investor-final.mp4` (in project root)
+- **Duration:** 17.7 seconds
+- **Format:** 3-panel side-by-side (Doctor, Patient, Pharmacist)
+- **Resolution:** Professional demo quality
+- **Ready to share** with investors
+
+---
+
 ## 🎯 Recommended Approach
 
 ### Timeline Options
