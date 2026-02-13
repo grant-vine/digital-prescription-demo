@@ -1264,14 +1264,23 @@ def print_summary(stats: Dict[str, Any]) -> None:
 
 def main():
     """Main entry point for seed script."""
+    # Prevent accidental demo account creation in production
+    if os.getenv("DEMO_MODE") != "true":
+        print("⚠️  DEMO_MODE not enabled, skipping demo data creation")
+        print("Set DEMO_MODE=true to create demo accounts")
+        print("")
+        print("If you want to seed production data, use:")
+        print("  python scripts/seed_production_data.py")
+        sys.exit(0)
+    
     parser = argparse.ArgumentParser(
         description="Seed demo data for digital prescription system (US-019)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python scripts/seed_demo_data.py                           # Use defaults
-  python scripts/seed_demo_data.py --doctors 5 --patients 10 # Custom counts
-  python scripts/seed_demo_data.py --reset                   # Clear and reseed
+  DEMO_MODE=true python scripts/seed_demo_data.py                           # Use defaults
+  DEMO_MODE=true python scripts/seed_demo_data.py --doctors 5 --patients 10 # Custom counts
+  DEMO_MODE=true python scripts/seed_demo_data.py --reset                   # Clear and reseed
 
 This script creates:
   - 5+ doctors with HPCSA registration numbers
@@ -1282,6 +1291,10 @@ This script creates:
   - Dispensing records for dispensed prescriptions
   - FHIR R4 compatible metadata
   - Scheduled revocation examples
+  
+⚠️  DEMO_MODE PROTECTION:
+  This script is protected by DEMO_MODE environment variable.
+  Only runs when DEMO_MODE=true is set to prevent accidental demo account creation.
         """,
     )
     
@@ -1322,6 +1335,11 @@ This script creates:
     )
     
     args = parser.parse_args()
+    
+    # Log warning when creating demo accounts
+    print("🎮 DEMO MODE: Creating demo accounts...")
+    print("   These accounts are for demonstration only!")
+    print("")
     
     # Get database URL
     database_url = args.database_url or get_database_url()
