@@ -1,5 +1,8 @@
 """FastAPI Application Entry Point"""
 
+import os
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -30,6 +33,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+USE_DEMO = os.getenv("USE_DEMO", "false").lower() in ("true", "1", "yes")
+app.state.use_demo = USE_DEMO
+
+logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+async def startup_event():
+    if USE_DEMO:
+        logger.warning("🎭 DEMO MODE ENABLED - Using mock SSI services (no ACA-Py required)")
+
 
 app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
 app.include_router(revocation_router, prefix="/api/v1")

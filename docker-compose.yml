@@ -94,6 +94,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/prescriptions
       REDIS_URL: redis://redis:6379/0
       ACAPY_ADMIN_URL: http://acapy:8001
+      USE_DEMO: ${USE_DEMO:-false}
     depends_on:
       db:
         condition: service_healthy

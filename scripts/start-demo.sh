@@ -29,6 +29,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND_DIR="${PROJECT_ROOT}/services/backend"
 MOBILE_DIR="${PROJECT_ROOT}/apps/mobile"
 VENV_DIR="${BACKEND_DIR}/venv"
+USE_DEMO="${USE_DEMO:-false}"
 
 ################################################################################
 # Helper Functions
@@ -126,14 +127,20 @@ check_prerequisites() {
 
 start_docker_infrastructure() {
     log_header "STEP 2: Starting Docker Infrastructure"
-    
+
     cd "${PROJECT_ROOT}"
-    
-    log_section "Pulling Docker images (may take a few minutes on first run)..."
-    docker-compose pull db redis acapy || log_warn "Some images already cached"
-    
-    log_section "Starting PostgreSQL, Redis, and ACA-Py..."
-    docker-compose up -d db redis acapy
+
+    if [ "$USE_DEMO" = "true" ]; then
+        log_warn "🎭 Demo mode enabled - skipping ACA-Py/Docker startup"
+        log_section "Starting PostgreSQL and Redis only..."
+        docker-compose up -d db redis
+    else
+        log_section "Pulling Docker images (may take a few minutes on first run)..."
+        docker-compose pull db redis acapy || log_warn "Some images already cached"
+
+        log_section "Starting PostgreSQL, Redis, and ACA-Py..."
+        docker-compose up -d db redis acapy
+    fi
     
     # Wait for services to be healthy
     log_section "Waiting for services to be healthy (this may take 30-45 seconds)..."
@@ -277,10 +284,14 @@ start_backend_server() {
     log_section "Starting backend API server (uvicorn)..."
     cd "${BACKEND_DIR}"
     source "${VENV_DIR}/bin/activate"
-    
-    # Start backend in background
+
+    # Start backend in background with USE_DEMO if enabled
     # Redirect to a log file to keep terminal clean
-    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 > /tmp/rxdistribute_backend.log 2>&1 &
+    if [ "$USE_DEMO" = "true" ]; then
+        USE_DEMO=true uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 > /tmp/rxdistribute_backend.log 2>&1 &
+    else
+        uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 > /tmp/rxdistribute_backend.log 2>&1 &
+    fi
     BACKEND_PID=$!
     echo $BACKEND_PID > /tmp/rxdistribute_backend.pid
     
