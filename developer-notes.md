@@ -58,6 +58,46 @@ git tag -l
 
 ---
 
+#### 2026-02-13 18:36 - Sisyphus (Router Path Fixes & E2E Test Maintenance)
+
+**Tasks Completed:**
+- Phase 1: Exhaustive router path verification - audited all screen files for `(doctor)`, `(patient)`, `(pharmacist)` patterns
+- Fixed remaining 3 broken router paths from folder rename:
+  - `doctor/auth.tsx` line 144: `'/(doctor)/dashboard'` → `'/doctor/dashboard'`
+  - `doctor/dashboard.tsx` line 156: `'/(doctor)/auth'` → `'/doctor/auth'`
+  - `doctor/dashboard.tsx` line 166: `'/(doctor)/auth'` → `'/doctor/auth'`
+- Phase 3: Fixed E2E spec imports to use non-parenthesized paths:
+  - `e2e/doctor.spec.ts`: 3 require paths updated `(doctor)` → `doctor`
+  - `e2e/patient.spec.ts`: 4 require paths updated `(patient)` → `patient`
+  - `e2e/error-scenarios.spec.ts`: 1 require path updated `(patient)` → `patient`
+- Phase 4: Updated `apps/mobile/AGENTS.md` STRUCTURE section - removed parentheses from folder names in documentation
+- Verified all 8 pharmacist API methods present in `api.ts` (already complete from previous work)
+- Verified `pharmacist/verify.tsx` has zero `as any` casts (already complete from previous work)
+
+**Time Taken:**
+- Duration: ~30 minutes
+
+**Files Modified:**
+- `apps/mobile/src/app/doctor/auth.tsx` - Fixed router path on line 144
+- `apps/mobile/src/app/doctor/dashboard.tsx` - Fixed router paths on lines 156, 166
+- `apps/mobile/e2e/doctor.spec.ts` - Updated 3 require paths from `(doctor)` to `doctor`
+- `apps/mobile/e2e/patient.spec.ts` - Updated 4 require paths from `(patient)` to `patient`
+- `apps/mobile/e2e/error-scenarios.spec.ts` - Updated 1 require path from `(patient)` to `patient`
+- `apps/mobile/AGENTS.md` - Updated STRUCTURE section and WHERE TO LOOK table to use `doctor/`, `patient/`, `pharmacist/` (no parentheses)
+
+**Notes:**
+- All router paths now use non-parenthesized format (`/doctor/`, `/patient/`, `/pharmacist/`) matching the actual folder structure
+- E2E tests now correctly import screen components after folder rename from `(role)` to `role`
+- Pre-existing `as any` casts remain in several files but are out of scope for this task (patient/wallet.tsx, patient/prescriptions/[id].tsx, patient/prescriptions/share.tsx, pharmacist/prescriptions/[id]/dispense.tsx, doctor/prescriptions/qr-display.tsx, doctor/prescriptions/repeat-config.tsx, components/qr/QRScanner.tsx)
+- TypeScript check shows pre-existing errors (unused variables in tests, missing API methods in dispense.test.tsx) - these existed before this work
+
+**Next Steps:**
+- Run `npm test` in apps/mobile to verify E2E tests execute without import errors
+- Test iOS simulator to verify all 3 role flows work end-to-end
+- Commit all changes with conventional commit message
+
+---
+
 #### 2026-02-12 21:28 - Sisyphus (Demo Mode Implementation)
 
 **Tasks Completed:**

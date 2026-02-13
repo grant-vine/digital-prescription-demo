@@ -72,7 +72,7 @@ export default function PrescriptionSignScreen() {
       setSuccess(true);
       // Navigate to QR display after brief success message
       setTimeout(() => {
-        router.push(`/(doctor)/prescriptions/qr-display?prescriptionId=${result.prescription_id}`);
+        router.push(`/doctor/prescriptions/qr-display?prescriptionId=${result.prescription_id}`);
       }, 500);
     } catch (err: any) {
       setError(err.message || 'Failed to sign prescription');

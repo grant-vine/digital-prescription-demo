@@ -103,7 +103,7 @@ export default function PharmacistAuthScreen() {
        await AsyncStorage.setItem('auth_token', authResponse.token);
        
        setCurrentStep(AuthStep.PROFILE_SETUP);
-       router.replace('/pharmacist/dashboard|home|dispensing');
+       router.replace('/pharmacist/verify');
      } catch (err: any) {
        console.error('Login error:', err);
        setError(err.message || 'Login failed');
@@ -175,7 +175,7 @@ export default function PharmacistAuthScreen() {
       
       setCurrentStep(AuthStep.COMPLETE);
       
-      router.replace('/pharmacist/dashboard');
+      router.replace('/pharmacist/verify');
     } catch (err: any) {
       console.error('DID creation error:', err);
       setError(err.message || 'DID creation failed');

@@ -142,7 +142,7 @@ export default function DoctorDashboard() {
       try {
         const token = await AsyncStorage.getItem('access_token');
         if (!token) {
-          router.replace('/(doctor)/auth');
+router.replace('/doctor/auth');
           return;
         }
 
@@ -153,7 +153,7 @@ export default function DoctorDashboard() {
 
         await fetchPrescriptions();
       } catch (e) {
-        router.replace('/(doctor)/auth');
+        router.replace('/doctor/auth');
       }
     };
 
@@ -163,15 +163,15 @@ export default function DoctorDashboard() {
   const handleLogout = async () => {
     await AsyncStorage.removeItem('access_token');
     await AsyncStorage.removeItem('refresh_token');
-    router.replace('/(doctor)/auth');
+    router.replace('/doctor/auth');
   };
 
   const handleNewPrescription = () => {
-    router.push('/(doctor)/prescription/create');
+    router.push('/doctor/prescriptions/patient-select');
   };
 
   const handlePrescriptionTap = (id: number) => {
-    router.push(`/(doctor)/prescription/${id}`);
+    router.push(`/doctor/prescriptions/${id}`);
   };
 
   const activeCount = prescriptions.filter(p => new Date(p.date_expires) > new Date()).length;

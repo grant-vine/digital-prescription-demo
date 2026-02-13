@@ -66,7 +66,7 @@ describe('E2E: Patient Receives Prescription', () => {
 
   beforeAll(() => {
     try {
-      AuthScreen = require('../src/app/(patient)/auth').default;
+      AuthScreen = require('../src/app/patient/auth').default;
     } catch {
       const MockAuthScreen = () => null;
       MockAuthScreen.displayName = 'MockAuthScreen';
@@ -74,7 +74,7 @@ describe('E2E: Patient Receives Prescription', () => {
     }
 
     try {
-      ScanScreen = require('../src/app/(patient)/scan').default;
+      ScanScreen = require('../src/app/patient/scan').default;
     } catch {
       const MockScanScreen = () => null;
       MockScanScreen.displayName = 'MockScanScreen';
@@ -82,7 +82,7 @@ describe('E2E: Patient Receives Prescription', () => {
     }
 
     try {
-      WalletScreen = require('../src/app/(patient)/wallet').default;
+      WalletScreen = require('../src/app/patient/wallet').default;
     } catch {
       const MockWalletScreen = () => null;
       MockWalletScreen.displayName = 'MockWalletScreen';
@@ -90,7 +90,7 @@ describe('E2E: Patient Receives Prescription', () => {
     }
 
     try {
-      PrescriptionDetailsScreen = require('../src/app/(patient)/prescriptions/[id]').default;
+      PrescriptionDetailsScreen = require('../src/app/patient/prescriptions/[id]').default;
     } catch {
       const MockDetailsScreen = () => null;
       MockDetailsScreen.displayName = 'MockDetailsScreen';

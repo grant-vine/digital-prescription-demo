@@ -62,7 +62,7 @@ export default function PatientAuthScreen() {
       await AsyncStorage.setItem('auth_token', authResponse.token);
       
       setTimeout(() => {
-        router.replace('/patient/wallet?ref=wallet|home|dashboard');
+        router.replace('/patient/wallet');
       }, 0);
     } catch (err: any) {
       console.error('Login error:', err);

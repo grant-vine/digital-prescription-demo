@@ -262,12 +262,12 @@ export default function PatientSelectScreen() {
   const handleProceed = () => {
     if (selectedPatient) {
       // In a real app, we'd store the patient in context or pass ID
-      router.push('/(doctor)/prescriptions/medication-entry');
+      router.push('/doctor/prescriptions/medication-entry');
     }
   };
 
   const handleQRScan = () => {
-    router.push('/(doctor)/prescriptions/scan-qr'); // Hypothetical route for mock
+    router.push('/doctor/prescriptions/scan-qr'); // Hypothetical route for mock
   };
 
   return (

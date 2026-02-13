@@ -13,16 +13,16 @@ apps/mobile/
 ├── src/
 │   ├── app/                     # Expo Router file-based routing
 │   │   ├── index.tsx            # Role selector (entry point)
-│   │   ├── (doctor)/            # Doctor route group (blue #2563EB)
+│   │   ├── doctor/              # Doctor route group (blue #2563EB)
 │   │   │   ├── _layout.tsx      # Group layout
 │   │   │   ├── auth.tsx         # Login/register
 │   │   │   ├── dashboard.tsx    # Main dashboard
 │   │   │   └── prescriptions/   # sign, medication-entry, patient-select, qr-display, repeat-config
-│   │   ├── (patient)/           # Patient route group (cyan #0891B2)
+│   │   ├── patient/             # Patient route group (cyan #0891B2)
 │   │   │   ├── _layout.tsx
 │   │   │   ├── auth.tsx, wallet.tsx, scan.tsx
 │   │   │   └── prescriptions/   # [id].tsx, share.tsx
-│   │   └── (pharmacist)/        # Pharmacist route group (green #059669)
+│   │   └── pharmacist/          # Pharmacist route group (green #059669)
 │   │       ├── _layout.tsx
 │   │       ├── auth.tsx, verify.tsx
 │   │       └── prescriptions/[id]/dispense.tsx
@@ -46,9 +46,9 @@ apps/mobile/
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Add doctor screen | `src/app/(doctor)/` | File name = route path |
-| Add patient screen | `src/app/(patient)/` | Dynamic routes: `[id].tsx` |
-| Add pharmacist screen | `src/app/(pharmacist)/` | Nested: `prescriptions/[id]/dispense.tsx` |
+| Add doctor screen | `src/app/doctor/` | File name = route path |
+| Add patient screen | `src/app/patient/` | Dynamic routes: `[id].tsx` |
+| Add pharmacist screen | `src/app/pharmacist/` | Nested: `prescriptions/[id]/dispense.tsx` |
 | Add shared component | `src/components/` | Import via `@/components/...` |
 | Add API method | `src/services/api.ts` | Single module, axios instance |
 | Add theme | `src/components/theme/` | Export from `index.ts` |

@@ -1,13 +1,13 @@
 import { Stack } from 'expo-router';
 import { ThemeProvider } from '../../components/theme';
 
-export default function PatientLayout() {
+export default function DoctorLayout() {
   return (
-    <ThemeProvider role="patient">
+    <ThemeProvider role="doctor">
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#0891B2',
+            backgroundColor: '#2563EB',
           },
           headerTintColor: '#fff',
           headerTitleStyle: {
@@ -15,7 +15,7 @@ export default function PatientLayout() {
           },
         }}
       >
-        <Stack.Screen name="index" options={{ title: 'My Prescriptions' }} />
+        <Stack.Screen name="auth" options={{ title: 'Doctor Login' }} />
       </Stack>
     </ThemeProvider>
   );

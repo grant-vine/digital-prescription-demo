@@ -182,12 +182,12 @@ export default function MedicationEntryScreen() {
     if (prescribedMedications.length === 0) {
       setFormError('At least one medication is required');
       if (process.env.NODE_ENV === 'test') {
-        router.push('/(doctor)/prescriptions/sign');
+        router.push('/doctor/prescriptions/sign');
       }
       return;
     }
     
-    router.push('/(doctor)/prescriptions/sign');
+    router.push('/doctor/prescriptions/sign');
   };
 
   const handleSaveDraft = () => {

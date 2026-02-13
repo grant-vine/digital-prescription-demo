@@ -16,7 +16,8 @@
       "package": "co.didx.digital_prescription"
     },
     "web": {
-      "favicon": "./src/assets/favicon.png"
+      "favicon": "./src/assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
       [

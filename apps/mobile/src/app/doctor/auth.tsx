@@ -98,7 +98,7 @@ export default function DoctorAuthScreen() {
     try {
       const token = await AsyncStorage.getItem('access_token');
       if (token) {
-        router.replace('/(doctor)/dashboard');
+router.replace('/doctor/dashboard');
       }
     } catch {
     }
@@ -141,7 +141,7 @@ export default function DoctorAuthScreen() {
         await AsyncStorage.setItem('refresh_token', response.refresh_token);
       }
       
-      router.replace('/(doctor)/dashboard');
+      router.replace('/doctor/dashboard');
     } catch (err: any) {
       console.log('Login error:', err);
       let errorMessage = 'Something went wrong';

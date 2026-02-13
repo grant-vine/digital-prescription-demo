@@ -81,7 +81,7 @@ export default function RoleSelector() {
                 roles.find((r) => r.id === selectedRole)?.color || '#2563EB',
             },
           ]}
-          onPress={() => router.push(`/(${selectedRole})`)}
+          onPress={() => router.push(`/${selectedRole}/auth`)}
         >
           <Text style={styles.continueButtonText}>Continue as {selectedRole}</Text>
         </TouchableOpacity>

@@ -67,7 +67,7 @@ describe('E2E: Error Scenarios - Time Validation, Signature, Revocation', () => 
 
   beforeAll(() => {
     try {
-      PatientScanScreen = require('../src/app/(patient)/scan').default;
+      PatientScanScreen = require('../src/app/patient/scan').default;
     } catch {
       const MockScreen = () => null;
       MockScreen.displayName = 'MockPatientScanScreen';

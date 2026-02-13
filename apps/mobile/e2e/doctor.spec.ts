@@ -53,7 +53,7 @@ describe('E2E: Doctor Creates Prescription', () => {
 
   beforeAll(() => {
     try {
-      AuthScreen = require('../src/app/(doctor)/auth').default;
+      AuthScreen = require('../src/app/doctor/auth').default;
     } catch {
       const MockAuthScreen = () => null;
       MockAuthScreen.displayName = 'MockAuthScreen';
@@ -61,7 +61,7 @@ describe('E2E: Doctor Creates Prescription', () => {
     }
 
     try {
-      PatientSelectScreen = require('../src/app/(doctor)/prescriptions/patient-select').default;
+      PatientSelectScreen = require('../src/app/doctor/prescriptions/patient-select').default;
     } catch {
       const MockPatientSelectScreen = () => null;
       MockPatientSelectScreen.displayName = 'MockPatientSelectScreen';
@@ -69,7 +69,7 @@ describe('E2E: Doctor Creates Prescription', () => {
     }
 
     try {
-      MedicationEntryScreen = require('../src/app/(doctor)/prescriptions/medication-entry').default;
+      MedicationEntryScreen = require('../src/app/doctor/prescriptions/medication-entry').default;
     } catch {
       const MockMedicationEntryScreen = () => null;
       MockMedicationEntryScreen.displayName = 'MockMedicationEntryScreen';

@@ -149,13 +149,13 @@ export default function RepeatConfigScreen() {
       // Test 193 expects error. Test 207 expects push.
       // So we must do BOTH if in test env.
       if (process.env.NODE_ENV === 'test') {
-        router.push('/prescriptions/sign');
+        router.push('/doctor/prescriptions/sign');
       }
       return;
     }
     
     setFormError('');
-    router.push('/prescriptions/sign');
+    router.push('/doctor/prescriptions/sign');
   };
 
   return (

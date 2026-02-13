@@ -96,8 +96,7 @@ export default function PharmacistVerifyScreen() {
 
         // Step 1: Verify signature
         setVerificationStep('Verifying signature...');
-        const apiAny = api as any;
-        const verificationResult = await apiAny.verifyPrescription(qrData);
+        const verificationResult = await api.verifyPrescription(qrData);
 
         if (!verificationResult.signature_valid) {
           throw new Error('Signature verification failed');
@@ -105,11 +104,11 @@ export default function PharmacistVerifyScreen() {
 
         // Step 2: Check trust registry
         setVerificationStep('Checking trust registry...');
-        await apiAny.checkTrustRegistry(qrData.issuer);
+        await api.checkTrustRegistry(qrData.issuer);
 
         // Step 3: Check revocation
         setVerificationStep('Checking revocation status...');
-        await apiAny.checkRevocationStatus(
+        await api.checkRevocationStatus(
           qrData.credentialSubject?.prescription?.id || 'rx-001'
         );
 
@@ -137,8 +136,7 @@ export default function PharmacistVerifyScreen() {
     setShowOnboarding(false);
 
     try {
-      const apiAny = api as any;
-      const verificationResult = await apiAny.verifyPresentation(manualCode);
+      const verificationResult = await api.verifyPresentation(manualCode);
       setResult(verificationResult);
       setError('');
     } catch (err: any) {
@@ -151,12 +149,12 @@ export default function PharmacistVerifyScreen() {
 
   const handleProceed = useCallback(() => {
     if (result?.valid) {
-      router.push(`dispense|dispensing|items|dispense-items`);
+      router.push('/pharmacist/prescriptions/dispense');
     }
   }, [result?.valid]);
 
   const handleTestProceed = useCallback(() => {
-    router.push(`dispense|dispensing|items|dispense-items`);
+    router.push('/pharmacist/prescriptions/dispense');
   }, []);
 
   const handleRetry = useCallback(() => {
@@ -225,8 +223,7 @@ export default function PharmacistVerifyScreen() {
               testID="verify-button"
               onPress={async () => {
                 try {
-                  const apiAny = api as any;
-                  await apiAny.verifyPresentation(manualCode);
+                  await api.verifyPresentation(manualCode);
                 } catch (err) {}
               }}
             />

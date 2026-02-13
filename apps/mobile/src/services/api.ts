@@ -362,4 +362,44 @@ export const api = {
      const response = await getClient().get(`/prescriptions/code/${code}`);
      return response.data;
    },
+
+  async authenticatePharmacist(username: string, password: string): Promise<{ token: string; pharmacist: { id: string; name: string } }> {
+    const response = await getClient().post('/auth/pharmacist/login', { username, password });
+    return response.data;
+  },
+
+  async validateSAPC(sapcNumber: string): Promise<{ valid: boolean; registration: any }> {
+    const response = await getClient().post('/verify/sapc', { sapc_number: sapcNumber });
+    return response.data;
+  },
+
+  async setupPharmacy(data: { pharmacy_name: string; sapc_number: string }): Promise<{ pharmacy_id: string; status: string }> {
+    const response = await getClient().post('/pharmacies/setup', data);
+    return response.data;
+  },
+
+  async createPharmacistDID(pharmacistId: string): Promise<{ did: string; did_document: any }> {
+    const response = await getClient().post(`/pharmacists/${pharmacistId}/setup-did`);
+    return response.data;
+  },
+
+  async verifyPrescription(qrData: any): Promise<{ valid: boolean; signature_valid: boolean; issuer: any; trust_registry_status: string; revocation_status: string; error?: string }> {
+    const response = await getClient().post('/verify/prescription', qrData);
+    return response.data;
+  },
+
+  async checkTrustRegistry(issuerDid: string): Promise<{ trusted: boolean; registry: string }> {
+    const response = await getClient().post('/verify/trust-registry', { issuer_did: issuerDid });
+    return response.data;
+  },
+
+  async checkRevocationStatus(prescriptionId: string): Promise<{ revoked: boolean; status: string }> {
+    const response = await getClient().get(`/prescriptions/${prescriptionId}/revocation-status`);
+    return response.data;
+  },
+
+  async verifyPresentation(code: string): Promise<{ valid: boolean; issuer: any; trust_registry_status: string; revocation_status: string; error?: string }> {
+    const response = await getClient().post('/verify/presentation', { code });
+    return response.data;
+  },
 };

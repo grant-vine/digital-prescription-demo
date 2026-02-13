@@ -102,7 +102,7 @@ export default function PrescriptionScanScreen() {
      try {
        const result = await api.acceptPrescription(prescriptionDetails?.id || 'test-id');
        if (result.success || result.prescription_id) {
-         router.replace('/patient/prescription-details');
+         router.replace('/patient/wallet');
        }
      } catch (err: any) {
        Alert.alert('Error', err.message || 'Failed to accept prescription');
