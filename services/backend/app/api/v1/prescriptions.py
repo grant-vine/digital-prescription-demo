@@ -53,7 +53,9 @@ class PrescriptionCreate(BaseModel):
         except (ValueError, AttributeError):
             raise ValueError("Invalid date format")
 
-        if expires < datetime.utcnow():
+        # Normalize to naive UTC for comparison
+        expires_naive = expires.replace(tzinfo=None) if expires.tzinfo else expires
+        if expires_naive < datetime.utcnow():
             raise ValueError("Expiration date must be in the future")
 
         return v
