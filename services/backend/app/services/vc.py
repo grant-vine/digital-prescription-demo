@@ -12,7 +12,7 @@ import json
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-from app.services.acapy import ACAPyService
+from app.services.factory import get_acapy_service
 
 
 class VCService:
@@ -22,7 +22,7 @@ class VCService:
     for digital prescriptions using Ed25519 signatures via ACA-Py.
     """
 
-    def __init__(self, acapy_service: Optional[ACAPyService] = None, tenant_id: str = "default"):
+    def __init__(self, acapy_service: Optional[Any] = None, tenant_id: str = "default"):
         """Initialize VC service with ACA-Py service.
 
         Args:
@@ -30,7 +30,7 @@ class VCService:
                           If None, creates new instance.
             tenant_id: Tenant identifier for multi-tenancy scoping.
         """
-        self._acapy_service = acapy_service or ACAPyService()
+        self._acapy_service = acapy_service or get_acapy_service()
         self._owns_acapy = acapy_service is None
         self.tenant_id = tenant_id
 
@@ -243,10 +243,10 @@ class VCService:
         }
 
     def _generate_mock_signature(self, credential: Dict[str, Any]) -> str:
-        """Generate mock base64 signature for development.
+        """Generate mock signature for development.
 
-        In production, ACA-Py provides real Ed25519 signature.
-        This is fallback for local testing.
+        Uses HMAC-SHA256 in demo mode for verifiable signatures,
+        falls back to base64 encoding otherwise.
 
         Args:
             credential: Credential dict to sign
@@ -254,14 +254,26 @@ class VCService:
         Returns:
             Base64-encoded mock signature string
         """
-        # Create deterministic signature based on credential content
-        credential_json = json.dumps(credential, sort_keys=True)
-        signature_bytes = credential_json.encode("utf-8")[:64]  # Mock 64-byte signature
+        import os
 
-        # Pad to 64 bytes if needed
+        use_demo = os.getenv("USE_DEMO", "false").lower() in ("true", "1", "yes")
+
+        if use_demo:
+            import hashlib
+            import hmac as hmac_mod
+            from app.services.demo_acapy import DEMO_HMAC_SECRET
+
+            credential_copy = {k: v for k, v in credential.items() if k != "proof"}
+            canonical = json.dumps(credential_copy, sort_keys=True, separators=(",", ":"))
+            signature = hmac_mod.new(
+                DEMO_HMAC_SECRET, canonical.encode("utf-8"), hashlib.sha256
+            ).hexdigest()
+            return f"z{signature}"
+
+        credential_json = json.dumps(credential, sort_keys=True)
+        signature_bytes = credential_json.encode("utf-8")[:64]
         if len(signature_bytes) < 64:
             signature_bytes += b"\x00" * (64 - len(signature_bytes))
-
         return base64.b64encode(signature_bytes).decode("utf-8")
 
     def _generate_credential_id(self) -> str:

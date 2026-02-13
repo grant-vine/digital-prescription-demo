@@ -63,10 +63,20 @@ class QRService:
         credential["id"] = credential_id
 
         if prescription.digital_signature:
-            credential["proof"] = {
-                "type": "Ed25519Signature2020",
-                "proofValue": prescription.digital_signature,
-            }
+            try:
+                stored_vc = json.loads(prescription.digital_signature)
+                if isinstance(stored_vc, dict) and "proof" in stored_vc:
+                    credential["proof"] = stored_vc["proof"]
+                else:
+                    credential["proof"] = {
+                        "type": "Ed25519Signature2020",
+                        "proofValue": prescription.digital_signature,
+                    }
+            except (json.JSONDecodeError, TypeError):
+                credential["proof"] = {
+                    "type": "Ed25519Signature2020",
+                    "proofValue": prescription.digital_signature,
+                }
 
         credential_json = json.dumps(credential, separators=(",", ":"))
         credential_size = len(credential_json.encode("utf-8"))

@@ -7,6 +7,7 @@ RBAC:
 - Sign: Doctor only (prescribing doctor)
 """
 
+import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -76,9 +77,9 @@ async def sign_prescription(
 
     doctor_did_record = db.query(DID).filter(DID.user_id == current_user.id).first()
     if not doctor_did_record:
-        from app.services.acapy import ACAPyService
+        from app.services.factory import get_acapy_service
 
-        acapy_service = ACAPyService()
+        acapy_service = get_acapy_service()
         try:
             wallet_result = await acapy_service.create_wallet()
             if "error" not in wallet_result and wallet_result.get("did"):
@@ -101,9 +102,9 @@ async def sign_prescription(
 
     patient_did_record = db.query(DID).filter(DID.user_id == prescription.patient_id).first()
     if not patient_did_record:
-        from app.services.acapy import ACAPyService
+        from app.services.factory import get_acapy_service
 
-        acapy_service = ACAPyService()
+        acapy_service = get_acapy_service()
         try:
             wallet_result = await acapy_service.create_wallet()
             if "error" not in wallet_result and wallet_result.get("did"):
@@ -144,7 +145,7 @@ async def sign_prescription(
         credential_id = signed_result["credential_id"]
         signature = signed_result["signature"]
 
-        prescription.digital_signature = signature
+        prescription.digital_signature = json.dumps(signed_credential)
         prescription.credential_id = credential_id
         prescription.updated_at = datetime.utcnow()
 

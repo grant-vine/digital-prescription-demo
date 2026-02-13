@@ -7,7 +7,7 @@ from app.dependencies.auth import get_current_user, get_db
 from app.models.user import User
 from app.models.did import DID
 from app.models.wallet import Wallet
-from app.services.acapy import ACAPyService
+from app.services.factory import get_acapy_service
 
 router = APIRouter()
 
@@ -56,7 +56,7 @@ async def create_did(
             detail="DID already exists for this user",
         )
 
-    acapy_service = ACAPyService()
+    acapy_service = get_acapy_service()
     try:
         wallet_result = await acapy_service.create_wallet()
 
@@ -146,7 +146,7 @@ async def setup_wallet(
             detail="Wallet already exists for this user",
         )
 
-    acapy_service = ACAPyService()
+    acapy_service = get_acapy_service()
     try:
         wallet_result = await acapy_service.create_wallet()
 
