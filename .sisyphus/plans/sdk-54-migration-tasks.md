@@ -20,11 +20,11 @@
 5. Document current package versions in notepad
 
 **Acceptance Criteria**:
-- [ ] All changes committed to git
-- [ ] New branch created: `feat/expo-sdk-54-migration`
-- [ ] Git tag created: `pre-sdk-54-migration`
-- [ ] All Phase 0-8 tests pass on SDK 49
-- [ ] Current versions documented
+- [x] All changes committed to git
+- [x] New branch created: `feat/expo-sdk-54-migration`
+- [x] Git tag created: `pre-sdk-54-migration`
+- [x] All Phase 0-8 tests pass on SDK 49
+- [x] Current versions documented
 
 **Files Modified**:
 - `.sisyphus/notepads/demo-polish/decisions.md` (document versions)
@@ -47,10 +47,10 @@
    - Build configuration (iOS/Android)
 
 **Acceptance Criteria**:
-- [ ] All 5 SDK changelogs reviewed
-- [ ] Breaking changes documented in notepad
-- [ ] High-risk areas identified (camera, router, RN version)
-- [ ] Migration strategy for each breaking change
+- [x] All 5 SDK changelogs reviewed
+- [x] Breaking changes documented in notepad
+- [x] High-risk areas identified (camera, router, RN version)
+- [x] Migration strategy for each breaking change
 
 **Files Created**:
 - `docs/migration/SDK_49_TO_54_BREAKING_CHANGES.md`
@@ -74,10 +74,10 @@
 4. Plan package update order
 
 **Acceptance Criteria**:
-- [ ] All dependencies checked for SDK 54 compatibility
-- [ ] Incompatible packages identified
-- [ ] Update plan created for each package
-- [ ] No critical blockers found
+- [x] All dependencies checked for SDK 54 compatibility
+- [x] Incompatible packages identified
+- [x] Update plan created for each package
+- [x] No critical blockers found (TypeScript 5.3.3+ required)
 
 **Files Modified**:
 - `.sisyphus/notepads/demo-polish/issues.md` (if incompatibilities found)
@@ -133,12 +133,12 @@
 5. Run `npm install` to update lockfile
 
 **Acceptance Criteria**:
-- [ ] Expo upgraded to SDK 54
-- [ ] All expo-* packages at SDK 54 versions
-- [ ] React Native upgraded to 0.81.x
-- [ ] React upgraded to 19.1.0
-- [ ] `package-lock.json` updated
-- [ ] No npm install errors
+- [x] Expo upgraded to SDK 54
+- [x] All expo-* packages at SDK 54 versions
+- [x] React Native upgraded to 0.81.x
+- [x] React upgraded to 19.1.0
+- [ ] `package-lock.json` updated (pending npm install)
+- [ ] No npm install errors (pending npm install)
 
 **Files Modified**:
 - `apps/mobile/package.json`
