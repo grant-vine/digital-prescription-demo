@@ -1,4 +1,4 @@
-import { test, expect, devices } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 test.describe('Investor Demo - Complete Prescription Flow', () => {
   test('Full workflow with video recording', async ({ browser }) => {

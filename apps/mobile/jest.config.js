@@ -9,6 +9,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'node',
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|expo|expo-router|@react-native)/)',
+    'node_modules/(?!(react-native|expo|expo-router|expo-modules-core|@react-native)/)',
   ],
 };

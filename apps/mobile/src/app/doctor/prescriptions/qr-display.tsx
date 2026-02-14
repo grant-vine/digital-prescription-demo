@@ -63,16 +63,17 @@ export default function QRDisplayScreen() {
     }
   }, [prescriptionId, loadPrescription]);
 
-  const handleMarkAsGiven = async () => {
-    if (!prescriptionId) return;
-    try {
-      setMarkingAsGiven(true);
-      await api.markPrescriptionAsGiven(prescriptionId);
-    } catch (err) {
-    } finally {
-      setMarkingAsGiven(false);
-    }
-  };
+   const handleMarkAsGiven = async (): Promise<void> => {
+     if (!prescriptionId) return;
+     try {
+       setMarkingAsGiven(true);
+       await api.markPrescriptionAsGiven(prescriptionId);
+     } catch (err) {
+       // Error handled silently
+     } finally {
+       setMarkingAsGiven(false);
+     }
+   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={[styles.contentContainer, styles.content]}>

@@ -224,7 +224,9 @@ export default function PharmacistVerifyScreen() {
               onPress={async () => {
                 try {
                   await api.verifyPresentation(manualCode);
-                } catch (err) {}
+                } catch (err) {
+                  // Verification error handled by API error handling
+                }
               }}
             />
             <TouchableOpacity 

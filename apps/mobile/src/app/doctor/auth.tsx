@@ -86,6 +86,7 @@ export default function DoctorAuthScreen() {
   const [error, setError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_request, _response, promptAsync] = useAuthRequest(
     {
       clientId: 'mock-client-id',
@@ -99,9 +100,10 @@ export default function DoctorAuthScreen() {
     try {
       const token = await AsyncStorage.getItem('access_token');
       if (token) {
-router.replace('/doctor/dashboard');
+        router.replace('/doctor/dashboard');
       }
-    } catch {
+    } catch (err) {
+      // Silent failure - user will see login screen
     }
   }, []);
 

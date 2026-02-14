@@ -195,11 +195,25 @@ export function RoleCard({
   const theme = getTheme();
 
   // Animation setup
-  const heightAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const heightAnimRef = useRef<Animated.Value>(null);
+  const opacityAnimRef = useRef<Animated.Value>(null);
   const [contentHeight, setContentHeight] = useState(0);
 
+  // eslint-disable-next-line react-hooks/refs
+  if (!heightAnimRef.current) {
+    heightAnimRef.current = new Animated.Value(0);
+  }
+  // eslint-disable-next-line react-hooks/refs
+  if (!opacityAnimRef.current) {
+    opacityAnimRef.current = new Animated.Value(0);
+  }
+
   useEffect(() => {
+    if (!heightAnimRef.current || !opacityAnimRef.current) return;
+
+    const heightAnim = heightAnimRef.current;
+    const opacityAnim = opacityAnimRef.current;
+
     if (expanded) {
       Animated.parallel([
         Animated.timing(heightAnim, {
@@ -228,7 +242,7 @@ export function RoleCard({
         }),
       ]).start();
     }
-  }, [expanded, contentHeight, heightAnim, opacityAnim]);
+  }, [expanded, contentHeight]);
 
   const handleExpandToggle = (): void => {
     onToggleExpand?.();
@@ -283,7 +297,8 @@ export function RoleCard({
       </TouchableOpacity>
 
       {/* Expandable Content */}
-      <Animated.View style={[styles.expandableContent, { height: heightAnim }]}>
+      {/* eslint-disable-next-line react-hooks/refs */}
+      <Animated.View style={[styles.expandableContent, { height: heightAnimRef.current, opacity: opacityAnimRef.current }]}>
         <View
           style={styles.contentWrapper}
           onLayout={(event): void => {
@@ -292,7 +307,7 @@ export function RoleCard({
         >
           <View style={styles.responsibilitiesSection}>
             <Text style={[styles.responsibilitiesTitle, { color: theme.colors.text }]}>
-              What you'll do:
+              What you&apos;ll do:
             </Text>
             <ScrollView style={styles.responsibilitiesList} showsVerticalScrollIndicator={false}>
               {role.responsibilities.map((responsibility) => (

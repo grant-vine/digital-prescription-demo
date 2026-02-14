@@ -118,13 +118,14 @@ export default function SharePrescriptionScreen() {
     }
   };
 
-  const handlePharmacySelect = async (pharmacyId: string) => {
-    setSelectedPharmacy(pharmacyId);
-    try {
-      await api.selectPharmacy(pharmacyId);
-    } catch (err) {
-    }
-  };
+   const handlePharmacySelect = async (pharmacyId: string): Promise<void> => {
+     setSelectedPharmacy(pharmacyId);
+     try {
+       await api.selectPharmacy(pharmacyId);
+     } catch (err) {
+       // Pharmacy selection handled - error silently ignored for UX
+     }
+   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

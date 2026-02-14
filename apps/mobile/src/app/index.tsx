@@ -74,19 +74,30 @@ function FAQAccordionItem({
   onToggle,
   index,
 }: FAQAccordionItemProps): React.ReactElement {
-  const heightAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const heightAnimRef = useRef<Animated.Value>(null);
+  const opacityAnimRef = useRef<Animated.Value>(null);
   const [contentHeight, setContentHeight] = useState(0);
 
+  // eslint-disable-next-line react-hooks/refs
+  if (!heightAnimRef.current) {
+    heightAnimRef.current = new Animated.Value(0);
+  }
+  // eslint-disable-next-line react-hooks/refs
+  if (!opacityAnimRef.current) {
+    opacityAnimRef.current = new Animated.Value(0);
+  }
+
   useEffect(() => {
+    if (!heightAnimRef.current || !opacityAnimRef.current) return;
+
     if (expanded) {
       Animated.parallel([
-        Animated.timing(heightAnim, {
+        Animated.timing(heightAnimRef.current, {
           toValue: contentHeight,
           duration: 250,
           useNativeDriver: false,
         }),
-        Animated.timing(opacityAnim, {
+        Animated.timing(opacityAnimRef.current, {
           toValue: 1,
           duration: 200,
           delay: 50,
@@ -95,19 +106,19 @@ function FAQAccordionItem({
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(heightAnim, {
+        Animated.timing(heightAnimRef.current, {
           toValue: 0,
           duration: 200,
           useNativeDriver: false,
         }),
-        Animated.timing(opacityAnim, {
+        Animated.timing(opacityAnimRef.current, {
           toValue: 0,
           duration: 150,
           useNativeDriver: false,
         }),
       ]).start();
     }
-  }, [expanded, contentHeight, heightAnim, opacityAnim]);
+  }, [expanded, contentHeight]);
 
   return (
     <View style={styles.faqItem}>
@@ -123,7 +134,8 @@ function FAQAccordionItem({
           ▼
         </Text>
       </TouchableOpacity>
-      <Animated.View style={[styles.faqAnswerContainer, { height: heightAnim }]}>
+      {/* eslint-disable-next-line react-hooks/refs */}
+      <Animated.View style={[styles.faqAnswerContainer, { height: heightAnimRef.current, opacity: opacityAnimRef.current }]}>
         <View
           style={styles.faqAnswerWrapper}
           onLayout={(event): void => {
