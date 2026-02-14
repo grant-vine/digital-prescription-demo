@@ -30,15 +30,9 @@ echo ""
 echo -e "${YELLOW}Running Playwright tests to generate videos...${NC}"
 cd "$PROJECT_ROOT/apps/mobile"
 
-# Run each test separately to get individual videos
-echo -e "${BLUE}Recording Doctor workflow...${NC}"
-npx playwright test e2e/demo-video.spec.ts --grep "Doctor:" --reporter=line 2>&1 | grep -E "(passed|failed|Error)" || true
-
-echo -e "${BLUE}Recording Patient workflow...${NC}"
-npx playwright test e2e/demo-video.spec.ts --grep "Patient:" --reporter=line 2>&1 | grep -E "(passed|failed|Error)" || true
-
-echo -e "${BLUE}Recording Pharmacist workflow...${NC}"
-npx playwright test e2e/demo-video.spec.ts --grep "Pharmacist:" --reporter=line 2>&1 | grep -E "(passed|failed|Error)" || true
+# Run all tests together (they create videos in separate directories)
+echo -e "${BLUE}Recording all role workflows...${NC}"
+npx playwright test e2e/demo-video.spec.ts --reporter=line 2>&1 | tail -10
 
 echo ""
 echo -e "${GREEN}✓ Video generation complete${NC}"
