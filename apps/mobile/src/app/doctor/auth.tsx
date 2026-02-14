@@ -217,6 +217,7 @@ export default function DoctorAuthScreen() {
                 autoCapitalize="none"
                 keyboardType="email-address"
                 error={emailError}
+                testID="email-input"
               />
 
               <ThemedInput
@@ -227,6 +228,7 @@ export default function DoctorAuthScreen() {
                   if (error) setError(null);
                 }}
                 secureTextEntry
+                testID="password-input"
               />
 
               {error && (
@@ -242,6 +244,8 @@ export default function DoctorAuthScreen() {
                 loading={loading}
                 style={[styles.loginButton, (!isFormValid || loading) && { opacity: 0.5 }]}
                 textStyle={(!isFormValid || loading) ? { opacity: 0.5 } : undefined}
+                testID="login-button"
+              />
                 accessibilityState={{ disabled: !isFormValid || loading }}
               />
 

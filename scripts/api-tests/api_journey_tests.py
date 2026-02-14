@@ -7,6 +7,7 @@ Tests the core API flows independently of mobile app
 import requests
 import json
 import sys
+import time
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
 from datetime import datetime
@@ -137,11 +138,20 @@ class APITester:
         self.log("JOURNEY 1: System Health Check", "info")
         self.log(f"{'='*50}", "info")
         
-        # Try to get prescriptions list (should work even without auth for testing)
-        result = self.api_call("GET", "/prescriptions?page=1&page_size=1", expected_status=200)
-        if result:
-            self.log("Health check passed - API is responsive", "success")
-        return result is not None
+        start_time = time.time()
+        try:
+            response = self.session.get(f"{API_BASE.replace('/api/v1', '')}/health", timeout=10)
+            duration = (time.time() - start_time) * 1000
+            
+            if response.status_code == 200:
+                self.log(f"✓ Health check passed (HTTP 200, {duration:.0f}ms)", "success")
+                return True
+            else:
+                self.log(f"✗ Health check failed (HTTP {response.status_code})", "error")
+                return False
+        except Exception as e:
+            self.log(f"✗ Health check failed: {str(e)}", "error")
+            return False
     
     def test_doctor_workflow(self) -> Optional[int]:
         """Journey 5: Doctor creates and signs prescription"""

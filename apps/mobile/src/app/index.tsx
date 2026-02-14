@@ -120,8 +120,18 @@ function FAQAccordionItem({
     }
   }, [expanded, contentHeight]);
 
+  const getTestID = (question: string): string => {
+    const testIdMap: Record<string, string> = {
+      'How the Demo Works': 'faq-how-it-works',
+      'What is SSI?': 'faq-what-is-ssi',
+      'QR Code Flow': 'faq-qr-code-flow',
+      'Total Demo Time': 'faq-demo-time',
+    };
+    return testIdMap[question] || `faq-${index}`;
+  };
+
   return (
-    <View style={styles.faqItem}>
+    <View style={styles.faqItem} testID={getTestID(item.question)}>
       <TouchableOpacity
         style={styles.faqQuestionContainer}
         onPress={onToggle}
@@ -211,14 +221,16 @@ export default function RoleSelector(): React.ReactElement {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Digital Prescription Demo</Text>
+          <Text style={styles.title} testID="index-title">Digital Prescription Demo</Text>
           <Text style={styles.subtitle}>
             Experience the future of secure, verifiable digital prescriptions
           </Text>
         </View>
 
         {/* Workflow Diagram */}
-        <WorkflowDiagram />
+        <View testID="workflow-diagram">
+          <WorkflowDiagram />
+        </View>
 
         {/* Role Cards Section */}
         <View style={styles.section}>
