@@ -14,8 +14,8 @@ React Native 0.81 + Expo SDK 54 + Expo Router v4. Three role-based route groups 
 apps/mobile/
 ├── src/
 │   ├── app/                     # Expo Router file-based routing
-│   │   ├── index.tsx            # Role selector (entry point)
-│   │   ├── doctor/              # Doctor route group (blue #2563EB)
+│   │   ├── index.tsx            # Role selector (entry point) - Polished with expandable cards
+│   │   ├── doctor/              # Healthcare Provider route group (blue #2563EB)
 │   │   │   ├── _layout.tsx      # Group layout
 │   │   │   ├── auth.tsx         # Login/register
 │   │   │   ├── dashboard.tsx    # Main dashboard
@@ -56,7 +56,7 @@ apps/mobile/
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Add doctor screen | `src/app/doctor/` | File name = route path |
+| Add healthcare provider screen | `src/app/doctor/` | File name = route path |
 | Add patient screen | `src/app/patient/` | Dynamic routes: `[id].tsx` |
 | Add pharmacist screen | `src/app/pharmacist/` | Nested: `prescriptions/[id]/dispense.tsx` |
 | Add shared component | `src/components/` | Import via `@/components/...` |
