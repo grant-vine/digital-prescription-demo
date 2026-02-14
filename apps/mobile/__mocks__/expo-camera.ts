@@ -3,7 +3,8 @@ import { View } from 'react-native';
 
 /**
  * Mock for expo-camera module used in tests
- * Provides mocked Camera component and useCameraPermissions hook
+ * Provides mocked CameraView component and useCameraPermissions hook
+ * Updated for Expo SDK 50+ API (Camera → CameraView)
  */
 
 interface CameraProps {
@@ -12,20 +13,20 @@ interface CameraProps {
   [key: string]: unknown;
 }
 
-export const Camera = React.forwardRef(
+export const CameraView = React.forwardRef(
   ({ children, ...props }: CameraProps, ref: React.Ref<View>) =>
     React.createElement(
       View,
       {
         ref,
-        testID: 'camera-component',
+        testID: 'camera-view-component',
         ...props,
       },
       children
     )
 );
 
-Camera.displayName = 'MockCamera';
+CameraView.displayName = 'MockCameraView';
 
 export const useCameraPermissions = jest.fn(() => [
   { granted: true },
@@ -41,7 +42,7 @@ export const BarCodeScanner = {
 };
 
 export default {
-  Camera,
+  CameraView,
   useCameraPermissions,
   BarCodeScanner,
 };
