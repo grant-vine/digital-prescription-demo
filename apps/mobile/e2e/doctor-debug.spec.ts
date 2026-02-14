@@ -89,10 +89,18 @@ test.describe('DEBUG: Doctor Flow with Logging', () => {
       
       console.log(`Current URL after click: ${page.url()}`);
       
-      console.log('=== STEP 3: Find and click demo login button ===');
+      console.log('=== STEP 2b: Wait for page hydration and reload if needed ===');
+      await page.waitForTimeout(2000);
       
-      // Wait for navigation to complete
-      await page.waitForLoadState('networkidle');
+      const hasForm = await page.locator('input').count() > 0;
+      if (!hasForm) {
+        console.log('Page not hydrated, reloading...');
+        await page.reload();
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(2000);
+      }
+      
+      console.log('=== STEP 3: Find and click demo login button ===');
       
       const loginSelectors = [
         'text=Use Demo Doctor',
@@ -136,9 +144,59 @@ test.describe('DEBUG: Doctor Flow with Logging', () => {
       }
       
       await loginButton.click();
-      console.log('Clicked demo login button');
+      console.log('Clicked demo login button (filled credentials)');
+      
+      console.log('=== STEP 3b: Click actual Login button ===');
+      await page.waitForTimeout(1000);
+      
+      const actualLoginSelectors = [
+        'button:has-text("Login")',
+        'text=Login',
+        '[data-testid="login-button"]',
+        'button:has-text("Sign")'
+      ];
+      
+      let actualLoginBtn: any = null;
+      for (const selector of actualLoginSelectors) {
+        console.log(`  Trying login button selector: ${selector}`);
+        const btn = page.locator(selector).first();
+        const count = await btn.count();
+        console.log(`    Found ${count} elements`);
+        
+        if (count > 0) {
+          const isVisible = await btn.isVisible().catch(() => false);
+          console.log(`    Is visible: ${isVisible}`);
+          if (isVisible) {
+            actualLoginBtn = btn;
+            console.log(`    ✓ Using: ${selector}`);
+            break;
+          }
+        }
+      }
+      
+      if (actualLoginBtn) {
+        await actualLoginBtn.click();
+        console.log('Clicked actual Login button');
+      } else {
+        console.log('ERROR: Could not find Login button');
+        const allButtons = await page.locator('button').all();
+        console.log(`Found ${allButtons.length} buttons:`);
+        for (let i = 0; i < Math.min(allButtons.length, 10); i++) {
+          const text = await allButtons[i].textContent();
+          console.log(`  ${i}: "${text}"`);
+        }
+      }
       
       console.log('=== STEP 4: Wait for dashboard to load ===');
+      console.log('Waiting for navigation to dashboard...');
+      
+      try {
+        await page.waitForURL('**/doctor/dashboard', { timeout: 10000 });
+        console.log('✓ Navigated to dashboard');
+      } catch (e) {
+        console.log('Navigation timeout, current URL:', page.url());
+      }
+      
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(2000);
       

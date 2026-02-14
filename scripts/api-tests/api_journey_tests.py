@@ -167,7 +167,7 @@ class APITester:
             "repeat_count": 0
         }
         
-        result = self.api_call("POST", "/prescriptions", prescription_data, token)
+        result = self.api_call("POST", "/prescriptions", prescription_data, token, expected_status=201)
         if not result or "id" not in result:
             self.log("Failed to create prescription", "error")
             return None
