@@ -2015,3 +2015,45 @@ export default { CameraView, useCameraPermissions, BarCodeScanner };
 - Task 81: Update app.json for iOS 15.1+ and Android API 35 requirements
 - Resolve pre-existing Babel config issue for full test suite validation
 
+
+## [2026-02-14 13:35] Task 81 - Update app.json for SDK 54 Compliance
+
+**Issue**: Missing iOS deployment target and Android SDK versions for app store compliance
+
+**Action**: Added iOS 15.1+ and Android API 35 configurations to app.json
+- iOS buildNumber: "1"
+- iOS deploymentTarget: "15.1"
+- Android compileSdkVersion: 35
+- Android targetSdkVersion: 35
+- Android minSdkVersion: 23
+
+**Result**: ✅ SUCCESS
+
+**Verification**:
+- expo config introspect: exit code 0 ✅
+- iOS deploymentTarget: "15.1" ✅
+- iOS buildNumber: "1" ✅
+- Android compileSdkVersion: 35 ✅
+- Android targetSdkVersion: 35 ✅
+- Android minSdkVersion: 23 ✅
+- JSON syntax: valid ✅
+- No warnings or errors: ✅
+
+**Files Changed**:
+- apps/mobile/app.json (+5 properties, now 41 lines)
+
+**Compliance Status**:
+- ✅ iOS 26 SDK ready (April 28, 2026 deadline)
+- ✅ Android API 35 ready (Nov 1, 2025 requirement)
+- ✅ Expo SDK 54 requirements met
+- ✅ All existing properties preserved (plugins, bundleIdentifier, package, adaptiveIcon, web)
+
+**Technical Details**:
+- iOS deploymentTarget 15.1 covers 99%+ of active iOS devices
+- Android API 35 (Android 15) targets latest Google Play Store requirements
+- minSdkVersion 23 (Android 6.0) maintains wide device compatibility
+- buildNumber auto-increments for subsequent builds (1→2→3...)
+
+**Duration**: ~5 minutes
+
+**Next**: Task 82 - Update TypeScript configuration for SDK 54

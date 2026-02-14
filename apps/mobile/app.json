@@ -8,14 +8,19 @@
     ],
     "ios": {
       "supportsTabletMode": true,
-      "bundleIdentifier": "co.didx.digital-prescription"
+      "bundleIdentifier": "co.didx.digital-prescription",
+      "buildNumber": "1",
+      "deploymentTarget": "15.1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "co.didx.digital_prescription"
+      "package": "co.didx.digital_prescription",
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "minSdkVersion": 23
     },
     "web": {
       "favicon": "./src/assets/favicon.png",
