@@ -4330,3 +4330,330 @@ grep -E "^- \[ \]" .sisyphus/plans/digital-prescription-mvp.md | wc -l
 
 **🎉 DIGITAL PRESCRIPTION MVP - 100% COMPLETE 🎉**
 
+
+## Expo-Camera Testing Patterns Research (2026-02-14)
+
+### Version Information
+- **Installed:** expo-camera@13.4.4 (SDK 49)
+- **CameraView:** Available starting SDK 50+
+- **Current Issue:** TypeScript error - `Module 'expo-camera' has no exported member 'CameraView'`
+
+### Root Cause
+The project uses Expo SDK 49 (expo-camera 13.4.4), but the code imports `CameraView` which was introduced in SDK 50+. In SDK 49, the component is called `Camera`, not `CameraView`.
+
+**SDK 49 API:**
+```typescript
+import { Camera, useCameraPermissions } from 'expo-camera';
+```
+
+**SDK 50+ API:**
+```typescript
+import { CameraView, useCameraPermissions } from 'expo-camera';
+```
+
+### Testing Approaches
+
+#### 1. Unit Testing (Jest)
+**Recommended for:** Component logic, permission handling, QR parsing
+
+**Current Mock Implementation:** `__mocks__/expo-camera.ts`
+- ✅ Mocks `Camera` component as React Native `View`
+- ✅ Mocks `useCameraPermissions` hook with granted state
+- ✅ Provides `BarCodeScanner` constants
+- ❌ Does NOT mock `CameraView` (doesn't exist in SDK 49)
+
+**Best Practices:**
+1. Mock returns testID-enabled View component
+2. Mock permission hook with controllable states
+3. Test barcode scanning via manual callback triggering
+4. Use `jest.fn()` to verify callbacks called
+
+**Example Test Pattern:**
+```typescript
+jest.mock('expo-camera');
+
+test('handles barcode scan', () => {
+  const onScan = jest.fn();
+  const { getByTestId } = render(<QRScanner onQRCodeScanned={onScan} />);
+  
+  const camera = getByTestId('camera-component');
+  
+  // Manually trigger barcode scan
+  const mockBarcode = { data: JSON.stringify(credential), type: 'qr' };
+  camera.props.onBarcodeScanned(mockBarcode);
+  
+  expect(onScan).toHaveBeenCalledWith(credential);
+});
+```
+
+#### 2. E2E Testing (Playwright)
+**Recommended for:** Full workflow testing WITHOUT camera
+
+**Camera Limitations:**
+- ❌ Cannot access real device camera in web context
+- ❌ No native camera API in Expo Web
+- ⚠️ Mocking camera feed requires complex chromium args and y4m video files
+- ⚠️ Very flaky, browser-specific (chromium only)
+
+**Playwright Camera Mocking (Chromium Only):**
+```typescript
+// Launch args needed
+launchOptions: {
+  args: [
+    '--use-fake-device-for-media-stream',
+    '--use-fake-ui-for-media-stream',
+    '--use-file-for-fake-video-capture=/path/to/video.y4m'
+  ]
+}
+
+// Mock getUserMedia API
+await page.addInitScript(() => {
+  navigator.mediaDevices.getUserMedia = async () => {
+    return mockMediaStream; // Complex mock
+  };
+});
+```
+
+**Recommendation:** DON'T test camera in Playwright for this project
+- Too complex for demo project
+- Requires video file conversion (mp4 → y4m)
+- Flaky and unreliable
+- Not supported in webkit/firefox
+
+**Alternative:** Test the QR scanner component in isolation with manual data injection
+
+#### 3. Recommended Testing Strategy
+
+**Unit Tests (Jest) - 20 tests:**
+- ✅ Permission request/grant/deny flows
+- ✅ Barcode detection callbacks
+- ✅ JSON parsing from QR data
+- ✅ Credential validation logic
+- ✅ Error handling (invalid JSON, missing fields)
+- ✅ Visual feedback states
+
+**Integration Tests (Jest):**
+- ✅ QRScanner + API integration
+- ✅ Mock API responses
+- ✅ Full credential flow without camera
+
+**E2E Tests (Playwright):**
+- ❌ Skip camera testing
+- ✅ Test manual entry fallback
+- ✅ Test prescription display after "scan"
+- ✅ Mock scan success by calling callback directly
+
+### Fixes Required
+
+#### Fix 1: Update Mock to Match SDK 49
+```typescript
+// __mocks__/expo-camera.ts
+export const Camera = React.forwardRef(({ children, ...props }, ref) =>
+  React.createElement(View, {
+    ref,
+    testID: 'camera-component',
+    ...props,
+  }, children)
+);
+
+export const useCameraPermissions = jest.fn(() => [
+  { granted: true },
+  jest.fn(),
+]);
+```
+
+#### Fix 2: Remove CameraView from Code OR Upgrade SDK
+**Option A:** Keep SDK 49, use `Camera` component
+```typescript
+import { Camera, useCameraPermissions } from 'expo-camera';
+
+<Camera
+  style={styles.camera}
+  onBarCodeScanned={handleBarCodeScanned}
+  barCodeScannerSettings={{ barcodeTypes: ['qr'] }}
+/>
+```
+
+**Option B:** Upgrade to SDK 50+
+- More breaking changes
+- Not recommended for MVP
+
+#### Fix 3: Update Mock to Export CameraView (Compatibility)
+```typescript
+// __mocks__/expo-camera.ts
+export const CameraView = Camera; // Alias for backward compatibility
+```
+
+### Official Expo Testing Guidance
+From expo docs (2026):
+- Use `jest-expo` preset (✅ already configured)
+- Mock native modules like expo-camera
+- Test component logic, not native camera functionality
+- Use `transformIgnorePatterns` to transpile expo modules
+
+**Example from docs:**
+```json
+{
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*)"
+    ]
+  }
+}
+```
+
+### Community Patterns (GitHub Search Results)
+- **No results** for "expo-camera jest mock" - confirms custom mocking needed
+- **No results** for "CameraView jest.mock" - confirms new API (SDK 50+)
+- Most projects mock the entire module with simplified components
+
+### Conclusion
+1. **Unit tests:** Use current mock, trigger callbacks manually
+2. **E2E tests:** Skip camera, test manual entry or mock scan results
+3. **Fix version issue:** Either downgrade code to `Camera` or add `CameraView` alias to mock
+4. **Playwright camera mocking:** NOT recommended (too complex, too flaky)
+
+### References
+- Expo Camera Docs: https://docs.expo.dev/versions/latest/sdk/camera/
+- Playwright Mock APIs: https://playwright.dev/docs/next/mock-browser-apis
+- Medium: Fake video capture with Playwright (y4m approach)
+- GitHub Issue #36303: Request for better camera mocking in Playwright
+
+
+## Expo SDK & App Store Research (2026-02-14)
+
+### Latest Expo SDK Version
+- **SDK 55**: Currently in Beta (released Jan 22, 2026, ~2 week beta period)
+- **SDK 54**: Current Stable (released Sept 10, 2025)
+- React Native versions:
+  - SDK 55 → RN 0.83.1, React 19.2.0
+  - SDK 54 → RN 0.81, React 19.1.0
+  - SDK 49 → RN 0.72.x, React 18.2.0 (deprecated, unsupported)
+
+### App Store Compatibility Requirements (2026)
+
+#### Apple App Store (iOS)
+- **Deadline**: April 28, 2026
+- **Requirements**:
+  - iOS 26 SDK (via Xcode 26) mandatory for all submissions
+  - Applies to iOS, iPadOS, tvOS, visionOS, watchOS
+- **Expo SDK 55 Support**:
+  - Minimum iOS: 15.1
+  - Target iOS: Uses iOS compileSdkVersion 35
+  - SDK 56 will bump minimum iOS from 15.1 to 16.4
+- **Build Requirements**:
+  - Xcode 26 required (includes iOS 26 SDK)
+  - macOS version: Latest for Xcode 26
+
+#### Google Play Store (Android)
+- **Current Requirement** (Nov 1, 2025): Target API Level 35 (Android 15)
+- **Upcoming** (Aug 31, 2026): Target API Level 36 (Android 16)
+- **Expo SDK 55 Support**:
+  - compileSdkVersion: 35 (Android 15)
+  - targetSdkVersion: 35 (Android 15)
+  - buildToolsVersion: 35.0.0
+- **Note**: Extensions available if more time needed (request by Nov 1, 2025 deadline)
+
+#### Huawei AppGallery
+- **HMS Core**: Required for Huawei devices without Google Play Services
+- **React Native Support**: Possible but requires HMS SDK integration
+- **Expo Limitation**: No official Expo SDK support for HMS APIs
+  - Would need custom native modules or react-native-hms packages
+  - Not a blocking issue if targeting Google Play primarily
+- **Market Context**: Significant in China/Asia, less critical for US/EU markets
+
+### SDK 49 → SDK 55 Migration
+
+#### Breaking Changes (Major)
+1. **Legacy Architecture Dropped** (SDK 55)
+   - SDK 54 was last to support Legacy Architecture
+   - New Architecture (Fabric/TurboModules) mandatory in SDK 55
+   - `newArchEnabled` config removed from app.json
+
+2. **Camera API Changes**
+   - SDK 49: Used `Camera` component
+   - SDK 54+: Migrated to `CameraView` component
+   - SDK 55: Option to disable barcode scanner to reduce app size
+   - Breaking: Different props, event handlers
+
+3. **expo-av Removed from Expo Go** (SDK 55)
+   - Replaced by `expo-video` and `expo-audio`
+   - If using expo-av, must migrate or use development builds
+
+4. **Notifications Config**
+   - `notification` field removed from app.json (SDK 55)
+   - Must use `expo-notifications` config plugin
+   - Push notifications on Android require development builds (no longer in Expo Go)
+
+5. **Package Versioning Scheme** (SDK 55)
+   - All packages now use SDK major version (e.g., expo-camera@^55.0.0)
+   - Easier to identify compatibility at a glance
+
+#### Security Vulnerabilities
+- **React Server Components CVE** (Dec 2025): Patches released for SDK 53, 54, 55
+  - Only affects apps using experimental RSC/Server Functions
+  - Not applicable to standard client-side Expo apps
+- **SDK 49 Status**: No official security patches (deprecated)
+  - Risk: Unpatched vulnerabilities in dependencies
+  - Recommendation: Upgrade to supported SDK
+
+#### Migration Complexity Assessment
+- **SDK 49 → SDK 54**: Medium complexity (~2-3 days)
+  - Major: Camera API migration
+  - Major: Dependency updates
+  - Moderate: New Architecture prep (optional in SDK 54)
+  
+- **SDK 54 → SDK 55**: Low-Medium complexity (~1-2 days)
+  - Critical: New Architecture mandatory (no opt-out)
+  - Moderate: Package version updates
+  - Minor: Config plugin adjustments
+
+- **SDK 49 → SDK 55** (Direct): High complexity (~4-5 days)
+  - 6 major SDK versions behind
+  - Accumulation of breaking changes
+  - Recommended: Incremental upgrade (49→50→51→52→53→54→55)
+
+#### Typical Migration Timeline
+- **Incremental** (one SDK at a time): 1-2 days per SDK
+- **Jump multiple versions**: Risk of compounding breaking changes
+- **QR/Camera focus**: Extra 1 day for thorough testing of core feature
+
+### Compliance & Timeline Recommendations
+
+#### Immediate Action Required (Current: SDK 49)
+- **Google Play Compliance**: Already non-compliant with API 35 requirement (since Nov 1, 2025)
+  - SDK 49 targets much older API level
+  - Cannot submit new apps or updates to Google Play
+
+- **Apple Compliance**: Will be non-compliant April 28, 2026
+  - SDK 49 doesn't support iOS 26 SDK requirements
+
+#### Recommended Upgrade Path
+1. **Option A - Conservative**: Upgrade to SDK 54 (stable)
+   - Pros: Battle-tested, stable, good for production
+   - Cons: Will need another upgrade to SDK 55/56 within 6 months
+   - Timeline: 3-4 days for migration + testing
+
+2. **Option B - Current**: Upgrade to SDK 55 (beta/stable soon)
+   - Pros: Aligns with app store requirements, longer support window
+   - Cons: Beta period may have bugs (stable release ~early Feb 2026)
+   - Timeline: 4-5 days for migration + testing
+   - **Recommended**: Wait 2 weeks for SDK 55 stable release
+
+3. **Option C - Skip SDK 55**: Wait for SDK 56 (mid-2026)
+   - Pros: None - would miss app store deadlines
+   - Cons: Cannot submit to stores, security risks
+   - **Not Recommended**
+
+#### Action Items Priority
+1. **HIGH**: Plan SDK upgrade to 54 or 55 immediately
+2. **HIGH**: Test camera/QR functionality extensively post-upgrade
+3. **MEDIUM**: Review and update build configurations for API 35
+4. **LOW**: Consider Huawei AppGallery only if targeting Asian markets
+
+### Community Resources
+- Expo upgrade skills for AI agents: https://github.com/expo/skills/tree/main/plugins/upgrading-expo
+- Native project upgrade helper: https://docs.expo.dev/bare/upgrade
+- SDK changelogs: Individual per SDK version on expo.dev/changelog
+
