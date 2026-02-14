@@ -152,3 +152,92 @@ Rather than bloat Phase 6 with feature additions + tests, we:
 
 This maintains clean task boundaries and delivers value immediately.
 
+
+## [2026-02-14] Pre-SDK 54 Migration - Current Versions
+
+### Decision: Safety Checkpoint Before Major Upgrade
+
+**Objective:** Create a stable rollback point before SDK 54 migration work begins.
+
+**Commit:** 4e24a9b (docs: Phase 9 SDK research complete - migration plan created)
+**Branch:** feat/expo-sdk-54-migration (created from feat/demo-mode)
+**Tag:** pre-sdk-54-migration (pushed to remote for team safety)
+
+### Current Production Versions
+
+**Mobile Dependencies:**
+- `expo`: ~49.0.0 (Expo SDK 49)
+- `expo-camera`: ~13.4.4 (SDK 49 compatible)
+- `expo-router`: ^2.0.15 (Route management)
+- `expo-auth-session`: ~5.0.2 (OAuth)
+- `expo-constants`: ~14.4.2
+- `expo-crypto`: ~12.4.1
+- `expo-splash-screen`: ~0.20.5
+- `expo-status-bar`: ~1.6.0
+- `expo-web-browser`: ~12.3.2
+
+**React & Native Stack:**
+- `react`: 18.2.0
+- `react-native`: 0.72.10
+- `react-dom`: 18.2.0
+- `react-native-web`: ~0.19.6
+
+**Navigation & UI:**
+- `react-native-gesture-handler`: ~2.12.0
+- `react-native-screens`: ~3.22.0
+- `react-native-safe-area-context`: 4.6.3
+- `react-native-qrcode-svg`: ^6.3.21
+
+**Tooling:**
+- `typescript`: ^5.1.3
+- `@babel/core`: ^7.20.0
+- `@playwright/test`: ^1.58.2
+- `jest`: (via jest-expo preset)
+
+### Migration Target Versions (SDK 54)
+
+**Planned Upgrades:**
+- `expo`: ~54.0.0 (+5 major versions)
+- `expo-camera`: ~16.0.0 (+3 major versions)
+- `expo-router`: ^4.0.0 (+2 major versions)
+- `react`: 19.1.0 (major bump, breaking changes)
+- `react-native`: 0.81.x (significant version jump)
+- Other Expo packages: Updated to SDK 54 compatible versions
+
+### Migration Strategy
+
+**Phase-Based Approach:**
+1. **Phase 1 (Task 79):** Core dependencies (expo, react-native, react)
+2. **Phase 2 (Task 80):** Camera & SSI packages
+3. **Phase 3 (Task 81):** Navigation & routing
+4. **Phase 4 (Task 82):** Testing & tooling
+5. **Phase 5 (Task 83):** Full integration & verification
+
+### Rollback Path
+
+**If Migration Fails:**
+```bash
+git checkout pre-sdk-54-migration
+git reset --hard pre-sdk-54-migration
+# All code and package.json reverted to working state
+```
+
+**Remote Safety:**
+- Tag pushed to GitHub for team access
+- Can rollback from any branch by referencing the tag
+
+### Testing Before Migration
+
+**Current Test Status:**
+- ✅ E2E tests passing (auth flows, role dashboards)
+- ✅ Unit tests stable
+- ✅ TypeScript strict mode enforced
+- ✅ No deprecation warnings in SDK 49
+
+### Notes
+
+- This commit (4e24a9b) represents stable, working demo state
+- All Phase 9 research and SDK 54 task planning is complete
+- Migration branch is ready to accept Task 79+ work
+- Working directory is clean for task 79 start
+
