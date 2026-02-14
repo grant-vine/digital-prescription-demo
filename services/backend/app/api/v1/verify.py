@@ -1,15 +1,11 @@
-"""Prescription verification endpoint (US-010).
+"""Prescription verification endpoint (US-010)."""
 
-GET /api/v1/prescriptions/{id}/verify - Verify prescription authenticity
-
-RBAC: All authenticated users can verify prescriptions
-"""
-
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.dependencies.auth import get_current_user, get_db
 from app.models.user import User
@@ -96,3 +92,74 @@ async def verify_prescription(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Verification error: {error_msg}",
             )
+
+
+class VerifyPrescriptionRequest(BaseModel):
+    """Request body for POST /verify/prescription"""
+    prescription_id: int
+
+
+@router.post(
+    "/api/v1/verify/prescription",
+    response_model=VerificationResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def verify_prescription_post(
+    request: VerifyPrescriptionRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Alternative POST endpoint for prescription verification.
+
+    Same functionality as GET /prescriptions/{id}/verify but accepts
+    prescription_id in request body for compatibility.
+    """
+    return await verify_prescription(request.prescription_id, current_user, db)
+
+
+class TrustRegistryRequest(BaseModel):
+    did: str = Field(..., alias="issuer_did")
+
+
+class TrustRegistryResponse(BaseModel):
+    """Response for trust registry verification"""
+    did: str
+    trusted: bool
+    role: Optional[str] = None
+    verified_at: str
+
+
+@router.post(
+    "/api/v1/verify/trust-registry",
+    response_model=TrustRegistryResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def verify_trust_registry(
+    request: TrustRegistryRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Verify if a DID is in the trust registry.
+
+    Checks if the provided DID belongs to a registered and active user.
+    """
+    from app.models.did import DID as DIDModel
+
+    did_record = db.query(DIDModel).filter(DIDModel.did_identifier == request.did).first()
+
+    if not did_record:
+        return TrustRegistryResponse(
+            did=request.did,
+            trusted=False,
+            role=None,
+            verified_at=datetime.utcnow().isoformat() + "Z",
+        )
+
+    user = db.query(User).filter(User.id == did_record.user_id).first()
+
+    return TrustRegistryResponse(
+        did=request.did,
+        trusted=True,
+        role=user.role if user else did_record.role,
+        verified_at=datetime.utcnow().isoformat() + "Z",
+    )

@@ -15,18 +15,22 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
-  timeout: 120000,
-  retries: 2,
+  timeout: 60000,
+  retries: 1,
   expect: { timeout: 10000 },
+  workers: 1,
 
   use: {
     baseURL: 'http://localhost:8081',
     video: {
-      mode: 'on',
+      mode: 'on-first-retry',
       size: { width: 1280, height: 720 },
     },
     viewport: { width: 1280, height: 720 },
     permissions: ['camera'],
+    trace: 'on-first-retry',
+    actionTimeout: 10000,
+    navigationTimeout: 10000,
   },
 
   projects: [
@@ -37,10 +41,12 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npx expo start --web --non-interactive',
+    command: 'npx expo start --web',
     port: 8081,
     timeout: 120000,
     reuseExistingServer: true,
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 
   outputDir: 'test-results/',

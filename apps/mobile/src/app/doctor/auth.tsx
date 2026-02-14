@@ -34,7 +34,7 @@ const ThemedInput = ({ style, error, ...props }: any) => {
   );
 };
 
-const ThemedButton = ({ title, onPress, variant = 'primary', disabled, loading, style, textStyle }: any) => {
+const ThemedButton = ({ title, onPress, variant = 'primary', disabled, loading, style, textStyle, testID }: any) => {
   const backgroundColor = variant === 'primary' ? DoctorTheme.colors.primary : 'transparent';
   const textColor = variant === 'primary' ? '#ffffff' : DoctorTheme.colors.primary;
   const borderColor = variant === 'outline' ? DoctorTheme.colors.border : 'transparent';
@@ -59,6 +59,7 @@ const ThemedButton = ({ title, onPress, variant = 'primary', disabled, loading, 
       disabled={disabled || loading}
       style={finalStyle}
       accessibilityState={{ disabled: disabled || loading }}
+      testID={testID}
     >
       {loading ? (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -245,8 +246,6 @@ export default function DoctorAuthScreen() {
                 style={[styles.loginButton, (!isFormValid || loading) && { opacity: 0.5 }]}
                 textStyle={(!isFormValid || loading) ? { opacity: 0.5 } : undefined}
                 testID="login-button"
-              />
-                accessibilityState={{ disabled: !isFormValid || loading }}
               />
 
               <View style={styles.divider}>

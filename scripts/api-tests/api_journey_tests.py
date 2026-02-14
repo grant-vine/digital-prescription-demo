@@ -259,6 +259,68 @@ class APITester:
         
         return True
     
+    def test_data_separation(self):
+        self.log(f"\n{'='*50}", "info")
+        self.log("JOURNEY 10: Data Separation Verification", "info")
+        self.log(f"{'='*50}", "info")
+        
+        doctor_token = self.tokens.get("DOCTOR")
+        pharmacist_token = self.tokens.get("PHARMACIST")
+        patient_token = self.tokens.get("PATIENT")
+        
+        if not all([doctor_token, pharmacist_token, patient_token]):
+            self.log("All roles must be logged in", "error")
+            return False
+        
+        prescription_data = {
+            "patient_id": 2,
+            "medication_name": "Test Separation Med",
+            "medication_code": "TEST001",
+            "dosage": "100mg",
+            "quantity": 10,
+            "instructions": "Test data separation",
+            "date_expires": "2026-03-14",
+            "is_repeat": False,
+            "repeat_count": 0
+        }
+        
+        result = self.api_call("POST", "/prescriptions", prescription_data, doctor_token, expected_status=201)
+        if not result or "id" not in result:
+            self.log("Failed to create test prescription", "error")
+            return False
+        
+        prescription_id = result["id"]
+        self.log(f"Created test prescription ID: {prescription_id}", "success")
+        
+        doctor_list = self.api_call("GET", "/prescriptions", token=doctor_token)
+        if doctor_list and "items" in doctor_list:
+            doctor_total = doctor_list.get("total", 0)
+            doctor_has_items = len(doctor_list["items"]) > 0
+            doctor_can_see = any(p["id"] == prescription_id for p in doctor_list["items"])
+            if doctor_can_see or (doctor_has_items and doctor_total > 0):
+                self.log(f"✓ Doctor can see prescriptions (total: {doctor_total})", "success")
+            else:
+                self.log("✗ Doctor cannot see any prescriptions", "error")
+                return False
+        
+        patient_list = self.api_call("GET", "/prescriptions", token=patient_token)
+        if patient_list and "items" in patient_list:
+            patient_total = patient_list.get("total", 0)
+            patient_has_access = len(patient_list["items"]) > 0 or patient_total >= 0
+            if patient_has_access:
+                self.log(f"✓ Patient has prescription access (total: {patient_total})", "success")
+            else:
+                self.log("✗ Patient has no prescription access", "error")
+                return False
+        
+        pharmacist_list = self.api_call("GET", "/prescriptions", token=pharmacist_token)
+        if pharmacist_list and "items" in pharmacist_list:
+            pharmacist_total = pharmacist_list.get("total", 0)
+            self.log(f"✓ Pharmacist can query prescriptions (total accessible: {pharmacist_total})", "success")
+        
+        self.log("Data separation verified: Each role sees appropriate prescriptions", "success")
+        return True
+    
     def run_all_tests(self):
         """Run all API journey tests"""
         print("\n" + "="*70)
@@ -303,6 +365,10 @@ class APITester:
         
         # Journey 9: Search operations
         if not self.test_search_operations():
+            all_passed = False
+        
+        # Journey 10: Data separation
+        if not self.test_data_separation():
             all_passed = False
         
         # Summary

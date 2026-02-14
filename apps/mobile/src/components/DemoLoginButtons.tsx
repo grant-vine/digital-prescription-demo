@@ -196,10 +196,10 @@ export function DemoLoginButtons({
                 },
               ]}
               onPress={() => onSelect(credentials)}
-              accessibilityLabel={`Login as ${role}`}
+              accessibilityLabel={`Login as ${roleKey}`}
               accessibilityRole="button"
               accessibilityState={{ selected: isActive }}
-              testID={`demo-login-${role}`}
+              testID={`demo-login-${roleKey}`}
             >
               <Text
                 style={[

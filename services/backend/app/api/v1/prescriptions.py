@@ -9,12 +9,12 @@ Implements:
 
 from typing import List, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, validator
 
 from app.dependencies.auth import get_current_user, require_role, get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.models.prescription import Prescription
 
 router = APIRouter()
@@ -322,3 +322,38 @@ async def list_prescriptions(
     return PrescriptionListResponse(
         items=prescriptions, total=total, page=page, page_size=page_size
     )
+
+
+class PatientSearchResponse(BaseModel):
+    """Schema for patient search response."""
+
+    id: int
+    username: str
+    email: str
+    full_name: Optional[str]
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("/patients/search", response_model=List[PatientSearchResponse])
+async def search_patients(
+    q: str = Query(..., description="Search query for patient name or email"),
+    current_user: User = Depends(require_role(["doctor"])),
+    db: Session = Depends(get_db),
+):
+    search_pattern = f"%{q}%"
+    
+    patients = (
+        db.query(User)
+        .filter(User.role == "patient")
+        .filter(
+            (User.username.ilike(search_pattern))
+            | (User.email.ilike(search_pattern))
+            | (User.full_name.ilike(search_pattern))
+        )
+        .limit(20)
+        .all()
+    )
+    
+    return patients

@@ -23,10 +23,10 @@ class QRResponse(BaseModel):
         from_attributes = True
 
 
-@router.post(
+@router.get(
     "/api/v1/prescriptions/{id}/qr",
     response_model=QRResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
 )
 def generate_qr_code(
     id: int,

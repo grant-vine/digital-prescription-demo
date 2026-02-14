@@ -213,7 +213,7 @@ export default function RoleSelector(): React.ReactElement {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} testID="index-screen">
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}

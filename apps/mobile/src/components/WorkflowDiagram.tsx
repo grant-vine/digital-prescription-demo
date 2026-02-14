@@ -174,6 +174,7 @@ export function WorkflowDiagram({ testID }: WorkflowDiagramProps): React.ReactEl
     return (
       <View
         key={stepData.step}
+        testID={`workflow-step-${stepData.step}`}
         style={[
           styles.stepContainer,
           isMobile ? styles.stepContainerMobile : styles.stepContainerDesktop,
