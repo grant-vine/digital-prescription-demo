@@ -22,7 +22,7 @@ test.describe('Investor Demo - Complete Prescription Flow', () => {
         await doctorPage.goto('/');
         await doctorPage.waitForLoadState('networkidle');
 
-        const doctorCard = doctorPage.locator('text=Doctor').first();
+        const doctorCard = doctorPage.locator('text=Healthcare Provider').first();
         if (await doctorCard.isVisible()) {
           await doctorCard.click();
           await doctorPage.waitForTimeout(300);

@@ -6,7 +6,7 @@ test.describe('E2E: Doctor Creates Prescription', () => {
     await page.waitForLoadState('networkidle');
 
     // Select doctor role
-    const doctorCard = page.locator('text=Doctor').first();
+    const doctorCard = page.locator('text=Healthcare Provider').first();
     if (await doctorCard.isVisible()) {
       await doctorCard.click();
       await page.waitForTimeout(300);
@@ -40,7 +40,7 @@ test.describe('E2E: Doctor Creates Prescription', () => {
     await page.waitForLoadState('networkidle');
 
     // Select doctor role
-    const doctorCard = page.locator('text=Doctor').first();
+    const doctorCard = page.locator('text=Healthcare Provider').first();
     if (await doctorCard.isVisible()) {
       await doctorCard.click();
       await page.waitForTimeout(300);
@@ -67,7 +67,7 @@ test.describe('E2E: Doctor Creates Prescription', () => {
     await page.waitForLoadState('networkidle');
 
     // Select doctor role
-    const doctorCard = page.locator('text=Doctor').first();
+    const doctorCard = page.locator('text=Healthcare Provider').first();
     if (await doctorCard.isVisible()) {
       await doctorCard.click();
       await page.waitForTimeout(300);
@@ -83,7 +83,7 @@ test.describe('E2E: Doctor Creates Prescription', () => {
     await page.waitForLoadState('networkidle');
 
     // Select doctor role and login
-    const doctorCard = page.locator('text=Doctor').first();
+    const doctorCard = page.locator('text=Healthcare Provider').first();
     if (await doctorCard.isVisible()) {
       await doctorCard.click();
       await page.waitForTimeout(300);
@@ -100,7 +100,7 @@ test.describe('E2E: Doctor Creates Prescription', () => {
     await page.waitForLoadState('networkidle');
 
     // Select doctor role
-    const doctorCard = page.locator('text=Doctor').first();
+    const doctorCard = page.locator('text=Healthcare Provider').first();
     if (await doctorCard.isVisible()) {
       await doctorCard.click();
       await page.waitForTimeout(300);

@@ -149,7 +149,7 @@ export interface DispensingAction {
 
 // --- Axios Instance ---
 
-const API_URL = 'http://localhost:8000'; // In real app, this should be env var
+const API_URL = 'http://localhost:8000/api/v1'; // In real app, this should be env var
 
 let _axiosInstance: AxiosInstance | null = null;
 
@@ -170,7 +170,7 @@ const getClient = (): AxiosInstance => {
   _axiosInstance.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
       // Skip auth header for login/refresh endpoints
-      if (config.url?.includes('/auth/login') || config.url?.includes('/auth/refresh')) {
+      if (config.url?.includes('/api/v1/auth/login') || config.url?.includes('/api/v1/auth/refresh')) {
         return config;
       }
 
@@ -216,7 +216,7 @@ const getClient = (): AxiosInstance => {
       const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
       // Skip refresh logic for login endpoint
-      if (originalRequest.url?.includes('/auth/login')) {
+      if (originalRequest.url?.includes('/api/v1/auth/login')) {
         return Promise.reject(error);
       }
 
