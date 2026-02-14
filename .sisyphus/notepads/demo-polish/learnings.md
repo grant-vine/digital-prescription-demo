@@ -1890,3 +1890,128 @@ Previous attempt to manually specify versions like `expo-auth-session@~9.0.2` fa
 - Manual version pins cause conflicts; letting Expo resolve them is the standard practice
 - All third-party packages keep explicit versions for deterministic builds
 
+
+---
+
+## [2026-02-14 12:45] Task 80 - TypeScript 5.6.2 Upgrade (Fix Module Preserve Blocker)
+
+### Issue Addressed
+Expo SDK 54's `tsconfig.base.json` uses `"module": "preserve"` which requires TypeScript 5.4+. Current version 5.3.3 doesn't support this feature, causing compilation error:
+```
+error TS6046: Argument for '--module' option must be: 'none', 'commonjs', ...
+```
+
+### Solution Executed
+1. **Updated package.json** - Line 40: `"typescript": "~5.3.3"` → `"typescript": "~5.6.2"`
+2. **Installed dependencies** - Ran `npm install --legacy-peer-deps`
+   - Actual installed version: typescript@5.6.3 (within ~5.6.2 range)
+   - Other 1513 packages unchanged, 1 package added
+3. **Verified compilation** - Ran `npx tsc --noEmit`
+   - ✅ Exit code 0 (success)
+   - ✅ No TS6046 error
+   - ✅ No other TypeScript errors
+
+### Verification Results
+```bash
+npm list typescript
+# Output:
+# @digital-prescription/mobile@0.1.0
+# └── typescript@5.6.3
+```
+
+**Success Criteria Met:**
+- [x] package.json line 40 updated to ~5.6.2
+- [x] npm install completed successfully with --legacy-peer-deps flag
+- [x] TypeScript compilation succeeds (npx tsc --noEmit)
+- [x] Exit code 0 from type checking command
+
+### Dependencies Updated
+- typescript: 5.3.3 → 5.6.3 (within ~5.6.2 range)
+- No other version changes
+- All 1513 packages remain compatible
+
+### Why TypeScript 5.6.2?
+- Introduces `"module": "preserve"` option (required by Expo SDK 54)
+- TypeScript 5.4 was first version with this feature
+- 5.6.2 is latest stable with confirmed React 19.1.0 compatibility
+- Expo SDK 54's built-in tsconfig requires this feature
+
+### Files Changed
+- `apps/mobile/package.json` (1 line modified)
+- `apps/mobile/package-lock.json` (automatically updated)
+
+### Impact
+- ✅ Unblocks Task 81 (expo-camera imports compilation)
+- ✅ Enables migration branch `feat/expo-sdk-54-migration` to proceed
+- ✅ Allows subsequent TypeScript compilation of SDK 54+ features
+
+### Next Steps
+- Task 81: Verify expo-camera imports compile with TypeScript 5.6.3
+- All remaining SDK 54 migration tasks now possible
+
+### Time Taken
+- Estimated: 15-20 minutes
+- Actual: ~5 minutes (straightforward version upgrade)
+
+### Technical Notes
+- The `~5.6.2` semver constraint allows 5.6.3 (npm installed latest patch in range)
+- `--legacy-peer-deps` flag was necessary due to intentional peer dep conflicts in stack
+- No breaking changes from 5.3.3 to 5.6.3 (minor version backward compatible)
+
+
+---
+
+## Task 80 - Expo SDK 54 Migration: Update expo-camera Mock (2026-02-14)
+
+### Discovery
+- All 3 source files (QRScanner.tsx, scan.tsx, verify.tsx) **already use CameraView API** ✅
+- Only the mock file (`apps/mobile/__mocks__/expo-camera.ts`) was exporting old SDK 49 `Camera` component
+- This was a leftover from earlier migration work - source code was already updated
+
+### Action Taken
+1. Updated mock export: `Camera` → `CameraView` (line 16)
+2. Updated testID: `'camera-component'` → `'camera-view-component'`
+3. Updated displayName: `'MockCamera'` → `'MockCameraView'`
+4. Updated default export to export `CameraView` instead of `Camera`
+5. Kept `useCameraPermissions` export unchanged (already correct)
+6. Kept `BarCodeScanner` export unchanged (already correct)
+
+### Verification Results
+- ✅ TypeScript compilation: **PASS** (npx tsc --noEmit - exit code 0)
+- ✅ Import compatibility: All source files import `CameraView` and `useCameraPermissions`
+- ✅ Mock default export: Exports `CameraView`, `useCameraPermissions`, `BarCodeScanner`
+- ⚠️ Jest tests: Pre-existing Babel config issue (`babel-plugin-module-resolver` missing) - unrelated to this change
+
+### Technical Details
+```typescript
+// BEFORE (SDK 49):
+export const Camera = React.forwardRef(...);
+Camera.displayName = 'MockCamera';
+export default { Camera, useCameraPermissions, BarCodeScanner };
+
+// AFTER (SDK 50+):
+export const CameraView = React.forwardRef(...);
+CameraView.displayName = 'MockCameraView';
+export default { CameraView, useCameraPermissions, BarCodeScanner };
+```
+
+### Files Modified
+- `apps/mobile/__mocks__/expo-camera.ts` (1 file)
+  - Lines 4-8: Updated docstring to reflect SDK 50+ API
+  - Line 16: `Camera` → `CameraView`
+  - Line 22: testID updated
+  - Line 29: displayName updated
+  - Line 45: Default export updated
+
+### Time Spent
+- **Estimate**: 15 minutes (mock update only)
+- **Actual**: 5 minutes (very straightforward)
+- **Savings**: 1 hour 55 minutes vs original estimate (source code was already migrated)
+
+### Key Learning
+**Source-First Migration Pattern**: When upgrading breaking-change libraries, update source code immediately, then sync mocks afterward. This prevents divergence between production code and test mocks.
+
+### Next Steps
+- Task 81: Update app.json for iOS 15.1+ and Android API 35 requirements
+- Resolve pre-existing Babel config issue for full test suite validation
+

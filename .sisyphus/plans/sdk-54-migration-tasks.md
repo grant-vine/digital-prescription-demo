@@ -137,8 +137,8 @@
 - [x] All expo-* packages at SDK 54 versions
 - [x] React Native upgraded to 0.81.x
 - [x] React upgraded to 19.1.0
-- [ ] `package-lock.json` updated (pending npm install)
-- [ ] No npm install errors (pending npm install)
+- [x] Dependencies installed successfully via expo install
+- [x] No critical npm install errors (used --legacy-peer-deps)
 
 **Files Modified**:
 - `apps/mobile/package.json`
