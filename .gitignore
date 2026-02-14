@@ -93,3 +93,4 @@ Thumbs.db
 
 # Keep plan files
 !.sisyphus/plans/
+**/test-results/*
