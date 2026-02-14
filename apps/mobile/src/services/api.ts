@@ -459,7 +459,7 @@ export const api = {
     };
   },
 
-  async setupPharmacy(data: { pharmacy_name: string; sapc_number: string }): Promise<{ pharmacy_id: string; status: string }> {
+  async setupPharmacy(_data: { pharmacy_name: string; sapc_number: string }): Promise<{ pharmacy_id: string; status: string }> {
     console.warn('Setup pharmacy using mock data');
     return {
       pharmacy_id: 'pharm-001',
