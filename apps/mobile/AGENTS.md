@@ -4,7 +4,9 @@
 
 ## OVERVIEW
 
-React Native 0.72 + Expo SDK 49 + Expo Router. Three role-based route groups with distinct color themes. TypeScript strict mode.
+React Native 0.81 + Expo SDK 54 + Expo Router v4. Three role-based route groups with distinct color themes. TypeScript strict mode.
+
+**Updated**: 2026-02-14 - Upgraded to SDK 54 for app store compliance.
 
 ## STRUCTURE
 
@@ -109,3 +111,32 @@ npx tsc --noEmit                 # Type check
 ### Demo Configuration
 
 Environment variable `EXPO_PUBLIC_DEMO_MODE` controls demo features visibility. Set via Expo config `extra.demoMode` or directly as an environment variable during development.
+
+---
+
+## SDK 54 MIGRATION NOTES
+
+**Completed**: 2026-02-14
+
+### Key Changes
+- Upgraded from SDK 49 → SDK 54 (5 major versions)
+- React Native 0.72 → 0.81
+- React 18.2 → 19.1
+- TypeScript 5.3 → 5.6
+- Expo Router v2 → v4
+
+### Breaking Changes Fixed
+- **React 19 ref pattern**: Animated values now use lazy initialization (refs cannot be accessed during render)
+- **Camera API**: Already using CameraView (SDK 50+ API) - no migration needed
+- **SafeAreaView**: Migrated to `react-native-safe-area-context` (5 files updated)
+- **Jest transforms**: Added `expo-modules-core` to transformIgnorePatterns
+
+### App Store Compliance
+- **iOS**: Deployment target 15.1+ (meets April 2026 requirement for iOS 26 SDK)
+- **Android**: Target SDK 35, Compile SDK 35 (meets Nov 2025 API 35 requirement)
+
+### Camera Component Usage
+- Component: `CameraView` from `expo-camera` (SDK 50+ modern API)
+- Old API: `Camera` component (deprecated in SDK 50)
+- Location: `src/components/qr/QRScanner.tsx`, `src/app/patient/scan.tsx`, `src/app/pharmacist/verify.tsx`
+- All camera code already uses the modern API - no updates needed during migration

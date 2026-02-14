@@ -6,6 +6,17 @@ This package contains everything needed to build and deploy a digital prescripti
 
 ---
 
+## 🎉 Recent Updates
+
+**2026-02-14**: Upgraded to Expo SDK 54
+- ✅ Full app store compliance (iOS 26 SDK, Android API 35)
+- ✅ Latest security patches and performance improvements
+- ✅ Modern CameraView API for QR code scanning
+- ✅ React Native 0.81 with React 19.1
+- ✅ Zero breaking changes for end users
+
+---
+
 ## 📋 Quick Navigation
 
 ### Plans (Choose Your Path)
@@ -207,8 +218,8 @@ Each role has distinct visual identity:
 ### Technology Stack
 
 **Mobile App:**
-- React Native + Expo
-- TypeScript
+- React Native 0.81 + Expo SDK 54
+- TypeScript 5.6
 - TailwindCSS (via NativeWind)
 - Zustand (state management)
 - React Navigation
