@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthRequest } from 'expo-auth-session';
 import { api } from '../../services/api';
 import { DoctorTheme } from '../../components/theme/DoctorTheme';
+import { DemoLoginButtons } from '../../components/DemoLoginButtons';
 
 
 const ThemedText = ({ style, type = 'body', children, ...props }: any) => {
@@ -192,6 +193,13 @@ export default function DoctorAuthScreen() {
             </View>
 
             <View style={styles.form}>
+              <DemoLoginButtons 
+                onSelect={(creds) => {
+                  setEmail(creds.email);
+                  setPassword(creds.password);
+                }}
+              />
+              
               <ThemedInput
                 placeholder="Email or Username"
                 value={email}
