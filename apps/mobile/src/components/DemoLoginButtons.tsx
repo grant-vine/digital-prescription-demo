@@ -29,14 +29,26 @@ export interface DemoCredentials {
  */
 export const DEMO_CREDENTIALS: Record<string, DemoCredentials> = {
   doctor: {
-    label: '👨‍⚕️ Use Demo Doctor',
+    label: '👨‍⚕️ Use Demo Doctor (Sarah)',
     email: 'sarah.johnson@hospital.co.za',
     password: 'Demo@2024',
     role: 'doctor',
   },
+  doctor2: {
+    label: '👩‍⚕️ Use Demo Doctor (Michael)',
+    email: 'michael.chen@hospital.co.za',
+    password: 'Demo@2024',
+    role: 'doctor',
+  },
   patient: {
-    label: '👤 Use Demo Patient',
+    label: '👤 Use Demo Patient (John)',
     email: 'john.smith@example.com',
+    password: 'Demo@2024',
+    role: 'patient',
+  },
+  patient2: {
+    label: '🧑 Use Demo Patient (Emma)',
+    email: 'emma.wilson@example.com',
     password: 'Demo@2024',
     role: 'patient',
   },
@@ -142,7 +154,10 @@ export function DemoLoginButtons({
     return null;
   }
 
-  const rolesToShow = role ? [role] : (Object.keys(DEMO_CREDENTIALS) as Role[]);
+  const allKeys = Object.keys(DEMO_CREDENTIALS);
+  const rolesToShow = role 
+    ? allKeys.filter(key => DEMO_CREDENTIALS[key].role === role)
+    : allKeys;
 
   return (
     <View style={styles.container}>

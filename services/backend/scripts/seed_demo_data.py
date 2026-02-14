@@ -85,8 +85,8 @@ DEMO_DOCTORS = [
         "specialty": "Pediatrics",
     },
     {
-        "email": "michael.brown@surgery.co.za",
-        "full_name": "Dr. Michael Brown",
+        "email": "michael.chen@hospital.co.za",
+        "full_name": "Dr. Michael Chen",
         "registration_number": "MP4567890",
         "password": "Demo@2024",
         "specialty": "Surgery",
@@ -107,6 +107,12 @@ DEMO_PATIENTS = [
         "full_name": "John Smith",
         "password": "Demo@2024",
         "id_number": "8001015001001",
+    },
+    {
+        "email": "emma.wilson@example.com",
+        "full_name": "Emma Wilson",
+        "password": "Demo@2024",
+        "id_number": "8705055005005",
     },
     {
         "email": "mary.williams@example.com",
