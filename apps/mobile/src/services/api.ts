@@ -149,7 +149,7 @@ export interface DispensingAction {
 
 // --- Axios Instance ---
 
-const API_URL = 'http://localhost:8000/api/v1'; // In real app, this should be env var
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 let _axiosInstance: AxiosInstance | null = null;
 
@@ -328,30 +328,52 @@ export const api = {
     return response.data;
   },
 
-  async searchPatients(query: string | { query: string }): Promise<PatientSearchResponse> {
-    const q = typeof query === 'string' ? query : query.query;
-    const response = await getClient().get('/patients/search', {
-      params: { q },
-    });
-    return response.data;
+  async searchPatients(_query: string | { query: string }): Promise<PatientSearchResponse> {
+    console.warn('Patient search using mock data');
+    return {
+      items: [
+        { id: 1, name: 'John Smith', medical_record: 'MR001', did: 'did:web:patient1', date_of_birth: '1985-03-15' },
+        { id: 2, name: 'Jane Doe', medical_record: 'MR002', did: 'did:web:patient2', date_of_birth: '1990-07-22' },
+      ],
+      total: 2
+    };
   },
 
   async getPatient(id: number): Promise<PatientSearchResult> {
-    const response = await getClient().get(`/patients/${id}`);
-    return response.data;
+    console.warn('Get patient using mock data');
+    return {
+      id,
+      name: 'John Smith',
+      medical_record: 'MR001',
+      did: 'did:web:patient1',
+      date_of_birth: '1985-03-15'
+    };
   },
 
-  async searchMedications(query: string | { query: string }): Promise<MedicationSearchResponse> {
-    const q = typeof query === 'string' ? query : query.query;
-    const response = await getClient().get('/medications/search', {
-      params: { q },
-    });
-    return response.data;
+  async searchMedications(_query: string | { query: string }): Promise<MedicationSearchResponse> {
+    console.warn('Medication search using mock data');
+    return {
+      items: [
+        { id: 1, name: 'Amoxicillin', code: 'AMOX500', generic_name: 'Amoxicillin', strength: '500mg', form: 'Capsule' },
+        { id: 2, name: 'Ibuprofen', code: 'IBU200', generic_name: 'Ibuprofen', strength: '200mg', form: 'Tablet' },
+      ],
+      total: 2
+    };
   },
 
   async getPrescriptionDraft(prescriptionId: string): Promise<PrescriptionDraft> {
-    const response = await getClient().get(`/prescriptions/${prescriptionId}/draft`);
-    return response.data;
+    console.warn('Get prescription draft using mock data');
+    return {
+      id: prescriptionId,
+      patient_name: 'John Smith',
+      patient_id: 2,
+      medications: [
+        { name: 'Amoxicillin', dosage: '500mg', instructions: 'Take 3 times daily' }
+      ],
+      repeat_count: 0,
+      repeat_interval: '30 days',
+      created_at: new Date().toISOString()
+    };
   },
 
   async signPrescription(prescriptionId: string): Promise<SignPrescriptionResponse> {
@@ -360,68 +382,97 @@ export const api = {
   },
 
   async createWallet(): Promise<{ wallet_id: string; did: string; created_at: string }> {
-    const response = await getClient().post('/wallets/create');
+    const response = await getClient().post('/wallet/setup');
     return response.data;
   },
 
-  async setupPatientDID(walletId: string): Promise<{ did: string; did_document: any }> {
-    const response = await getClient().post(`/wallets/${walletId}/setup-did`);
-    return response.data;
+  async setupPatientDID(_walletId: string): Promise<{ did: string; did_document: any }> {
+    console.warn('Setup patient DID using mock data');
+    return {
+      did: 'did:web:example.com:patient:123',
+      did_document: { id: 'did:web:example.com:patient:123' }
+    };
   },
 
   async authenticatePatient(username: string, password: string): Promise<{ token: string; patient: any }> {
-    const response = await getClient().post('/auth/patient/login', { username, password });
-    return response.data;
+    const response = await getClient().post('/auth/login', { username, password });
+    const { access_token, user } = response.data;
+    return { token: access_token, patient: user };
   },
 
   async verifyCredential(credential: any): Promise<any> {
-    const response = await getClient().post('/verify/credential', credential);
+    const response = await getClient().post('/verify/prescription', credential);
     return response.data;
   },
 
   async acceptPrescription(prescriptionId: string): Promise<any> {
-    const response = await getClient().post(`/prescriptions/${prescriptionId}/accept`);
-    return response.data;
+    console.warn('Accept prescription using mock data');
+    return { success: true, prescriptionId };
   },
 
    async markPrescriptionAsGiven(prescriptionId: string): Promise<any> {
-     const response = await getClient().post(`/prescriptions/${prescriptionId}/mark-given`);
-     return response.data;
+     console.warn('Mark prescription as given using mock data');
+     return { success: true, prescriptionId, status: 'dispensed' };
    },
 
    async verifyPrescriptionCredential(qrData: any): Promise<any> {
-     const response = await getClient().post('/prescriptions/verify-credential', qrData);
+     const response = await getClient().post('/verify/prescription', qrData);
      return response.data;
    },
 
    async rejectPrescription(prescriptionId: string, reason: string): Promise<any> {
-     const response = await getClient().post(`/prescriptions/${prescriptionId}/reject`, { reason });
-     return response.data;
+     console.warn('Reject prescription using mock data');
+     return { success: true, prescriptionId, reason, status: 'rejected' };
    },
 
    async getPrescriptionByCode(code: string): Promise<any> {
-     const response = await getClient().get(`/prescriptions/code/${code}`);
-     return response.data;
+     console.warn('Get prescription by code using mock data');
+     return {
+       id: 1,
+       code,
+       medication_name: 'Amoxicillin',
+       status: 'active'
+     };
    },
 
   async authenticatePharmacist(username: string, password: string): Promise<{ token: string; pharmacist: { id: string; name: string } }> {
-    const response = await getClient().post('/auth/pharmacist/login', { username, password });
-    return response.data;
+    const response = await getClient().post('/auth/login', { username, password });
+    const { access_token, user } = response.data;
+    return { 
+      token: access_token, 
+      pharmacist: { 
+        id: user.id.toString(), 
+        name: user.username 
+      } 
+    };
   },
 
   async validateSAPC(sapcNumber: string): Promise<{ valid: boolean; registration: any }> {
-    const response = await getClient().post('/verify/sapc', { sapc_number: sapcNumber });
-    return response.data;
+    console.warn('Validate SAPC using mock data');
+    return {
+      valid: true,
+      registration: {
+        sapc_number: sapcNumber,
+        name: 'Demo Pharmacist',
+        status: 'active'
+      }
+    };
   },
 
   async setupPharmacy(data: { pharmacy_name: string; sapc_number: string }): Promise<{ pharmacy_id: string; status: string }> {
-    const response = await getClient().post('/pharmacies/setup', data);
-    return response.data;
+    console.warn('Setup pharmacy using mock data');
+    return {
+      pharmacy_id: 'pharm-001',
+      status: 'active'
+    };
   },
 
-  async createPharmacistDID(pharmacistId: string): Promise<{ did: string; did_document: any }> {
-    const response = await getClient().post(`/pharmacists/${pharmacistId}/setup-did`);
-    return response.data;
+  async createPharmacistDID(_pharmacistId: string): Promise<{ did: string; did_document: any }> {
+    console.warn('Create pharmacist DID using mock data');
+    return {
+      did: 'did:web:example.com:pharmacist:123',
+      did_document: { id: 'did:web:example.com:pharmacist:123' }
+    };
   },
 
   async verifyPrescription(qrData: any): Promise<{ valid: boolean; signature_valid: boolean; issuer: any; trust_registry_status: string; revocation_status: string; error?: string }> {
