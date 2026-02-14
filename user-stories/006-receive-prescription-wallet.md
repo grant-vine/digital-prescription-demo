@@ -247,3 +247,53 @@ CREATE INDEX idx_credentials_status ON credentials(status);
 - US-007: View Prescription Details
 - US-008: Share Prescription with Pharmacist
 - US-018: DIDComm v2 Messaging (future replacement)
+
+---
+
+## Technical Notes (SDK 54)
+
+**SDK Version:** Expo SDK 54  
+**Camera API:** CameraView (expo-camera SDK 50+)  
+**Updated:** 2026-02-14
+
+### Implementation Details
+- Uses modern **CameraView component** (replaces deprecated Camera component from SDK 49)
+- QR code scanning via `onBarcodeScanned` callback prop
+- Camera permissions handled via expo-camera plugin in app.json
+- Fallback to manual entry if camera unavailable or permission denied
+
+### Camera Permission Configuration
+```json
+// app.json
+{
+  "expo": {
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Digital Prescription to access your camera for QR code scanning."
+        }
+      ]
+    ]
+  }
+}
+```
+
+### CameraView API Usage
+```typescript
+import { CameraView, useCameraPermissions } from 'expo-camera';
+
+const [permission, requestPermission] = useCameraPermissions();
+
+<CameraView
+  onBarcodeScanned={handleBarcodeScanned}
+  barcodeScannerSettings={{
+    barcodeTypes: ['qr'],
+  }}
+/>
+```
+
+### App Store Compliance
+- **iOS**: Requires iOS 15.1+ (deployment target set in app.json)
+- **Android**: Targets API 35, minimum API 23 (configured in app.json)
+- **Permissions**: Camera permission required on both platforms

@@ -175,3 +175,67 @@ GET  https://resolver.cheqd.net/1.0/identifiers/{did}
 - US-008: Share Prescription with Pharmacist (prerequisite)
 - US-011: View Prescription Items for Dispensing (next step)
 - US-015: Revoke or Cancel Prescription (revocation mechanism)
+
+---
+
+## Technical Notes (SDK 54)
+
+**SDK Version:** Expo SDK 54  
+**Camera API:** CameraView (expo-camera SDK 50+)  
+**Updated:** 2026-02-14
+
+### Implementation Details
+- Uses modern **CameraView component** for QR code scanning (replaces deprecated Camera component from SDK 49)
+- QR code scanning via `onBarcodeScanned` callback prop
+- Prescription verification happens after successful QR scan
+- Camera permissions handled via expo-camera plugin in app.json
+- Fallback to manual entry if camera unavailable or permission denied
+
+### Camera Permission Configuration
+```json
+// app.json
+{
+  "expo": {
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Digital Prescription to access your camera for QR code scanning."
+        }
+      ]
+    ]
+  }
+}
+```
+
+### CameraView API Usage
+```typescript
+import { CameraView, useCameraPermissions } from 'expo-camera';
+
+const [permission, requestPermission] = useCameraPermissions();
+
+<CameraView
+  onBarcodeScanned={handleBarcodeScanned}
+  barcodeScannerSettings={{
+    barcodeTypes: ['qr'],
+  }}
+/>
+```
+
+### Verification Flow
+1. Pharmacist opens verification screen
+2. CameraView component activates camera
+3. Patient displays QR code with verifiable presentation
+4. `onBarcodeScanned` callback fires when QR detected
+5. System extracts verifiable presentation from QR data
+6. Backend verification API validates:
+   - Digital signature (doctor's signature on credential)
+   - Patient's signature on presentation
+   - Doctor DID resolution and trust registry check
+   - Prescription expiration and revocation status
+7. Verification results displayed to pharmacist
+
+### App Store Compliance
+- **iOS**: Requires iOS 15.1+ (deployment target set in app.json)
+- **Android**: Targets API 35, minimum API 23 (configured in app.json)
+- **Permissions**: Camera permission required on both platforms for QR scanning

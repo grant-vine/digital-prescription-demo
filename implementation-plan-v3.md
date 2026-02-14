@@ -133,6 +133,12 @@ const ThemeProvider = ({ role, children }) => {
 
 ### Technology: React Native with Expo
 
+**Current Stack** (Updated 2026-02-14):
+- Expo SDK 54 (React Native 0.81, React 19.1)
+- TypeScript 5.6 with strict mode
+- Expo Router v4 for file-based navigation
+- Modern CameraView API for QR code scanning
+
 **Why React Native:**
 - ✅ Single codebase for iOS, Android, and Web
 - ✅ Near-native performance
@@ -148,6 +154,7 @@ const ThemeProvider = ({ role, children }) => {
 - ✅ Easy device testing
 - ✅ Push notifications built-in
 - ✅ Camera access for QR scanning
+- ✅ App store compliance (iOS 26 SDK, Android API 35)
 
 ### Project Structure
 ```
