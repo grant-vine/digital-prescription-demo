@@ -514,6 +514,7 @@ export default function PatientAuthScreen(): React.ReactElement {
 
             {/* Demo Login Buttons */}
             <DemoLoginButtons
+              role="patient"
               onSelect={handleDemoSelect}
               currentRole="patient"
             />

@@ -121,13 +121,11 @@ export default function DoctorAuthScreen() {
     setError(null);
     setEmailError(null);
 
-    // Validate email format if email has a value
     if (email && !validateEmail(email)) {
       setEmailError('Invalid email format');
       return;
     }
 
-    // Check for empty fields
     if (!email || !password) {
       setError('Required fields missing');
       return;
@@ -143,6 +141,13 @@ export default function DoctorAuthScreen() {
       }
       if (response?.refresh_token) {
         await AsyncStorage.setItem('refresh_token', response.refresh_token);
+      }
+      
+      const userRole = response?.user?.role;
+      if (userRole !== 'doctor') {
+        setError(`Access denied. This portal is for doctors only. Your role: ${userRole}`);
+        setLoading(false);
+        return;
       }
       
       router.replace('/doctor/dashboard');
@@ -194,6 +199,7 @@ export default function DoctorAuthScreen() {
 
             <View style={styles.form}>
               <DemoLoginButtons 
+                role="doctor"
                 onSelect={(creds) => {
                   setEmail(creds.email);
                   setPassword(creds.password);

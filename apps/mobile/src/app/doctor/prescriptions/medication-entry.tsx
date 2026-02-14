@@ -9,7 +9,7 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { DoctorTheme } from '../../../components/theme/DoctorTheme';
 import { api, MedicationSearchResult } from '../../../services/api';
 
@@ -75,6 +75,7 @@ interface PrescribedMedication {
 
 export default function MedicationEntryScreen() {
   const router = useRouter();
+  const { patientId, patientName } = useLocalSearchParams<{ patientId: string; patientName: string }>();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<MedicationSearchResult[]>([]);
@@ -178,16 +179,45 @@ export default function MedicationEntryScreen() {
     setPrescribedMedications(prescribedMedications.filter(m => m.id !== id));
   };
 
-  const handleProceed = () => {
+  const handleProceed = async () => {
     if (prescribedMedications.length === 0) {
       setFormError('At least one medication is required');
-      if (process.env.NODE_ENV === 'test') {
-        router.push('/doctor/prescriptions/sign');
-      }
       return;
     }
     
-    router.push('/doctor/prescriptions/sign');
+    if (!patientId) {
+      setFormError('Patient ID is missing');
+      return;
+    }
+    
+    try {
+      setFormError('');
+      
+      const firstMed = prescribedMedications[0];
+      
+      const prescriptionData = {
+        patient_id: parseInt(patientId, 10),
+        medication_name: firstMed.medication.name,
+        medication_code: firstMed.medication.code || firstMed.medication.name.substring(0, 10).toUpperCase(),
+        dosage: firstMed.dosage,
+        quantity: 21,
+        instructions: firstMed.instructions,
+        date_expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        is_repeat: false,
+        repeat_count: 0
+      };
+      
+      const result = await api.createPrescription(prescriptionData);
+      
+      if (result && result.id) {
+        router.push(`/doctor/prescriptions/sign?prescriptionId=${result.id}`);
+      } else {
+        setFormError('Failed to create prescription');
+      }
+    } catch (error: any) {
+      console.error('Failed to create prescription:', error);
+      setFormError(error.message || 'Failed to create prescription');
+    }
   };
 
   const handleSaveDraft = () => {
@@ -198,6 +228,13 @@ export default function MedicationEntryScreen() {
     <View style={styles.container}>
       <ScrollView style={styles.content}>
         <ThemedText style={styles.title}>Medication Entry</ThemedText>
+        
+        {patientName && (
+          <View style={styles.patientInfo}>
+            <ThemedText style={styles.patientLabel}>Patient:</ThemedText>
+            <ThemedText style={styles.patientName}>{decodeURIComponent(patientName)}</ThemedText>
+          </View>
+        )}
         
         <View style={styles.card}>
           <ThemedText style={styles.sectionTitle}>Medication Details</ThemedText>

@@ -782,6 +782,7 @@ export default function PharmacistAuthScreen(): React.ReactElement {
 
             {/* Demo Login Buttons */}
             <DemoLoginButtons
+              role="pharmacist"
               onSelect={handleDemoSelect}
               currentRole="pharmacist"
             />

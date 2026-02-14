@@ -261,8 +261,7 @@ export default function PatientSelectScreen() {
 
   const handleProceed = () => {
     if (selectedPatient) {
-      // In a real app, we'd store the patient in context or pass ID
-      router.push('/doctor/prescriptions/medication-entry');
+      router.push(`/doctor/prescriptions/medication-entry?patientId=${selectedPatient.id}&patientName=${encodeURIComponent(selectedPatient.name)}`);
     }
   };
 

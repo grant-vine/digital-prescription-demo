@@ -55,6 +55,8 @@ export const DEMO_CREDENTIALS: Record<string, DemoCredentials> = {
 export interface DemoLoginButtonsProps {
   /** Callback when a demo credential is selected */
   onSelect: (credentials: DemoCredentials) => void;
+  /** Role to display (if specified, only shows this role's button) */
+  role?: Role;
   /** Currently selected role (for highlighting active state) */
   currentRole?: Role;
 }
@@ -130,22 +132,20 @@ const getRoleTheme = (role: Role) => {
  */
 export function DemoLoginButtons({
   onSelect,
+  role,
   currentRole,
 }: DemoLoginButtonsProps): React.ReactElement | null {
   const theme = PatientTheme;
 
-  /**
-   * Check if demo mode is enabled in Expo config
-   * Returns null if not in demo mode
-   */
   const isDemoMode = Constants.expoConfig?.extra?.demoMode;
   if (!isDemoMode) {
     return null;
   }
 
+  const rolesToShow = role ? [role] : (Object.keys(DEMO_CREDENTIALS) as Role[]);
+
   return (
     <View style={styles.container}>
-      {/* Warning Banner */}
       <View
         style={[
           styles.warningBanner,
@@ -160,16 +160,15 @@ export function DemoLoginButtons({
         </Text>
       </View>
 
-      {/* Demo Buttons */}
       <View style={styles.buttonsContainer}>
-        {(Object.keys(DEMO_CREDENTIALS) as Role[]).map((role) => {
-          const credentials = DEMO_CREDENTIALS[role];
-          const roleTheme = getRoleTheme(role);
-          const isActive = currentRole === role;
+        {rolesToShow.map((roleKey) => {
+          const credentials = DEMO_CREDENTIALS[roleKey];
+          const roleTheme = getRoleTheme(roleKey);
+          const isActive = currentRole === roleKey;
 
           return (
             <TouchableOpacity
-              key={role}
+              key={roleKey}
               style={[
                 styles.button,
                 {
