@@ -185,6 +185,7 @@ export function DemoLoginButtons({
               accessibilityLabel={`Login as ${role}`}
               accessibilityRole="button"
               accessibilityState={{ selected: isActive }}
+              testID={`demo-login-${role}`}
             >
               <Text
                 style={[

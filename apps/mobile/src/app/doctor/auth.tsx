@@ -170,7 +170,7 @@ export default function DoctorAuthScreen() {
   const isFormValid = !!(email && password && validateEmail(email));
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} testID="doctor-auth-screen">
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
