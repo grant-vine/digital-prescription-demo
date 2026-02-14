@@ -237,6 +237,7 @@ export default function RoleSelector(): React.ReactElement {
                 expanded={expandedRole === role.id}
                 onToggleExpand={() => handleToggleExpand(role.id)}
                 onPress={() => navigateToRole(role.id)}
+                testID={`role-card-${role.id}`}
               />
             ))}
           </View>
