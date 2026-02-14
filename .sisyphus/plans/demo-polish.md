@@ -2540,40 +2540,40 @@ Don't have a number? Use demo: SAPC123456
 ## Phase 9 Acceptance Criteria
 
 ### Functional
-- [ ] Doctor auth screen uses all shared components (CardContainer, ThemedInput, DemoLoginButtons)
-- [ ] DemoLoginButtons show multiple users per role (minimum 2 per role)
-- [ ] Clicking demo button auto-logins (not just populates)
-- [ ] GlobalFooter shows "Powered by DIDx" with working link
-- [ ] Footer appears on all role screens (doctor, patient, pharmacist)
-- [ ] Demo video shows actual UI (all 3 roles, login flows)
+- [x] Doctor auth screen uses all shared components (CardContainer, ThemedInput, DemoLoginButtons)
+- [x] DemoLoginButtons show multiple users per role (minimum 2 per role)
+- [x] Clicking demo button auto-logins (not just populates)
+- [x] GlobalFooter shows "Powered by DIDx" with working link
+- [x] Footer appears on all role screens (doctor, patient, pharmacist)
+- [x] Demo video shows actual UI (all 3 roles, login flows)
 
 ### Quality
-- [ ] No TypeScript errors (expo-camera imports fixed)
-- [ ] E2E tests pass 5/5 times (no flakes)
-- [ ] Video file < 10MB, 1280x720, 30fps
-- [ ] Video duration 15-30 seconds (optimized)
-- [ ] All new components have JSDoc
-- [ ] AGENTS.md updated with new components
+- [x] No TypeScript errors (expo-camera imports fixed)
+- [x] E2E tests pass 5/5 times (no flakes)
+- [x] Video file < 10MB, 1280x720, 30fps
+- [x] Video duration 15-30 seconds (optimized)
+- [x] All new components have JSDoc
+- [x] AGENTS.md updated with new components
 
 ### Security
-- [ ] Demo mode checks preserved (DEMO_MODE backend, expoConfig frontend)
-- [ ] Auto-login only works in demo mode
-- [ ] Multiple users don't compromise security
-- [ ] DemoLoginButtons only render when demo enabled
+- [x] Demo mode checks preserved (DEMO_MODE backend, expoConfig frontend)
+- [x] Auto-login only works in demo mode
+- [x] Multiple users don't compromise security
+- [x] DemoLoginButtons only render when demo enabled
 
 ### Documentation
-- [ ] apps/mobile/AGENTS.md updated
-- [ ] README.md includes multi-user demo
-- [ ] docs/DEMO.md has investor scripts
-- [ ] docs/testing/CAMERA_TESTING.md created
-- [ ] Learnings appended to notepad
+- [x] apps/mobile/AGENTS.md updated
+- [x] README.md includes multi-user demo
+- [x] docs/DEMO.md has investor scripts
+- [x] docs/testing/CAMERA_TESTING.md created
+- [x] Learnings appended to notepad
 
 ### Testing
-- [ ] Backend seed creates 6+ demo users
-- [ ] Playwright config has correct port (8081)
-- [ ] Playwright env has EXPO_PUBLIC_DEMO_MODE=true
-- [ ] E2E test uses explicit waitForSelector (no waitForLoadState)
-- [ ] data-testid added to critical elements
+- [x] Backend seed creates 6+ demo users
+- [x] Playwright config has correct port (8081)
+- [x] Playwright env has EXPO_PUBLIC_DEMO_MODE=true
+- [x] E2E test uses explicit waitForSelector (no waitForLoadState)
+- [x] data-testid added to critical elements
 
 ---
 
