@@ -1,8 +1,8 @@
 # Digital Prescription Demo
 
-**Generated:** 2026-02-12  
+**Generated:** 2026-02-14  
 **Commit:** 4f84277  
-**Branch:** before-cheqd (detached) | master, milestone/mvp-complete
+**Branch:** master (milestone/mvp-complete)
 
 ## OVERVIEW
 
@@ -13,19 +13,19 @@ Tech demo: digital prescription system using SSI (Self-Sovereign Identity). Doct
 ```
 rxdistribute/
 ├── services/backend/         # FastAPI API + SQLAlchemy + ACA-Py integration
-│   ├── app/api/v1/           # 12 route modules (auth, prescriptions, dids, signing, qr, verify...)
+│   ├── app/api/v1/           # 12 route modules (auth, prescriptions signing, qr,, dids, verify...)
 │   ├── app/services/         # Business logic (acapy, vc, qr, audit, fhir, revocation, validation)
 │   ├── app/models/           # SQLAlchemy models (User, Prescription, Dispensing, Audit, DID, Wallet)
 │   ├── app/tests/            # 20 pytest test files, conftest with fixture hierarchy
 │   ├── alembic/              # DB migrations (PostgreSQL)
 │   └── scripts/              # seed_demo_data.py
 ├── apps/mobile/              # React Native + Expo Router (TypeScript)
-│   ├── src/app/(doctor)/     # Doctor screens: auth, dashboard, prescriptions/*
-│   ├── src/app/(patient)/    # Patient screens: auth, wallet, scan, prescriptions/*
-│   ├── src/app/(pharmacist)/ # Pharmacist screens: auth, verify, prescriptions/[id]/dispense
+│   ├── src/app/doctor/       # Doctor screens: auth, dashboard, prescriptions/*
+│   ├── src/app/patient/      # Patient screens: auth, wallet, scan, prescriptions/*
+│   ├── src/app/pharmacist/   # Pharmacist screens: auth, verify, prescriptions/[id]/dispense
 │   ├── src/components/       # Shared: qr/ (QRDisplay, QRScanner), theme/ (per-role themes)
 │   ├── src/services/         # API client (axios)
-│   └── e2e/                  # E2E specs per role
+│   └── e2e/                  # E2E specs per role (48 tests)
 ├── user-stories/             # 25 markdown stories (001-025), README index
 ├── scripts/                  # start-demo.sh, verify-structure.py
 ├── .sisyphus/                # Execution plan + notepads (73 tasks, boulder.json)
@@ -41,7 +41,7 @@ rxdistribute/
 | Add business logic | `services/backend/app/services/` | SSI ops in `acapy.py`, credential ops in `vc.py` |
 | Add/modify DB model | `services/backend/app/models/` | Re-export in `__init__.py`, create alembic migration |
 | Backend tests | `services/backend/app/tests/` | Fixtures in `conftest.py`, in-memory SQLite |
-| Mobile screen | `apps/mobile/src/app/(role)/` | Expo Router file-based routing, `_layout.tsx` per group |
+| Mobile screen | `apps/mobile/src/app/role/` | Expo Router file-based routing, `_layout.tsx` per group |
 | Mobile shared component | `apps/mobile/src/components/` | `qr/` and `theme/` subdirs |
 | Mobile API calls | `apps/mobile/src/services/api.ts` | Single axios client module |
 | User stories | `user-stories/###-slug.md` | Format template in `user-stories/AGENTS.md` |
@@ -100,11 +100,3 @@ npm test -- e2e/doctor.spec.ts          # E2E per role
 | `v1.0.0-mvp` | Tag: all 16 core stories |
 
 Agents must update `developer-notes.md` (newest-first log) with: date, tasks, duration, files changed, notes, next steps.
-
-## CHILD AGENTS.md
-
-- `services/backend/AGENTS.md` — Backend API, models, services, DB
-- `services/backend/app/api/v1/AGENTS.md` — Route module conventions
-- `services/backend/app/tests/AGENTS.md` — Test fixture hierarchy, patterns
-- `apps/mobile/AGENTS.md` — Mobile app structure, theming, testing
-- `user-stories/AGENTS.md` — Story format, naming, cross-references

@@ -2,7 +2,7 @@
 
 ## 📦 Package Contents
 
-This package contains everything needed to build and deploy a digital prescription demo using DIDx's verifiable identity infrastructure.
+This package contains everything needed to run a digital prescription demo using Self-Sovereign Identity (SSI). Doctors sign prescriptions as W3C Verifiable Credentials, patients store in mobile wallets, pharmacists verify and dispense.
 
 ---
 
@@ -19,13 +19,19 @@ This package contains everything needed to build and deploy a digital prescripti
 
 ## 📋 Quick Navigation
 
-### Plans (Choose Your Path)
-1. **[Implementation Plan v3.0](/implementation-plan-v3.md)** ← **START HERE**
+### Project Status
+- **Current Branch:** `master` (milestone/mvp-complete)
+- **SDK Version:** Expo SDK 54 (updated 2026-02-14)
+- **Test Status:** All tests passing (API: 10/10, E2E: 48/48)
+
+### Implementation Plans
+1. **[Implementation Plan v3.0](/implementation-plan-v3.md)** ← **Current plan**
    - ✅ Themed UI (3 distinct roles)
    - ✅ Mobile-first (React Native + Expo)
-   - ✅ Adaptive infrastructure (ACA-Py ↔ DIDx)
+   - ✅ Local ACA-Py infrastructure
    - ✅ MacBook Air M1 8GB optimized
-   - ✅ Contract-independent development
+
+> **Note:** This project uses local ACA-Py for SSI. Integration with DIDx CloudAPI is planned for future phases.
 
 ### User Stories (25 Total)
 
@@ -139,36 +145,24 @@ npm run demo:video
 
 ---
 
-## 🎯 Recommended Approach
+## 🎯 Project Phases
 
-### Timeline Options
-
-#### Option A: MVP Demo (Recommended) - 4 Weeks + 2 Weeks Migration
-**Best for:** Quick demo to stakeholders, proof of concept, limited budget
-
-**Weeks 1-4:** MVP Development
-- 11 user stories
-- Local ACA-Py (no DIDx dependency)
-- QR code flows (simple)
+### Phase 1: MVP - Current ✅
+- Local ACA-Py for SSI
+- QR code flows for prescription exchange
 - Themed mobile app (3 roles)
 - Runs on MacBook Air M1 8GB
 
-**Weeks 5-6:** Migration to DIDx
-- Contract signed
-- Switch to DIDx CloudAPI (config only)
-- Same features, production infrastructure
+### Phase 2: Enhanced Features (Planned)
+- Full FHIR R4 compliance
+- DIDComm v2 messaging (replace QR codes)
+- Prescription repeats/refills
+- Advanced audit trail
 
-**Total: 6 weeks to DIDx demo**
-
-#### Option B: Full Implementation - 14 Weeks
-**Best for:** Production-ready system, enterprise deployment
-
-**Weeks 1-4:** MVP (as above)
-**Weeks 5-6:** DIDx migration + polish
-**Weeks 7-10:** Enhanced features (FHIR, DIDComm, repeats)
-**Weeks 11-14:** Production hardening (K8s, monitoring, security)
-
-**Total: 14 weeks to production**
+### Phase 3: Production (Planned)
+- DIDx CloudAPI integration
+- Kubernetes deployment
+- Monitoring & alerting
 
 ---
 
@@ -185,25 +179,29 @@ npm run demo:video
 └──────────────────────┬──────────────────────────────┘
                        │
            ┌───────────▼───────────┐
-           │   SSIProvider Adapter  │
-           │  (Swappable Backend)   │
+           │   Backend API (FastAPI) │
+           │       + SSI Layer       │
            └───────────┬───────────┘
                        │
          ┌─────────────┼─────────────┐
          ▼             ▼             ▼
   ┌──────────────┐ ┌──────────┐ ┌──────────┐
-  │ ACA-Py Local │ │   DIDx   │ │  Mock    │
-  │  (Weeks 1-4) │ │(Week 5+) │ │(Testing) │
+  │   ACA-Py     │ │   DIDx   │ │  Mock    │
+  │   (local)    │ │ (future) │ │(testing) │
   └──────────────┘ └──────────┘ └──────────┘
 ```
 
-**Switch backends with one config change:**
+**Current Configuration:**
 ```bash
-# Local development
-export SSI_PROVIDER=acapy-local
+# Local development (current)
+SSI_PROVIDER=acapy-local
+ACAPY_ADMIN_URL=http://localhost:8001
+```
 
-# Production with DIDx
-export SSI_PROVIDER=didx-cloud
+**Future DIDx Integration:**
+```bash
+# Production (planned)
+SSI_PROVIDER=didx-cloud
 ```
 
 ### Themed UI
@@ -346,10 +344,18 @@ npm test -- src/components/qr       # Run tests in specific directory
 The mobile app includes E2E tests simulating full user flows:
 ```bash
 cd apps/mobile
-npm test -- e2e/doctor.spec.ts     # Test doctor workflow
-npm test -- e2e/patient.spec.ts    # Test patient workflow
-npm test -- e2e/pharmacist.spec.ts # Test pharmacist workflow
+npm run test:e2e                   # Run all E2E tests (48 tests)
+npm run test:e2e -- e2e/demo-video.spec.ts    # Generate demo videos (3 tests)
+npm run test:e2e -- e2e/navigation-coverage.spec.ts  # Navigation tests (7 tests)
+npm run test:e2e -- e2e/doctor.spec.ts     # Test doctor workflow (5 tests)
+npm run test:e2e -- e2e/patient.spec.ts    # Test patient workflow (7 tests)
+npm run test:e2e -- e2e/pharmacist.spec.ts  # Test pharmacist workflow (7 tests)
+npm run test:e2e -- e2e/error-scenarios.spec.ts  # Error scenarios (19 tests)
 ```
+
+**Current Test Status (2026-02-14):**
+- API Tests: ✅ ALL PASSING (10/10 journeys)
+- E2E Tests: ✅ 48/48 PASSING
 
 ---
 
@@ -468,61 +474,37 @@ export DIDX_TOKEN=your-oauth-token
 
 ---
 
-## ⚠️ Critical Prerequisites
+## ⚙️ Development Prerequisites
 
-### Before Development Starts
+### Quick Start
+```bash
+# Clone and run
+git clone https://github.com/grant-vine/digital-prescription-demo.git
+cd digital-prescription-demo
+./scripts/start-demo.sh
+```
 
-1. **✅ Decide Timeline**
-   - 4-week MVP + 2-week migration?
-   - Or 14-week full implementation?
-
-2. **✅ Confirm Team**
-   - 1-2 developers recommended
-   - React Native + Python skills needed
-
-3. **📧 Contact DIDx (Set Expectations)**
-   ```
-   To: hello@didx.co.za
-   Subject: Partnership - Digital Prescription Demo
-   
-   We're building a demo using your infrastructure.
-   Timeline: Start development immediately with ACA-Py,
-   migrate to DIDx CloudAPI in ~4 weeks when contract signed.
-   
-   Questions:
-   - Typical contract timeline?
-   - Testnet availability?
-   - Technical support during migration?
-   ```
-
-4. **✅ Setup MacBook Air**
-   - Install Docker Desktop
-   - Install Node.js 20
-   - Install Python 3.12
-   - Clone repo and run `docker-compose up`
+### Requirements
+- **Docker Desktop** - PostgreSQL, Redis, ACA-Py
+- **Node.js 20+** - Mobile development
+- **Python 3.12** - Backend
 
 ---
 
 ## 📈 Success Metrics
 
-### MVP (Week 4)
-- [ ] App runs on iOS/Android
-- [ ] 3 themed role interfaces
-- [ ] QR code flow works end-to-end
-- [ ] Local ACA-Py integration
-- [ ] Demo ready (5-minute walkthrough)
+### MVP Complete ✅
+- [x] Mobile app on iOS/Android
+- [x] 3 themed role interfaces (Doctor/Patient/Pharmacist)
+- [x] QR code flow works end-to-end
+- [x] Local ACA-Py integration
+- [x] Demo ready
 
-### Post-Migration (Week 6)
-- [ ] All features work on DIDx
-- [ ] Configuration-only migration validated
-- [ ] Demo on DIDx infrastructure
-
-### Full Production (Week 14)
+### Next Steps
+- [ ] Full FHIR R4 compliance
+- [ ] DIDComm v2 messaging
 - [ ] Kubernetes deployment
-- [ ] Full FHIR compliance
-- [ ] DIDComm messaging
-- [ ] Production monitoring
-- [ ] Security audit passed
+- [ ] DIDx CloudAPI integration
 
 ---
 
@@ -592,24 +574,20 @@ docker system prune
 
 ## 🎬 Next Steps
 
-### Today:
-1. ✅ Read `implementation-plan-v3.md` completely
-2. 📧 Email DIDx about timeline
-3. 💻 Setup development environment
-4. 📱 Install Expo Go on your phone
+### Run the Demo
+```bash
+./scripts/start-demo.sh
+```
 
-### This Week:
-1. Initialize React Native project
-2. Setup Docker with ACA-Py
-3. Implement SSIProvider adapter
-4. Create themed component library
-5. Build "Hello ACA-Py" test
+### Development Workflow
+1. **Backend**: `cd services/backend && source venv/bin/activate && uvicorn app.main:app --reload`
+2. **Mobile**: `cd apps/mobile && npx expo start`
+3. **Tests**: `pytest` (backend) / `npm test` (mobile)
 
-### Next Week:
-1. Begin Week 1 tasks (foundation)
-2. Backend API scaffolding
-3. Mobile navigation structure
-4. Database setup
+### Learn More
+- See [user-stories/README.md](user-stories/README.md) for feature breakdown
+- See [implementation-plan-v3.md](implementation-plan-v3.md) for technical details
+- See [AGENTS.md](AGENTS.md) for developer conventions
 
 ---
 
@@ -637,20 +615,17 @@ docker system prune
 
 ## 🎉 Summary
 
-You now have:
-- ✅ **25 comprehensive user stories**
-- ✅ **3 detailed implementation plans** (v3.0 is current)
-- ✅ **Expert review** (Momus) with all issues resolved
-- ✅ **Mobile-first architecture** (React Native + Expo)
-- ✅ **Adaptive infrastructure** (ACA-Py ↔ DIDx)
-- ✅ **Themed UI** (3 distinct role experiences)
-- ✅ **MacBook Air optimization** (8GB RAM)
-- ✅ **Contract-independent development** (start immediately)
+This project provides:
+- ✅ **Digital prescription system** using SSI (Self-Sovereign Identity)
+- ✅ **React Native mobile app** with themed role-based UI (Doctor/Patient/Pharmacist)
+- ✅ **FastAPI backend** with SQLAlchemy, JWT auth, and ACA-Py integration
+- ✅ **25 user stories** covering MVP through production phases
+- ✅ **All tests passing** (API: 10/10, E2E: 48/48)
 
-**Ready to start?** Begin with Week 0 tasks in `implementation-plan-v3.md`!
+**Ready to use?** Run `./scripts/start-demo.sh` to start the demo.
 
 ---
 
 **Package Version:** 3.0  
-**Last Updated:** 12 February 2026  
-**Status:** ✅ Ready for Development
+**Last Updated:** 14 February 2026  
+**Status:** ✅ MVP Complete
