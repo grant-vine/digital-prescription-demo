@@ -1,10 +1,12 @@
 # Digital Prescription System - User Stories
 
+**SDK Version:** Expo SDK 54 (updated 2026-02-14)
+
 ## Project Overview
 
 This project implements a digital prescription system using Self-Sovereign Identity (SSI) infrastructure. The system enables doctors to create and digitally sign prescriptions, patients to receive and manage them in a digital wallet, and pharmacists to verify and dispense medications securely.
 
-**Technology Stack:** Python/FastAPI (backend), React Native + Expo (mobile), ACA-Py/DIDx (SSI infrastructure)
+**Technology Stack:** Python/FastAPI (backend), React Native 0.81 + Expo SDK 54 (mobile), ACA-Py/DIDx (SSI infrastructure)
 
 ## Architecture
 
@@ -121,7 +123,7 @@ Where:
 ## Tech Stack
 
 - **Backend:** Python 3.12, FastAPI, PostgreSQL, Redis
-- **Mobile:** React Native 0.72+, Expo SDK 49+, TypeScript 5.0+
+- **Mobile:** React Native 0.81, Expo SDK 54, TypeScript 5.6+
 - **SSI:** ACA-Py CloudAPI, DIDx CloudAPI (production)
 - **Ledger:** cheqd testnet (DID registry)
 - **Standards:** W3C Verifiable Credentials, FHIR R4, DIDComm v2

@@ -359,3 +359,64 @@ const PrescriptionShareScreen = ({ prescription }) => {
 - US-009: Pharmacist Authentication & DID Setup (pharmacy side)
 - US-010: Verify Prescription Authenticity (pharmacy side)
 - US-018: DIDComm v2 Messaging (future replacement)
+
+---
+
+## Technical Notes (SDK 54)
+
+**SDK Version:** Expo SDK 54  
+**Camera API:** CameraView (expo-camera SDK 50+)  
+**Updated:** 2026-02-14
+
+### Implementation Details
+- Uses modern **CameraView component** for QR code scanning (pharmacist side) and display (patient side)
+- Patient generates QR code containing verifiable presentation using `react-native-qrcode-svg`
+- Pharmacist scans QR code via `onBarcodeScanned` callback prop on CameraView
+- Camera permissions handled via expo-camera plugin in app.json
+- Fallback to manual entry if camera unavailable or permission denied
+
+### Camera Permission Configuration
+```json
+// app.json
+{
+  "expo": {
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Digital Prescription to access your camera for QR code scanning."
+        }
+      ]
+    ]
+  }
+}
+```
+
+### CameraView API Usage (Pharmacist Scanning)
+```typescript
+import { CameraView, useCameraPermissions } from 'expo-camera';
+
+const [permission, requestPermission] = useCameraPermissions();
+
+<CameraView
+  onBarcodeScanned={handleBarcodeScanned}
+  barcodeScannerSettings={{
+    barcodeTypes: ['qr'],
+  }}
+/>
+```
+
+### QR Code Generation (Patient Display)
+```typescript
+import QRCode from 'react-native-qrcode-svg';
+
+<QRCode 
+  value={JSON.stringify(verifiablePresentation)} 
+  size={300} 
+/>
+```
+
+### App Store Compliance
+- **iOS**: Requires iOS 15.1+ (deployment target set in app.json)
+- **Android**: Targets API 35, minimum API 23 (configured in app.json)
+- **Permissions**: Camera permission required on both platforms for pharmacist scanning

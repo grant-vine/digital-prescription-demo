@@ -19,11 +19,13 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+*.pyo
 
 # Virtual Environment
 venv/
 env/
 ENV/
+.venv/
 
 # Python testing
 .pytest_cache/
@@ -54,6 +56,7 @@ yarn.lock
 
 # Expo/React Native
 .expo/
+.expo-shared/
 *.jks
 *.p8
 *.p12
@@ -84,6 +87,9 @@ yarn-error.*
 
 # Docker
 .dockerignore
+
+# OS
+Thumbs.db
 
 # Keep plan files
 !.sisyphus/plans/

@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Digital Prescription",
+    "slug": "digital-prescription-demo",
+    "version": "0.1.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "co.didx.digital-prescription",
+      "buildNumber": "1",
+      "deploymentTarget": "15.1"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "co.didx.digital_prescription",
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "minSdkVersion": 23
+    },
+    "web": {
+      "favicon": "./src/assets/favicon.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "demoMode": true
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Digital Prescription to access your camera for QR code scanning."
+        }
+      ],
+      "expo-router",
+      "expo-web-browser"
+    ]
+  }
+}
