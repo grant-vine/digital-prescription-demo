@@ -170,7 +170,7 @@ export default function PharmacistVerifyScreen() {
   // Show onboarding instructions
   if (showOnboarding && !result) {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} testID="pharmacist-verify">
          <ThemedText style={styles.title}>Prescription Scanner</ThemedText>
         
          <View style={styles.instructionsContainer}>
@@ -241,7 +241,7 @@ export default function PharmacistVerifyScreen() {
   // Show QR scanner view
   if (scanning && !result && !manualEntry) {
     return (
-      <View style={styles.container}>
+      <View style={styles.container} testID="pharmacist-verify">
         {permission?.granted && (
           <>
             <View style={styles.cameraContainer} testID="qr-scanner">
@@ -295,7 +295,7 @@ export default function PharmacistVerifyScreen() {
   // Show manual entry form
   if (manualEntry && !result) {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} testID="pharmacist-verify">
         <ThemedText style={styles.title}>Enter Prescription Code</ThemedText>
 
         <View style={styles.formSection}>
@@ -340,7 +340,7 @@ export default function PharmacistVerifyScreen() {
   // Show error state
   if (error && !result) {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} testID="pharmacist-verify">
         <ThemedText style={styles.title}>Verification Failed</ThemedText>
 
         <View style={styles.errorContainer} testID="error-message">
@@ -361,7 +361,7 @@ export default function PharmacistVerifyScreen() {
   // Show success result
   if (result && result.valid) {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} testID="pharmacist-verify">
         <ThemedText style={styles.successTitle} testID="verification-result-success">
           ✓ Verified - Safe to Dispense
         </ThemedText>
@@ -424,7 +424,7 @@ export default function PharmacistVerifyScreen() {
   // Show failure result
   if (result && !result.valid) {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} testID="pharmacist-verify">
         <ThemedText style={styles.failureTitle} testID="verification-result-failure">
           ✗ Verification Failed - Not Authentic
         </ThemedText>
@@ -446,7 +446,7 @@ export default function PharmacistVerifyScreen() {
 
   // Fallback
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="pharmacist-verify">
       <ActivityIndicator size="large" color={PharmacistTheme.colors.primary} />
     </View>
   );

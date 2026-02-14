@@ -259,11 +259,12 @@ All API endpoints are prefixed with `/api/v1`:
 - ✅ Emoji icons (👨‍⚕️, 🤒, 💊)
 - ✅ Time estimates (⏱ 2-3 minutes)
 
-**Demo Video**:
-- ✅ 3-panel side-by-side layout
-- ✅ H.264 codec, 1278x720, 30fps
-- ✅ File size: 188KB
-- ✅ Duration: 20.7 seconds
+**Demo Videos** (3 Separate Files):
+- ✅ Individual videos for each role (Doctor, Patient, Pharmacist)
+- ✅ Complete workflow demonstration (login → dashboard → features)
+- ✅ H.264 codec, 1280x720, 30fps
+- ✅ Files: demo-doctor.mp4, demo-patient.mp4, demo-pharmacist.mp4
+- ✅ Generated via Playwright with testID targeting
 
 ---
 
@@ -360,10 +361,10 @@ python3 scripts/api-tests/api_journey_tests.py
    - Consolidate documentation
    - Ensure consistency across codebase
 
-2. **Regenerate Demo Video**:
-   - Run: `npm run demo:video`
-   - Verify 3 distinct panels (not same site)
-   - Compress and validate output
+2. **Regenerate Demo Videos**:
+   - Run: `./scripts/generate-demo-videos.sh`
+   - Generates 3 separate videos (demo-doctor.mp4, demo-patient.mp4, demo-pharmacist.mp4)
+   - Each video shows complete workflow from index → login → dashboard → features
 
 3. **Update Documentation**:
    - Consolidate plans into this master file
@@ -403,8 +404,13 @@ python3 scripts/api-tests/api_journey_tests.py
 # Run E2E tests
 cd apps/mobile && npm run test:e2e
 
-# Generate demo video
-cd apps/mobile && npm run demo:video
+# Generate demo videos (3 separate files)
+./scripts/generate-demo-videos.sh
+
+# Or run individual tests
+cd apps/mobile && npx playwright test e2e/demo-video.spec.ts --grep "Doctor:"
+cd apps/mobile && npx playwright test e2e/demo-video.spec.ts --grep "Patient:"
+cd apps/mobile && npx playwright test e2e/demo-video.spec.ts --grep "Pharmacist:"
 
 # Type check
 npx tsc --noEmit

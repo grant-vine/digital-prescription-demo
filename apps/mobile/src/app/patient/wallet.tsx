@@ -182,7 +182,7 @@ export default function PatientWalletScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="patient-wallet">
       <ScrollView contentContainerStyle={styles.content}>
         <ThemedText style={styles.title}>Your Prescriptions</ThemedText>
 

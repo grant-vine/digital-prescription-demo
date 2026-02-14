@@ -212,13 +212,14 @@ router.replace('/doctor/auth');
          <StatsCard label="Dispensed" value={dispensedCount} color={DoctorTheme.colors.textSecondary} />
        </View>
 
-       <View style={styles.actionContainer}>
-         <ThemedButton 
-           title="+ New Prescription" 
-           onPress={handleNewPrescription}
-           style={styles.createButton}
-         />
-       </View>
+        <View style={styles.actionContainer}>
+          <ThemedButton 
+            title="+ New Prescription" 
+            onPress={handleNewPrescription}
+            style={styles.createButton}
+            testID="new-prescription-button"
+          />
+        </View>
 
        <ThemedText type="h3" style={styles.sectionTitle}>Recent Prescriptions</ThemedText>
      </View>
@@ -232,7 +233,7 @@ router.replace('/doctor/auth');
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} testID="doctor-dashboard">
       <StatusBar barStyle="dark-content" backgroundColor={DoctorTheme.colors.background} />
       <FlatList
         data={prescriptions}
