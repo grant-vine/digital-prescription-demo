@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, FlatList, RefreshControl, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, FlatList, RefreshControl, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api, Prescription } from '../../services/api';
